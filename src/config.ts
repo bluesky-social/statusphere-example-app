@@ -1,9 +1,9 @@
 import type pino from "pino";
 import type { Database } from "#/db";
-import type { Firehose } from "#/firehose";
+import type { Ingester } from "#/firehose/ingester";
 
 export type AppContext = {
   db: Database;
-  firehose: Firehose;
+  ingester: Ingester;
   logger: pino.Logger;
 };

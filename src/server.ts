@@ -9,7 +9,7 @@ import errorHandler from "#/common/middleware/errorHandler";
 import requestLogger from "#/common/middleware/requestLogger";
 import { env } from "#/common/utils/envConfig";
 import { createDb, migrateToLatest } from "#/db";
-import { Firehose } from "#/firehose";
+import { Ingester } from "#/firehose/ingester";
 import { createRouter } from "#/routes";
 import type { AppContext } from "./config";
 
@@ -26,11 +26,11 @@ export class Server {
     const logger = pino({ name: "server start" });
     const db = createDb(":memory:");
     await migrateToLatest(db);
-    const firehose = new Firehose("https://bsky.network", db);
-    firehose.run(10);
+    const ingester = new Ingester(db);
+    ingester.start();
     const ctx = {
       db,
-      firehose,
+      ingester,
       logger,
     };
 
@@ -67,6 +67,7 @@ export class Server {
 
   async close() {
     this.ctx.logger.info("sigint received, shutting down");
+    this.ctx.ingester.destroy();
     return new Promise<void>((resolve) => {
       this.server.close(() => {
         this.ctx.logger.info("server closed");
