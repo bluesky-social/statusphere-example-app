@@ -9,24 +9,32 @@ import errorHandler from "#/common/middleware/errorHandler";
 import rateLimiter from "#/common/middleware/rateLimiter";
 import requestLogger from "#/common/middleware/requestLogger";
 import { env } from "#/common/utils/envConfig";
-import { Database } from "#/db";
+import { createDb, migrateToLatest } from "#/db";
 import { Firehose } from "#/firehose";
-import router from "#/router";
+import { createRouter } from "#/router";
+import type { AppContext } from "./config";
 
 export class Server {
   constructor(
     public app: express.Application,
     public server: http.Server,
-    public firehose: Firehose,
-    public logger: pino.Logger,
+    public ctx: AppContext
   ) {}
 
   static async create() {
     const { NODE_ENV, HOST, PORT } = env;
 
-    await Database.sync({ force: true });
-
     const logger = pino({ name: "server start" });
+    const db = createDb(":memory:");
+    await migrateToLatest(db);
+    const firehose = new Firehose("https://bsky.network", db);
+    firehose.run(10);
+    const ctx = {
+      db,
+      firehose,
+      logger,
+    };
+
     const app: Express = express();
 
     // Set the application to trust the reverse proxy
@@ -46,6 +54,7 @@ export class Server {
     app.use(requestLogger);
 
     // Routes
+    const router = createRouter(ctx);
     app.use(router);
 
     // Error handlers
@@ -55,17 +64,14 @@ export class Server {
     await events.once(server, "listening");
     logger.info(`Server (${NODE_ENV}) running on port http://${HOST}:${PORT}`);
 
-    const firehose = new Firehose("https://bsky.network");
-    firehose.run(10);
-
-    return new Server(app, server, firehose, logger);
+    return new Server(app, server, ctx);
   }
 
   async close() {
-    this.logger.info("sigint received, shutting down");
+    this.ctx.logger.info("sigint received, shutting down");
     return new Promise<void>((resolve) => {
       this.server.close(() => {
-        this.logger.info("server closed");
+        this.ctx.logger.info("server closed");
         resolve();
       });
     });

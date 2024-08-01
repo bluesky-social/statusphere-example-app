@@ -1,11 +1,11 @@
 import { cborToLexRecord, readCar } from "@atproto/repo";
 import { Subscription } from "@atproto/xrpc-server";
-import { Post } from "#/db";
+import type { Database } from "#/db";
 
 export class Firehose {
   public sub: Subscription<unknown>;
 
-  constructor(public service: string) {
+  constructor(public service: string, public db: Database) {
     this.sub = new Subscription({
       service: service,
       method: "com.atproto.sync.subscribeRepos",
@@ -31,7 +31,14 @@ export class Firehose {
       const recordBytes = car.blocks.get(op.cid);
       if (!recordBytes) continue;
       const record = cborToLexRecord(recordBytes);
-      await Post.create({ uri, text: record.text });
+      await this.db
+        .insertInto("post")
+        .values({
+          uri,
+          text: record.text as string,
+          indexedAt: new Date().toISOString(),
+        })
+        .execute();
     }
   }
 
@@ -46,7 +53,10 @@ export class Firehose {
       }
     } catch (err) {
       console.error("repo subscription errored", err);
-      setTimeout(() => this.run(subscriptionReconnectDelay), subscriptionReconnectDelay);
+      setTimeout(
+        () => this.run(subscriptionReconnectDelay),
+        subscriptionReconnectDelay
+      );
     }
   }
 }
