@@ -11,7 +11,7 @@ import requestLogger from "#/common/middleware/requestLogger";
 import { env } from "#/common/utils/envConfig";
 import { Database } from "#/db";
 import { Firehose } from "#/firehose";
-import { addRoutes } from "#/routes";
+import router from "#/router";
 
 export class Server {
   constructor(
@@ -45,7 +45,8 @@ export class Server {
     // Request logging
     app.use(requestLogger);
 
-    addRoutes(app);
+    // Routes
+    app.use(router);
 
     // Error handlers
     app.use(errorHandler());
