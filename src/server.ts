@@ -6,12 +6,11 @@ import helmet from "helmet";
 import { pino } from "pino";
 
 import errorHandler from "#/common/middleware/errorHandler";
-import rateLimiter from "#/common/middleware/rateLimiter";
 import requestLogger from "#/common/middleware/requestLogger";
 import { env } from "#/common/utils/envConfig";
 import { createDb, migrateToLatest } from "#/db";
 import { Firehose } from "#/firehose";
-import { createRouter } from "#/router";
+import { createRouter } from "#/routes";
 import type { AppContext } from "./config";
 
 export class Server {
@@ -48,7 +47,6 @@ export class Server {
     app.use(express.urlencoded({ extended: true }));
     app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
     app.use(helmet());
-    app.use(rateLimiter);
 
     // Request logging
     app.use(requestLogger);
