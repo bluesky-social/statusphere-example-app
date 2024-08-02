@@ -4,9 +4,13 @@ import { AtUri } from "@atproto/syntax";
 import { Subscription } from "@atproto/xrpc-server";
 import type { CID } from "multiformats/cid";
 import {
+  type Account,
   type Commit,
+  type Identity,
   type RepoEvent,
+  isAccount,
   isCommit,
+  isIdentity,
   isValidRepoEvent,
 } from "./lexicons";
 
@@ -15,6 +19,10 @@ type Opts = {
   getCursor?: () => Promise<number | undefined>;
   setCursor?: (cursor: number) => Promise<void>;
   subscriptionReconnectDelay?: number;
+  filterCollections?: string[];
+  excludeIdentity?: boolean;
+  excludeAccount?: boolean;
+  excludeCommit?: boolean;
 };
 
 export class Firehose {
@@ -46,9 +54,23 @@ export class Firehose {
     try {
       for await (const evt of this.sub) {
         try {
-          const parsed = await parseEvent(evt);
-          for (const op of parsed) {
-            yield op;
+          if (isCommit(evt) && !this.opts.excludeCommit) {
+            const parsed = await parseCommit(evt);
+            for (const write of parsed) {
+              if (
+                !this.opts.filterCollections ||
+                this.opts.filterCollections.includes(write.uri.collection)
+              ) {
+                yield write;
+              }
+            }
+          } else if (isAccount(evt) && !this.opts.excludeAccount) {
+            const parsed = parseAccount(evt);
+            if (parsed) {
+              yield parsed;
+            }
+          } else if (isIdentity(evt) && !this.opts.excludeIdentity) {
+            yield parseIdentity(evt);
           }
         } catch (err) {
           console.error("repo subscription could not handle message", err);
@@ -71,15 +93,10 @@ export class Firehose {
   }
 }
 
-export const parseEvent = async (evt: RepoEvent): Promise<Event[]> => {
-  if (!isCommit(evt)) return [];
-  return parseCommit(evt);
-};
-
-export const parseCommit = async (evt: Commit): Promise<Event[]> => {
+export const parseCommit = async (evt: Commit): Promise<CommitEvt[]> => {
   const car = await readCar(evt.blocks);
 
-  const evts: Event[] = [];
+  const evts: CommitEvt[] = [];
 
   for (const op of evt.ops) {
     const uri = new AtUri(`at://${evt.repo}/${op.path}`);
@@ -115,7 +132,29 @@ export const parseCommit = async (evt: Commit): Promise<Event[]> => {
   return evts;
 };
 
-type Event = Create | Update | Delete;
+export const parseIdentity = (evt: Identity): IdentityEvt => {
+  return {
+    event: "identity",
+    did: evt.did,
+    handle: evt.handle,
+  };
+};
+
+export const parseAccount = (evt: Account): AccountEvt | undefined => {
+  if (evt.status && !isValidStatus(evt.status)) return;
+  return {
+    event: "account",
+    did: evt.did,
+    active: evt.active,
+    status: evt.status as AccountStatus,
+  };
+};
+
+const isValidStatus = (str: string): str is AccountStatus => {
+  return ["takendown", "suspended", "deleted", "deactivated"].includes(str);
+};
+
+type Event = CommitEvt | IdentityEvt | AccountEvt;
 
 type CommitMeta = {
   uri: AtUri;
@@ -123,6 +162,8 @@ type CommitMeta = {
   collection: string;
   rkey: string;
 };
+
+type CommitEvt = Create | Update | Delete;
 
 type Create = CommitMeta & {
   event: "create";
@@ -137,3 +178,18 @@ type Update = CommitMeta & {
 type Delete = CommitMeta & {
   event: "delete";
 };
+
+type IdentityEvt = {
+  event: "identity";
+  did: string;
+  handle?: string;
+};
+
+type AccountEvt = {
+  event: "account";
+  did: string;
+  active: boolean;
+  status?: AccountStatus;
+};
+
+type AccountStatus = "takendown" | "suspended" | "deleted" | "deactivated";
