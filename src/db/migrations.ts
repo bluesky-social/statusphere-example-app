@@ -1,23 +1,23 @@
-import type { Kysely, Migration, MigrationProvider } from "kysely";
+import type { Kysely, Migration, MigrationProvider } from 'kysely'
 
-const migrations: Record<string, Migration> = {};
+const migrations: Record<string, Migration> = {}
 
 export const migrationProvider: MigrationProvider = {
   async getMigrations() {
-    return migrations;
+    return migrations
   },
-};
+}
 
-migrations["001"] = {
+migrations['001'] = {
   async up(db: Kysely<unknown>) {
     await db.schema
-      .createTable("post")
-      .addColumn("uri", "varchar", (col) => col.primaryKey())
-      .addColumn("text", "varchar", (col) => col.notNull())
-      .addColumn("indexedAt", "varchar", (col) => col.notNull())
-      .execute();
+      .createTable('post')
+      .addColumn('uri', 'varchar', (col) => col.primaryKey())
+      .addColumn('text', 'varchar', (col) => col.notNull())
+      .addColumn('indexedAt', 'varchar', (col) => col.notNull())
+      .execute()
   },
   async down(db: Kysely<unknown>) {
-    await db.schema.dropTable("post").execute();
+    await db.schema.dropTable('post').execute()
   },
-};
+}

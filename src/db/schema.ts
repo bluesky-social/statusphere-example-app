@@ -1,9 +1,9 @@
 export type DatabaseSchema = {
-  post: Post;
-};
+  post: Post
+}
 
 export type Post = {
-  uri: string;
-  text: string;
-  indexedAt: string;
-};
+  uri: string
+  text: string
+  indexedAt: string
+}
