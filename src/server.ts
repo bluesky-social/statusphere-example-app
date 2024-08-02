@@ -5,11 +5,11 @@ import express, { type Express } from "express";
 import helmet from "helmet";
 import { pino } from "pino";
 
-import errorHandler from "#/common/middleware/errorHandler";
-import requestLogger from "#/common/middleware/requestLogger";
-import { env } from "#/common/utils/envConfig";
 import { createDb, migrateToLatest } from "#/db";
+import { env } from "#/env";
 import { Ingester } from "#/firehose/ingester";
+import errorHandler from "#/middleware/errorHandler";
+import requestLogger from "#/middleware/requestLogger";
 import { createRouter } from "#/routes";
 import type { AppContext } from "./config";
 
