@@ -10,6 +10,7 @@
     "dev": "tsx watch --clear-screen=false src/index.ts | pino-pretty",
     "build": "tsup",
     "start": "node dist/index.js",
+    "lexgen": "lex gen-server ./src/lexicon ./lexicons/*",
     "clean": "rimraf dist coverage",
     "lint": "biome check src/",
     "lint:fix": "biome check src/ --fix",
@@ -35,6 +36,7 @@
     "pino-http": "^10.0.0"
   },
   "devDependencies": {
+    "@atproto/lex-cli": "^0.4.1",
     "@biomejs/biome": "1.8.3",
     "@types/better-sqlite3": "^7.6.11",
     "@types/cors": "^2.8.17",
@@ -50,10 +52,16 @@
     "vitest": "^2.0.0"
   },
   "lint-staged": {
-    "*.{js,ts,cjs,mjs,d.cts,d.mts,json,jsonc}": ["biome check --apply --no-errors-on-unmatched"]
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,json,jsonc}": [
+      "biome check --apply --no-errors-on-unmatched"
+    ]
   },
   "tsup": {
-    "entry": ["src", "!src/**/__tests__/**", "!src/**/*.test.*"],
+    "entry": [
+      "src",
+      "!src/**/__tests__/**",
+      "!src/**/*.test.*"
+    ],
     "splitting": false,
     "sourcemap": true,
     "clean": true
