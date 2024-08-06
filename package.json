@@ -17,6 +17,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@atproto/lexicon": "^0.4.0",
     "@atproto/repo": "^0.4.1",
     "@atproto/syntax": "^0.3.0",
     "@atproto/xrpc-server": "^0.5.3",
@@ -30,6 +31,7 @@
     "http-status-codes": "^2.3.0",
     "kysely": "^0.27.4",
     "multiformats": "^9.9.0",
+    "pino": "^9.3.2",
     "pino-http": "^10.0.0"
   },
   "devDependencies": {
