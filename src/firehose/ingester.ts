@@ -1,4 +1,4 @@
-import type { Database } from '#/db'
+import type { Database } from '#/db/index'
 import { Firehose } from '#/firehose/firehose'
 
 export class Ingester {
@@ -19,6 +19,7 @@ export class Ingester {
             text: post.text as string,
             indexedAt: new Date().toISOString(),
           })
+          .onConflict((oc) => oc.doNothing())
           .execute()
       }
     }

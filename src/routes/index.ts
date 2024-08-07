@@ -1,5 +1,7 @@
 import express from 'express'
 import type { AppContext } from '#/config'
+import { home } from '#/pages/home'
+import { page } from '#/view'
 import { handler } from './util'
 
 export const createRouter = (ctx: AppContext) => {
@@ -9,8 +11,7 @@ export const createRouter = (ctx: AppContext) => {
     '/',
     handler(async (req, res) => {
       const posts = await ctx.db.selectFrom('post').selectAll().orderBy('indexedAt', 'desc').limit(10).execute()
-      const postTexts = posts.map((row) => row.text)
-      res.json(postTexts)
+      return res.type('html').send(page(home(posts)))
     }),
   )
 
