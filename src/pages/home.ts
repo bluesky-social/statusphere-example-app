@@ -3,17 +3,31 @@ import type { Post } from '#/db/schema'
 import { html } from '../view'
 import { shell } from './shell'
 
-export function home(posts: Post[]) {
+type Props = { posts: Post[]; profile?: { displayName?: string; handle: string } }
+
+export function home(props: Props) {
   return shell({
     title: 'Home',
-    content: content(posts),
+    content: content(props),
   })
 }
 
-function content(posts: Post[]) {
+function content({ posts, profile }: Props) {
   return html`<div>
-    <h1>Welcome to My Page</h1>
-    <p>It's pretty special here.</p>
+    <h1>Welcome to the Atmosphere</h1>
+    ${
+      profile
+        ? html`<form action="/logout" method="post">
+          <p>
+            Hi, <b>${profile.displayName || profile.handle}</b>. It's pretty special here.
+            <button type="submit">Log out.</button>
+          </p>
+        </form>`
+        : html`<p>
+          It's pretty special here.
+          <a href="/login">Login.</a>
+        </p>`
+    }
     <ul>
       ${posts.map((post) => {
         return html`<li>
