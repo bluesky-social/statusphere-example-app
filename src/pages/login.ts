@@ -1,5 +1,3 @@
-import { AtUri } from '@atproto/syntax'
-import type { Post } from '#/db/schema'
 import { html } from '../view'
 import { shell } from './shell'
 

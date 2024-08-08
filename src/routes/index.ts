@@ -12,13 +12,6 @@ export const createRouter = (ctx: AppContext) => {
   const router = express.Router()
 
   router.get(
-    '/jwks.json',
-    handler((_req, res) => {
-      return res.json(ctx.oauthClient.jwks)
-    }),
-  )
-
-  router.get(
     '/client-metadata.json',
     handler((_req, res) => {
       return res.json(ctx.oauthClient.clientMetadata)

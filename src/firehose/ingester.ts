@@ -1,4 +1,4 @@
-import type { Database } from '#/db/index'
+import type { Database } from '#/db'
 import { Firehose } from '#/firehose/firehose'
 
 export class Ingester {
