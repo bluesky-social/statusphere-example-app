@@ -11,7 +11,7 @@ export function login(props: Props) {
 }
 
 function content({ error }: Props) {
-  return html`<div>
+  return html`<div id="root">
     <form action="/login" method="post">
       <input type="text" name="handle" placeholder="handle" required />
       <button type="submit">Log in.</button>

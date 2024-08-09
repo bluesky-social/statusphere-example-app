@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { OAuthResolverError } from '@atproto/oauth-client-node'
 import { isValidHandle } from '@atproto/syntax'
 import express from 'express'
@@ -10,6 +11,8 @@ import { handler } from './util'
 
 export const createRouter = (ctx: AppContext) => {
   const router = express.Router()
+
+  router.use('/public', express.static(path.join(__dirname, '..', 'public')))
 
   router.get(
     '/client-metadata.json',

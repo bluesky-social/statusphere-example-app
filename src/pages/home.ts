@@ -13,7 +13,7 @@ export function home(props: Props) {
 }
 
 function content({ posts, profile }: Props) {
-  return html`<div>
+  return html`<div id="root">
     <h1>Welcome to the Atmosphere</h1>
     ${
       profile
