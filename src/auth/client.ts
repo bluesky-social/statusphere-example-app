@@ -14,9 +14,6 @@ export const createClient = async (db: Database) => {
         ? `${url}/client-metadata.json`
         : `http://localhost?redirect_uri=${encodeURIComponent(`${url}/oauth/callback`)}`,
       client_uri: url,
-      logo_uri: `${url}/logo.png`,
-      tos_uri: `${url}/tos`,
-      policy_uri: `${url}/policy`,
       redirect_uris: [`${url}/oauth/callback`],
       scope: 'profile offline_access',
       grant_types: ['authorization_code', 'refresh_token'],
