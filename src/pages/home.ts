@@ -25,7 +25,7 @@ function content({ posts, profile }: Props) {
         </form>`
         : html`<p>
           It's pretty special here.
-          <a href="/login">Login.</a>
+          <a href="/login">Log in.</a>
         </p>`
     }
     <ul>

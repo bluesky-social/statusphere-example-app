@@ -5,7 +5,7 @@ type Props = { error?: string }
 
 export function login(props: Props) {
   return shell({
-    title: 'Login',
+    title: 'Log in',
     content: content(props),
   })
 }
