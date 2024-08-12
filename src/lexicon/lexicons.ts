@@ -4,9 +4,9 @@
 import { LexiconDoc, Lexicons } from '@atproto/lexicon'
 
 export const schemaDict = {
-  ExampleLexiconStatus: {
+  ComExampleStatus: {
     lexicon: 1,
-    id: 'example.lexicon.status',
+    id: 'com.example.status',
     defs: {
       main: {
         type: 'record',
@@ -17,6 +17,9 @@ export const schemaDict = {
           properties: {
             status: {
               type: 'string',
+              minLength: 1,
+              maxGraphemes: 1,
+              maxLength: 10,
             },
             updatedAt: {
               type: 'string',
@@ -30,4 +33,4 @@ export const schemaDict = {
 }
 export const schemas: LexiconDoc[] = Object.values(schemaDict) as LexiconDoc[]
 export const lexicons: Lexicons = new Lexicons(schemas)
-export const ids = { ExampleLexiconStatus: 'example.lexicon.status' }
+export const ids = { ComExampleStatus: 'com.example.status' }

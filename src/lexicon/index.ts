@@ -16,25 +16,25 @@ export function createServer(options?: XrpcOptions): Server {
 
 export class Server {
   xrpc: XrpcServer
-  example: ExampleNS
+  com: ComNS
 
   constructor(options?: XrpcOptions) {
     this.xrpc = createXrpcServer(schemas, options)
-    this.example = new ExampleNS(this)
+    this.com = new ComNS(this)
   }
 }
 
-export class ExampleNS {
+export class ComNS {
   _server: Server
-  lexicon: ExampleLexiconNS
+  example: ComExampleNS
 
   constructor(server: Server) {
     this._server = server
-    this.lexicon = new ExampleLexiconNS(server)
+    this.example = new ComExampleNS(server)
   }
 }
 
-export class ExampleLexiconNS {
+export class ComExampleNS {
   _server: Server
 
   constructor(server: Server) {

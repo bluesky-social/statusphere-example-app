@@ -1,12 +1,20 @@
 export type DatabaseSchema = {
-  post: Post
+  user: User
+  status: Status
   auth_session: AuthSession
   auth_state: AuthState
 }
 
-export type Post = {
-  uri: string
-  text: string
+export type User = {
+  did: string
+  handle: string
+  indexedAt: string
+}
+
+export type Status = {
+  authorDid: string
+  status: string
+  updatedAt: string
   indexedAt: string
 }
 

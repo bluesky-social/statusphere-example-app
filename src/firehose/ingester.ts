@@ -1,5 +1,6 @@
 import type { Database } from '#/db'
 import { Firehose } from '#/firehose/firehose'
+import * as Status from '#/lexicon/types/com/example/status'
 
 export class Ingester {
   firehose: Firehose | undefined
@@ -10,17 +11,23 @@ export class Ingester {
 
     for await (const evt of firehose.run()) {
       if (evt.event === 'create') {
-        if (evt.collection !== 'app.bsky.feed.post') continue
-        const post: any = evt.record // @TODO fix types
-        await this.db
-          .insertInto('post')
-          .values({
-            uri: evt.uri.toString(),
-            text: post.text as string,
-            indexedAt: new Date().toISOString(),
-          })
-          .onConflict((oc) => oc.doNothing())
-          .execute()
+        const record = evt.record
+        if (
+          evt.collection === 'com.example.status' &&
+          Status.isRecord(record) &&
+          Status.validateRecord(record).success
+        ) {
+          await this.db
+            .insertInto('status')
+            .values({
+              authorDid: evt.author,
+              status: record.status,
+              updatedAt: record.updatedAt,
+              indexedAt: new Date().toISOString(),
+            })
+            .onConflict((oc) => oc.doNothing())
+            .execute()
+        }
       }
     }
   }

@@ -18,7 +18,7 @@ export const createRouter = (ctx: AppContext) => {
     '/client-metadata.json',
     handler((_req, res) => {
       return res.json(ctx.oauthClient.clientMetadata)
-    }),
+    })
   )
 
   router.get(
@@ -33,14 +33,14 @@ export const createRouter = (ctx: AppContext) => {
         return res.redirect('/?error')
       }
       return res.redirect('/')
-    }),
+    })
   )
 
   router.get(
     '/login',
     handler(async (_req, res) => {
       return res.type('html').send(page(login({})))
-    }),
+    })
   )
 
   router.post(
@@ -58,12 +58,15 @@ export const createRouter = (ctx: AppContext) => {
         return res.type('html').send(
           page(
             login({
-              error: err instanceof OAuthResolverError ? err.message : "couldn't initiate login",
-            }),
-          ),
+              error:
+                err instanceof OAuthResolverError
+                  ? err.message
+                  : "couldn't initiate login",
+            })
+          )
         )
       }
-    }),
+    })
   )
 
   router.post(
@@ -71,7 +74,7 @@ export const createRouter = (ctx: AppContext) => {
     handler(async (req, res) => {
       await destroySession(req, res)
       return res.redirect('/')
-    }),
+    })
   )
 
   router.get(
@@ -85,13 +88,18 @@ export const createRouter = (ctx: AppContext) => {
           await destroySession(req, res)
           return null
         }))
-      const posts = await ctx.db.selectFrom('post').selectAll().orderBy('indexedAt', 'desc').limit(10).execute()
+      const statuses = await ctx.db
+        .selectFrom('status')
+        .selectAll()
+        .orderBy('indexedAt', 'desc')
+        .limit(10)
+        .execute()
       if (!agent) {
-        return res.type('html').send(page(home({ posts })))
+        return res.type('html').send(page(home({ statuses })))
       }
       const { data: profile } = await agent.getProfile({ actor: session.did })
-      return res.type('html').send(page(home({ posts, profile })))
-    }),
+      return res.type('html').send(page(home({ statuses, profile })))
+    })
   )
 
   return router
