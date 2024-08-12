@@ -3,6 +3,36 @@ import type { Status } from '#/db/schema'
 import { html } from '../view'
 import { shell } from './shell'
 
+const STATUS_OPTIONS = [
+  '👍',
+  '👎',
+  '💙',
+  '🥹',
+  '😧',
+  '😤',
+  '🙃',
+  '😉',
+  '😎',
+  '🤓',
+  '🤨',
+  '🥳',
+  '😭',
+  '😤',
+  '🤯',
+  '🫡',
+  '💀',
+  '✊',
+  '🤘',
+  '👀',
+  '🧠',
+  '👩‍💻',
+  '🧑‍💻',
+  '🥷',
+  '🧌',
+  '🦋',
+  '🚀',
+]
+
 type Props = {
   statuses: Status[]
   profile?: { displayName?: string; handle: string }
@@ -17,32 +47,104 @@ export function home(props: Props) {
 
 function content({ statuses, profile }: Props) {
   return html`<div id="root">
-    <h1>Welcome to the Atmosphere</h1>
-    ${profile
-      ? html`<form action="/logout" method="post">
-          <p>
-            Hi, <b>${profile.displayName || profile.handle}</b>. It's pretty
-            special here.
-            <button type="submit">Log out.</button>
-          </p>
-        </form>`
-      : html`<p>
-          It's pretty special here.
-          <a href="/login">Log in.</a>
-        </p>`}
-    <ul>
-      ${statuses.map((status) => {
-        return html`<li>
-          ${status.status}
-          <a href="${toBskyLink(status.authorDid)}" target="_blank"
-            >${status.authorDid}</a
-          >
-        </li>`
+    <div class="error"></div>
+    <div id="header">
+      <h1>Statusphere</h1>
+      <p>Set your status on the Atmosphere.</p>
+    </div>
+    <div class="container">
+      <div class="card">
+        ${profile
+          ? html`<form action="/logout" method="post" class="session-form">
+              <div>
+                Hi, <strong>${profile.displayName || profile.handle}</strong>.
+                what's your status today?
+              </div>
+              <div>
+                <button type="submit">Log out</button>
+              </div>
+            </form>`
+          : html`<p><a href="/login">Log in</a> to set your status!</p>`}
+      </div>
+      <div class="">
+        <div class="status-options">
+          ${STATUS_OPTIONS.map(
+            (status) =>
+              html`<div class="status-option" data-value="${status}">
+                ${status}
+              </div>`
+          )}
+        </div>
+      </div>
+      <div class="status-line no-line">
+        <div class="status">👍</div>
+        <div class="desc">
+          <a class="author" href="/">@pfrazee.com</a>
+          is feeling 👍 on Aug 12, 2024
+        </div>
+      </div>
+      <div class="status-line">
+        <div class="status">👍</div>
+        <div class="desc">
+          <a class="author" href="/">@pfrazee.com</a>
+          is feeling 👍 on Aug 12, 2024
+        </div>
+      </div>
+      <div class="status-line">
+        <div class="status">👍</div>
+        <div class="desc">
+          <a class="author" href="/">@pfrazee.com</a>
+          is feeling 👍 on Aug 12, 2024
+        </div>
+      </div>
+      <div class="status-line">
+        <div class="status">👍</div>
+        <div class="desc">
+          <a class="author" href="/">@pfrazee.com</a>
+          is feeling 👍 on Aug 12, 2024
+        </div>
+      </div>
+      <div class="status-line">
+        <div class="status">👍</div>
+        <div class="desc">
+          <a class="author" href="/">@pfrazee.com</a>
+          is feeling 👍 on Aug 12, 2024
+        </div>
+      </div>
+      <div class="status-line">
+        <div class="status">👍</div>
+        <div class="desc">
+          <a class="author" href="/">@pfrazee.com</a>
+          is feeling 👍 on Aug 12, 2024
+        </div>
+      </div>
+      ${statuses.map((status, i) => {
+        return html`
+          <div class=${i === 0 ? 'status-line no-line' : 'status-line'}>
+            <div>
+              <div class="status">${status.status}</div>
+            </div>
+            <div class="desc">
+              <a class="author" href=${toBskyLink(status.authorDid)}
+                >@${status.authorDid}</a
+              >
+              is feeling ${status.status} on ${ts(status)}
+            </div>
+          </div>
+        `
       })}
-    </ul>
+    </div>
+    <script src="/public/home.js"></script>
   </div>`
 }
 
 function toBskyLink(did: string) {
   return `https://bsky.app/profile/${did}`
+}
+
+function ts(status: Status) {
+  const indexedAt = new Date(status.indexedAt)
+  const updatedAt = new Date(status.updatedAt)
+  if (updatedAt > indexedAt) return updatedAt.toDateString()
+  return indexedAt.toDateString()
 }
