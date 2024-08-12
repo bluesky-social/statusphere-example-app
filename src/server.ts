@@ -18,14 +18,14 @@ export class Server {
   constructor(
     public app: express.Application,
     public server: http.Server,
-    public ctx: AppContext,
+    public ctx: AppContext
   ) {}
 
   static async create() {
-    const { NODE_ENV, HOST, PORT } = env
+    const { NODE_ENV, HOST, PORT, DB_PATH } = env
 
     const logger = pino({ name: 'server start' })
-    const db = createDb(':memory:')
+    const db = createDb(DB_PATH)
     await migrateToLatest(db)
     const ingester = new Ingester(db)
     const oauthClient = await createClient(db)
@@ -57,7 +57,7 @@ export class Server {
             formAction: null,
           },
         },
-      }),
+      })
     )
 
     // Request logging
