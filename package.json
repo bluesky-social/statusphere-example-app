@@ -18,10 +18,12 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@atproto/lexicon": "^0.4.0",
-    "@atproto/repo": "^0.4.1",
+    "@atproto/jwk-jose": "0.1.2-rc.0",
+    "@atproto/lexicon": "0.4.1-rc.0",
+    "@atproto/oauth-client-node": "0.0.2-rc.2",
+    "@atproto/repo": "0.4.2-rc.0",
     "@atproto/syntax": "^0.3.0",
-    "@atproto/xrpc-server": "^0.5.3",
+    "@atproto/xrpc-server": "0.5.4-rc.0",
     "better-sqlite3": "^11.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -30,10 +32,12 @@
     "express-rate-limit": "^7.2.0",
     "helmet": "^7.1.0",
     "http-status-codes": "^2.3.0",
+    "iron-session": "^8.0.2",
     "kysely": "^0.27.4",
     "multiformats": "^9.9.0",
     "pino": "^9.3.2",
-    "pino-http": "^10.0.0"
+    "pino-http": "^10.0.0",
+    "uhtml": "^4.5.9"
   },
   "devDependencies": {
     "@atproto/lex-cli": "^0.4.1",
@@ -45,6 +49,7 @@
     "pino-pretty": "^11.0.0",
     "rimraf": "^5.0.0",
     "supertest": "^7.0.0",
+    "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
     "tsx": "^4.7.2",
     "typescript": "^5.4.4",
@@ -52,16 +57,10 @@
     "vitest": "^2.0.0"
   },
   "lint-staged": {
-    "*.{js,ts,cjs,mjs,d.cts,d.mts,json,jsonc}": [
-      "biome check --apply --no-errors-on-unmatched"
-    ]
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,json,jsonc}": ["biome check --apply --no-errors-on-unmatched"]
   },
   "tsup": {
-    "entry": [
-      "src",
-      "!src/**/__tests__/**",
-      "!src/**/*.test.*"
-    ],
+    "entry": ["src", "!src/**/__tests__/**", "!src/**/*.test.*"],
     "splitting": false,
     "sourcemap": true,
     "clean": true

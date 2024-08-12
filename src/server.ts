@@ -11,6 +11,7 @@ import { Ingester } from '#/firehose/ingester'
 import errorHandler from '#/middleware/errorHandler'
 import requestLogger from '#/middleware/requestLogger'
 import { createRouter } from '#/routes'
+import { createClient } from './auth/client'
 import type { AppContext } from './config'
 
 export class Server {
@@ -27,11 +28,13 @@ export class Server {
     const db = createDb(':memory:')
     await migrateToLatest(db)
     const ingester = new Ingester(db)
+    const oauthClient = await createClient(db)
     ingester.start()
     const ctx = {
       db,
       ingester,
       logger,
+      oauthClient,
     }
 
     const app: Express = express()
@@ -46,7 +49,16 @@ export class Server {
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
     app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }))
-    app.use(helmet())
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            // allow oauth redirect when submitting login form
+            formAction: null,
+          },
+        },
+      }),
+    )
 
     // Request logging
     app.use(requestLogger)

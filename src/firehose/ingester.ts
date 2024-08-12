@@ -19,6 +19,7 @@ export class Ingester {
             text: post.text as string,
             indexedAt: new Date().toISOString(),
           })
+          .onConflict((oc) => oc.doNothing())
           .execute()
       }
     }
