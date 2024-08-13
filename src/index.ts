@@ -12,6 +12,7 @@ import { createClient } from '#/auth/client'
 import { createResolver, Resolver } from '#/firehose/resolver'
 import type { Database } from '#/db'
 
+// Application state passed to the router and elsewhere
 export type AppContext = {
   db: Database
   ingester: Ingester
@@ -29,14 +30,16 @@ export class Server {
 
   static async create() {
     const { NODE_ENV, HOST, PORT, DB_PATH } = env
-
     const logger = pino({ name: 'server start' })
+
+    // Set up the SQLite database
     const db = createDb(DB_PATH)
     await migrateToLatest(db)
-    const ingester = new Ingester(db)
+
+    // Create the atproto utilities
     const oauthClient = await createClient(db)
+    const ingester = new Ingester(db)
     const resolver = createResolver()
-    ingester.start()
     const ctx = {
       db,
       ingester,
@@ -45,22 +48,21 @@ export class Server {
       resolver,
     }
 
-    const app: Express = express()
+    // Subscribe to events on the firehose
+    ingester.start()
 
-    // Set the application to trust the reverse proxy
+    // Create our server
+    const app: Express = express()
     app.set('trust proxy', true)
 
-    // Middlewares
+    // Routes & middlewares
+    const router = createRouter(ctx)
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
-
-    // Routes
-    const router = createRouter(ctx)
     app.use(router)
-
-    // Error handlers
     app.use((_req, res) => res.sendStatus(404))
 
+    // Bind our server to the port
     const server = app.listen(env.PORT)
     await events.once(server, 'listening')
     logger.info(`Server (${NODE_ENV}) running on port http://${HOST}:${PORT}`)
