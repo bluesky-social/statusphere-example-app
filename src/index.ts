@@ -2,16 +2,15 @@ import events from 'node:events'
 import type http from 'node:http'
 import express, { type Express } from 'express'
 import { pino } from 'pino'
+import type { OAuthClient } from '@atproto/oauth-client-node'
 
 import { createDb, migrateToLatest } from '#/db'
 import { env } from '#/env'
 import { Ingester } from '#/firehose/ingester'
 import { createRouter } from '#/routes'
 import { createClient } from '#/auth/client'
-import { createResolver } from '#/ident/resolver'
-import type { OAuthClient } from '@atproto/oauth-client-node'
+import { createResolver, Resolver } from '#/firehose/resolver'
 import type { Database } from '#/db'
-import { Resolver } from '#/ident/types'
 
 export type AppContext = {
   db: Database
