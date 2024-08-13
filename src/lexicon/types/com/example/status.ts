@@ -16,11 +16,10 @@ export function isRecord(v: unknown): v is Record {
   return (
     isObj(v) &&
     hasProp(v, '$type') &&
-    (v.$type === 'example.lexicon.status#main' ||
-      v.$type === 'example.lexicon.status')
+    (v.$type === 'com.example.status#main' || v.$type === 'com.example.status')
   )
 }
 
 export function validateRecord(v: unknown): ValidationResult {
-  return lexicons.validate('example.lexicon.status#main', v)
+  return lexicons.validate('com.example.status#main', v)
 }

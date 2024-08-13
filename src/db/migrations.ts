@@ -11,9 +11,16 @@ export const migrationProvider: MigrationProvider = {
 migrations['001'] = {
   async up(db: Kysely<unknown>) {
     await db.schema
-      .createTable('post')
-      .addColumn('uri', 'varchar', (col) => col.primaryKey())
-      .addColumn('text', 'varchar', (col) => col.notNull())
+      .createTable('did_cache')
+      .addColumn('did', 'varchar', (col) => col.primaryKey())
+      .addColumn('doc', 'varchar', (col) => col.notNull())
+      .addColumn('updatedAt', 'varchar', (col) => col.notNull())
+      .execute()
+    await db.schema
+      .createTable('status')
+      .addColumn('authorDid', 'varchar', (col) => col.primaryKey())
+      .addColumn('status', 'varchar', (col) => col.notNull())
+      .addColumn('updatedAt', 'varchar', (col) => col.notNull())
       .addColumn('indexedAt', 'varchar', (col) => col.notNull())
       .execute()
     await db.schema
@@ -30,6 +37,7 @@ migrations['001'] = {
   async down(db: Kysely<unknown>) {
     await db.schema.dropTable('auth_state').execute()
     await db.schema.dropTable('auth_session').execute()
-    await db.schema.dropTable('post').execute()
+    await db.schema.dropTable('status').execute()
+    await db.schema.dropTable('did_cache').execute()
   },
 }

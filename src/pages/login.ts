@@ -12,10 +12,21 @@ export function login(props: Props) {
 
 function content({ error }: Props) {
   return html`<div id="root">
-    <form action="/login" method="post">
-      <input type="text" name="handle" placeholder="handle" required />
-      <button type="submit">Log in.</button>
-      ${error ? html`<p>Error: <i>${error}</i></p>` : undefined}
-    </form>
+    <div id="header">
+      <h1>Statusphere</h1>
+      <p>Set your status on the Atmosphere.</p>
+    </div>
+    <div class="container">
+      <form action="/login" method="post" class="login-form">
+        <input
+          type="text"
+          name="handle"
+          placeholder="Enter your handle (eg alice.bsky.social)"
+          required
+        />
+        <button type="submit">Log in</button>
+        ${error ? html`<p>Error: <i>${error}</i></p>` : undefined}
+      </form>
+    </div>
   </div>`
 }

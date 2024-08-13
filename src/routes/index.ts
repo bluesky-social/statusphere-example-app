@@ -8,6 +8,7 @@ import { home } from '#/pages/home'
 import { login } from '#/pages/login'
 import { page } from '#/view'
 import { handler } from './util'
+import * as Status from '#/lexicon/types/com/example/status'
 
 export const createRouter = (ctx: AppContext) => {
   const router = express.Router()
@@ -18,7 +19,7 @@ export const createRouter = (ctx: AppContext) => {
     '/client-metadata.json',
     handler((_req, res) => {
       return res.json(ctx.oauthClient.clientMetadata)
-    }),
+    })
   )
 
   router.get(
@@ -33,14 +34,14 @@ export const createRouter = (ctx: AppContext) => {
         return res.redirect('/?error')
       }
       return res.redirect('/')
-    }),
+    })
   )
 
   router.get(
     '/login',
     handler(async (_req, res) => {
       return res.type('html').send(page(login({})))
-    }),
+    })
   )
 
   router.post(
@@ -58,12 +59,15 @@ export const createRouter = (ctx: AppContext) => {
         return res.type('html').send(
           page(
             login({
-              error: err instanceof OAuthResolverError ? err.message : "couldn't initiate login",
-            }),
-          ),
+              error:
+                err instanceof OAuthResolverError
+                  ? err.message
+                  : "couldn't initiate login",
+            })
+          )
         )
       }
-    }),
+    })
   )
 
   router.post(
@@ -71,7 +75,7 @@ export const createRouter = (ctx: AppContext) => {
     handler(async (req, res) => {
       await destroySession(req, res)
       return res.redirect('/')
-    }),
+    })
   )
 
   router.get(
@@ -85,13 +89,88 @@ export const createRouter = (ctx: AppContext) => {
           await destroySession(req, res)
           return null
         }))
-      const posts = await ctx.db.selectFrom('post').selectAll().orderBy('indexedAt', 'desc').limit(10).execute()
+      const statuses = await ctx.db
+        .selectFrom('status')
+        .selectAll()
+        .orderBy('indexedAt', 'desc')
+        .limit(10)
+        .execute()
+      const didHandleMap = await ctx.resolver.resolveDidsToHandles(
+        statuses.map((s) => s.authorDid)
+      )
       if (!agent) {
-        return res.type('html').send(page(home({ posts })))
+        return res.type('html').send(page(home({ statuses, didHandleMap })))
       }
       const { data: profile } = await agent.getProfile({ actor: session.did })
-      return res.type('html').send(page(home({ posts, profile })))
-    }),
+      return res
+        .type('html')
+        .send(page(home({ statuses, didHandleMap, profile })))
+    })
+  )
+
+  router.post(
+    '/status',
+    handler(async (req, res) => {
+      const session = await getSession(req, res)
+      const agent =
+        session &&
+        (await ctx.oauthClient.restore(session.did).catch(async (err) => {
+          ctx.logger.warn({ err }, 'oauth restore failed')
+          await destroySession(req, res)
+          return null
+        }))
+      if (!agent) {
+        return res.status(401).json({ error: 'Session required' })
+      }
+
+      const record = {
+        $type: 'com.example.status',
+        status: req.body?.status,
+        updatedAt: new Date().toISOString(),
+      }
+      if (!Status.validateRecord(record).success) {
+        return res.status(400).json({ error: 'Invalid status' })
+      }
+
+      try {
+        await agent.com.atproto.repo.putRecord({
+          repo: agent.accountDid,
+          collection: 'com.example.status',
+          rkey: 'self',
+          record,
+          validate: false,
+        })
+      } catch (err) {
+        ctx.logger.warn({ err }, 'failed to write record')
+        return res.status(500).json({ error: 'Failed to write record' })
+      }
+
+      try {
+        await ctx.db
+          .insertInto('status')
+          .values({
+            authorDid: agent.accountDid,
+            status: record.status,
+            updatedAt: record.updatedAt,
+            indexedAt: new Date().toISOString(),
+          })
+          .onConflict((oc) =>
+            oc.column('authorDid').doUpdateSet({
+              status: record.status,
+              updatedAt: record.updatedAt,
+              indexedAt: new Date().toISOString(),
+            })
+          )
+          .execute()
+      } catch (err) {
+        ctx.logger.warn(
+          { err },
+          'failed to update computed view; ignoring as it should be caught by the firehose'
+        )
+      }
+
+      res.status(200).json({})
+    })
   )
 
   return router
