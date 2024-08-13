@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Request, RequestHandler, Response } from 'express'
-import { StatusCodes, getReasonPhrase } from 'http-status-codes'
 import type { LevelWithSilent } from 'pino'
 import { type CustomAttributeKeys, type Options, pinoHttp } from 'pino-http'
 
@@ -33,7 +32,8 @@ const requestLogger = (options?: Options): RequestHandler[] => {
     customLogLevel,
     customSuccessMessage,
     customReceivedMessage: (req) => `request received: ${req.method}`,
-    customErrorMessage: (_req, res) => `request errored with status code: ${res.statusCode}`,
+    customErrorMessage: (_req, res) =>
+      `request errored with status code: ${res.statusCode}`,
     customAttributeKeys,
     ...options,
   }
@@ -67,19 +67,29 @@ const responseBodyMiddleware: RequestHandler = (_req, res, next) => {
   next()
 }
 
-const customLogLevel = (_req: IncomingMessage, res: ServerResponse<IncomingMessage>, err?: Error): LevelWithSilent => {
-  if (err || res.statusCode >= StatusCodes.INTERNAL_SERVER_ERROR) return LogLevel.Error
-  if (res.statusCode >= StatusCodes.BAD_REQUEST) return LogLevel.Warn
-  if (res.statusCode >= StatusCodes.MULTIPLE_CHOICES) return LogLevel.Silent
+const customLogLevel = (
+  _req: IncomingMessage,
+  res: ServerResponse<IncomingMessage>,
+  err?: Error
+): LevelWithSilent => {
+  if (err || res.statusCode >= 500) return LogLevel.Error
+  if (res.statusCode >= 400) return LogLevel.Warn
+  if (res.statusCode >= 300) return LogLevel.Silent
   return LogLevel.Info
 }
 
-const customSuccessMessage = (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
-  if (res.statusCode === StatusCodes.NOT_FOUND) return getReasonPhrase(StatusCodes.NOT_FOUND)
+const customSuccessMessage = (
+  req: IncomingMessage,
+  res: ServerResponse<IncomingMessage>
+) => {
+  if (res.statusCode === 404) return 'Not found'
   return `${req.method} completed`
 }
 
-const genReqId = (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
+const genReqId = (
+  req: IncomingMessage,
+  res: ServerResponse<IncomingMessage>
+) => {
   const existingID = req.id ?? req.headers['x-request-id']
   if (existingID) return existingID
   const id = randomUUID()
