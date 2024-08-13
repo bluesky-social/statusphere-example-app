@@ -1,5 +1,3 @@
-'use server'
-
 import assert from 'node:assert'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { getIronSession } from 'iron-session'

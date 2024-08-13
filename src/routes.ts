@@ -7,8 +7,21 @@ import type { AppContext } from '#/index'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
 import { page } from '#/view'
-import { handler } from './util'
 import * as Status from '#/lexicon/types/com/example/status'
+
+const handler =
+  (fn: express.Handler) =>
+  async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    try {
+      await fn(req, res, next)
+    } catch (err) {
+      next(err)
+    }
+  }
 
 export const createRouter = (ctx: AppContext) => {
   const router = express.Router()
