@@ -26,7 +26,7 @@ const handler =
 export const createRouter = (ctx: AppContext) => {
   const router = express.Router()
 
-  router.use('/public', express.static(path.join(__dirname, '..', 'public')))
+  router.use('/public', express.static(path.join(__dirname, 'pages', 'public')))
 
   router.get(
     '/client-metadata.json',
