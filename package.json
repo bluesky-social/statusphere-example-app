@@ -12,9 +12,6 @@
     "start": "node dist/index.js",
     "lexgen": "lex gen-server ./src/lexicon ./lexicons/*",
     "clean": "rimraf dist coverage",
-    "lint": "biome check src/",
-    "lint:fix": "biome check src/ --fix",
-    "format": "biome format src/",
     "test": "vitest run"
   },
   "dependencies": {
@@ -42,11 +39,9 @@
   },
   "devDependencies": {
     "@atproto/lex-cli": "^0.4.1",
-    "@biomejs/biome": "1.8.3",
     "@types/better-sqlite3": "^7.6.11",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
-    "lint-staged": "^15.2.2",
     "pino-pretty": "^11.0.0",
     "rimraf": "^5.0.0",
     "supertest": "^7.0.0",
@@ -56,11 +51,6 @@
     "typescript": "^5.4.4",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^2.0.0"
-  },
-  "lint-staged": {
-    "*.{js,ts,cjs,mjs,d.cts,d.mts,json,jsonc}": [
-      "biome check --apply --no-errors-on-unmatched"
-    ]
   },
   "tsup": {
     "entry": [
