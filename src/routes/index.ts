@@ -2,7 +2,7 @@ import path from 'node:path'
 import { OAuthResolverError } from '@atproto/oauth-client-node'
 import { isValidHandle } from '@atproto/syntax'
 import express from 'express'
-import { createSession, destroySession, getSession } from '#/auth/session'
+import { createSession, destroySession, getSessionAgent } from '#/auth/session'
 import type { AppContext } from '#/config'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
@@ -81,14 +81,7 @@ export const createRouter = (ctx: AppContext) => {
   router.get(
     '/',
     handler(async (req, res) => {
-      const session = await getSession(req, res)
-      const agent =
-        session &&
-        (await ctx.oauthClient.restore(session.did).catch(async (err) => {
-          ctx.logger.warn({ err }, 'oauth restore failed')
-          await destroySession(req, res)
-          return null
-        }))
+      const agent = await getSessionAgent(req, res, ctx)
       const statuses = await ctx.db
         .selectFrom('status')
         .selectAll()
@@ -108,7 +101,9 @@ export const createRouter = (ctx: AppContext) => {
       if (!agent) {
         return res.type('html').send(page(home({ statuses, didHandleMap })))
       }
-      const { data: profile } = await agent.getProfile({ actor: session.did })
+      const { data: profile } = await agent.getProfile({
+        actor: agent.accountDid,
+      })
       return res
         .type('html')
         .send(page(home({ statuses, didHandleMap, profile, myStatus })))
@@ -118,14 +113,7 @@ export const createRouter = (ctx: AppContext) => {
   router.post(
     '/status',
     handler(async (req, res) => {
-      const session = await getSession(req, res)
-      const agent =
-        session &&
-        (await ctx.oauthClient.restore(session.did).catch(async (err) => {
-          ctx.logger.warn({ err }, 'oauth restore failed')
-          await destroySession(req, res)
-          return null
-        }))
+      const agent = await getSessionAgent(req, res, ctx)
       if (!agent) {
         return res.status(401).json({ error: 'Session required' })
       }
