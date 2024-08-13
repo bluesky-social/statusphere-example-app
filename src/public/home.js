@@ -1,6 +1,12 @@
 Array.from(document.querySelectorAll('.status-option'), (el) => {
   el.addEventListener('click', async (ev) => {
     setError('')
+
+    if (el.dataset.authed !== '1') {
+      window.location = '/login'
+      return
+    }
+
     const res = await fetch('/status', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

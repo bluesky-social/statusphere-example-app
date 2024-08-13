@@ -65,59 +65,24 @@ function content({ statuses, didHandleMap, profile }: Props) {
                 <button type="submit">Log out</button>
               </div>
             </form>`
-          : html`<p><a href="/login">Log in</a> to set your status!</p>`}
+          : html`<div class="session-form">
+              <div><a href="/login">Log in</a> to set your status!</div>
+              <div>
+                <a href="/login" class="button">Log in</a>
+              </div>
+            </div>`}
       </div>
-      <div class="">
-        <div class="status-options">
-          ${STATUS_OPTIONS.map(
-            (status) =>
-              html`<div class="status-option" data-value="${status}">
-                ${status}
-              </div>`
-          )}
-        </div>
-      </div>
-      <div class="status-line no-line">
-        <div class="status">👍</div>
-        <div class="desc">
-          <a class="author" href="/">@pfrazee.com</a>
-          is feeling 👍 on Aug 12, 2024
-        </div>
-      </div>
-      <div class="status-line">
-        <div class="status">👍</div>
-        <div class="desc">
-          <a class="author" href="/">@pfrazee.com</a>
-          is feeling 👍 on Aug 12, 2024
-        </div>
-      </div>
-      <div class="status-line">
-        <div class="status">👍</div>
-        <div class="desc">
-          <a class="author" href="/">@pfrazee.com</a>
-          is feeling 👍 on Aug 12, 2024
-        </div>
-      </div>
-      <div class="status-line">
-        <div class="status">👍</div>
-        <div class="desc">
-          <a class="author" href="/">@pfrazee.com</a>
-          is feeling 👍 on Aug 12, 2024
-        </div>
-      </div>
-      <div class="status-line">
-        <div class="status">👍</div>
-        <div class="desc">
-          <a class="author" href="/">@pfrazee.com</a>
-          is feeling 👍 on Aug 12, 2024
-        </div>
-      </div>
-      <div class="status-line">
-        <div class="status">👍</div>
-        <div class="desc">
-          <a class="author" href="/">@pfrazee.com</a>
-          is feeling 👍 on Aug 12, 2024
-        </div>
+      <div class="status-options">
+        ${STATUS_OPTIONS.map(
+          (status) =>
+            html`<div
+              class="status-option"
+              data-value="${status}"
+              data-authed=${profile ? '1' : '0'}
+            >
+              ${status}
+            </div>`
+        )}
       </div>
       ${statuses.map((status, i) => {
         const handle = didHandleMap[status.authorDid] || status.authorDid
