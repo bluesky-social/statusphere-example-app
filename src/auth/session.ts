@@ -1,7 +1,7 @@
 import assert from 'node:assert'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { getIronSession } from 'iron-session'
-import { env } from '#/env'
+import { env } from '#/lib/env'
 import { AppContext } from '#/index'
 
 export type Session = { did: string }

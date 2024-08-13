@@ -1,6 +1,5 @@
-import { AtUri } from '@atproto/syntax'
 import type { Status } from '#/db/schema'
-import { html } from '../view'
+import { html } from '../lib/view'
 import { shell } from './shell'
 
 const TODAY = new Date().toDateString()

@@ -1,4 +1,4 @@
-import { type Hole, html } from '../view'
+import { type Hole, html } from '../lib/view'
 
 export function shell({ title, content }: { title: string; content: Hole }) {
   return html`<html>

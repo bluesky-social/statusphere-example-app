@@ -10,13 +10,17 @@ export class Ingester {
     const firehose = new Firehose({})
 
     for await (const evt of firehose.run()) {
-      if (evt.event === 'create') {
+      // Watch for write events
+      if (evt.event === 'create' || evt.event === 'update') {
         const record = evt.record
+
+        // If the write is a valid status update
         if (
           evt.collection === 'com.example.status' &&
           Status.isRecord(record) &&
           Status.validateRecord(record).success
         ) {
+          // Store the status in our SQLite
           await this.db
             .insertInto('status')
             .values({
@@ -25,7 +29,13 @@ export class Ingester {
               updatedAt: record.updatedAt,
               indexedAt: new Date().toISOString(),
             })
-            .onConflict((oc) => oc.doNothing())
+            .onConflict((oc) =>
+              oc.column('authorDid').doUpdateSet({
+                status: record.status,
+                updatedAt: record.updatedAt,
+                indexedAt: new Date().toISOString(),
+              })
+            )
             .execute()
         }
       }

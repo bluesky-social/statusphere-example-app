@@ -6,9 +6,10 @@ import { createSession, destroySession, getSessionAgent } from '#/auth/session'
 import type { AppContext } from '#/index'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
-import { page } from '#/view'
+import { page } from '#/lib/view'
 import * as Status from '#/lexicon/types/com/example/status'
 
+// Helper function for defining routes
 const handler =
   (fn: express.Handler) =>
   async (
@@ -26,8 +27,10 @@ const handler =
 export const createRouter = (ctx: AppContext) => {
   const router = express.Router()
 
+  // Static assets
   router.use('/public', express.static(path.join(__dirname, 'pages', 'public')))
 
+  // OAuth metadata
   router.get(
     '/client-metadata.json',
     handler((_req, res) => {
@@ -35,6 +38,7 @@ export const createRouter = (ctx: AppContext) => {
     })
   )
 
+  // OAuth callback to complete session creation
   router.get(
     '/oauth/callback',
     handler(async (req, res) => {
@@ -50,6 +54,7 @@ export const createRouter = (ctx: AppContext) => {
     })
   )
 
+  // Login page
   router.get(
     '/login',
     handler(async (_req, res) => {
@@ -57,13 +62,17 @@ export const createRouter = (ctx: AppContext) => {
     })
   )
 
+  // Login handler
   router.post(
     '/login',
     handler(async (req, res) => {
+      // Validate
       const handle = req.body?.handle
       if (typeof handle !== 'string' || !isValidHandle(handle)) {
         return res.type('html').send(page(login({ error: 'invalid handle' })))
       }
+
+      // Initiate the OAuth flow
       try {
         const url = await ctx.oauthClient.authorize(handle)
         return res.redirect(url.toString())
@@ -83,6 +92,7 @@ export const createRouter = (ctx: AppContext) => {
     })
   )
 
+  // Logout handler
   router.post(
     '/logout',
     handler(async (req, res) => {
@@ -91,10 +101,14 @@ export const createRouter = (ctx: AppContext) => {
     })
   )
 
+  // Homepage
   router.get(
     '/',
     handler(async (req, res) => {
+      // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
+
+      // Fetch data stored in our SQLite
       const statuses = await ctx.db
         .selectFrom('status')
         .selectAll()
@@ -108,29 +122,41 @@ export const createRouter = (ctx: AppContext) => {
             .where('authorDid', '=', agent.accountDid)
             .executeTakeFirst()
         : undefined
+
+      // Map user DIDs to their domain-name handles
       const didHandleMap = await ctx.resolver.resolveDidsToHandles(
         statuses.map((s) => s.authorDid)
       )
+
       if (!agent) {
+        // Serve the logged-out view
         return res.type('html').send(page(home({ statuses, didHandleMap })))
       }
+
+      // Fetch additional information about the logged-in user
       const { data: profile } = await agent.getProfile({
         actor: agent.accountDid,
       })
+      didHandleMap[profile.handle] = agent.accountDid
+
+      // Serve the logged-in view
       return res
         .type('html')
         .send(page(home({ statuses, didHandleMap, profile, myStatus })))
     })
   )
 
+  // "Set status" handler
   router.post(
     '/status',
     handler(async (req, res) => {
+      // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
       if (!agent) {
         return res.status(401).json({ error: 'Session required' })
       }
 
+      // Construct & validate their status record
       const record = {
         $type: 'com.example.status',
         status: req.body?.status,
@@ -141,6 +167,7 @@ export const createRouter = (ctx: AppContext) => {
       }
 
       try {
+        // Write the status record to the user's repository
         await agent.com.atproto.repo.putRecord({
           repo: agent.accountDid,
           collection: 'com.example.status',
@@ -154,6 +181,10 @@ export const createRouter = (ctx: AppContext) => {
       }
 
       try {
+        // Optimistically update our SQLite
+        // This isn't strictly necessary because the write event will be
+        // handled in #/firehose/ingestor.ts, but it ensures that future reads
+        // will be up-to-date after this method finishes.
         await ctx.db
           .insertInto('status')
           .values({
