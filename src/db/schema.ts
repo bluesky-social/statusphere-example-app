@@ -1,14 +1,7 @@
 export type DatabaseSchema = {
-  did_cache: DidCache
   status: Status
   auth_session: AuthSession
   auth_state: AuthState
-}
-
-export type DidCache = {
-  did: string
-  doc: string
-  updatedAt: string
 }
 
 export type Status = {
