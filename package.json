@@ -11,8 +11,7 @@
     "build": "tsup",
     "start": "node dist/index.js",
     "lexgen": "lex gen-server ./src/lexicon ./lexicons/*",
-    "clean": "rimraf dist coverage",
-    "test": "vitest run"
+    "clean": "rimraf dist coverage"
   },
   "dependencies": {
     "@atproto/identity": "^0.4.0",
@@ -44,13 +43,10 @@
     "@types/express": "^4.17.21",
     "pino-pretty": "^11.0.0",
     "rimraf": "^5.0.0",
-    "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
     "tsx": "^4.7.2",
-    "typescript": "^5.4.4",
-    "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^2.0.0"
+    "typescript": "^5.4.4"
   },
   "tsup": {
     "entry": [
