@@ -1,12 +1,11 @@
 import events from 'node:events'
 import type http from 'node:http'
-import express, { type Express, type ErrorRequestHandler } from 'express'
+import express, { type Express } from 'express'
 import { pino } from 'pino'
 
 import { createDb, migrateToLatest } from '#/db'
 import { env } from '#/env'
 import { Ingester } from '#/firehose/ingester'
-import requestLogger from '#/middleware/requestLogger'
 import { createRouter } from '#/routes'
 import { createClient } from '#/auth/client'
 import { createResolver } from '#/ident/resolver'
@@ -46,19 +45,12 @@ export class Server {
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
 
-    // Request logging
-    app.use(requestLogger)
-
     // Routes
     const router = createRouter(ctx)
     app.use(router)
 
     // Error handlers
     app.use((_req, res) => res.sendStatus(404))
-    app.use(((err, _req, res, next) => {
-      res.locals.err = err
-      next(err)
-    }) as ErrorRequestHandler)
 
     const server = app.listen(env.PORT)
     await events.once(server, 'listening')
