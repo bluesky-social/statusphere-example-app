@@ -30,7 +30,7 @@ export class Server {
     await migrateToLatest(db)
     const ingester = new Ingester(db)
     const oauthClient = await createClient(db)
-    const resolver = await createResolver(db)
+    const resolver = createResolver()
     ingester.start()
     const ctx = {
       db,
