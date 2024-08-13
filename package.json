@@ -25,7 +25,6 @@
     "dotenv": "^16.4.5",
     "envalid": "^8.0.0",
     "express": "^4.19.2",
-    "express-rate-limit": "^7.2.0",
     "http-status-codes": "^2.3.0",
     "iron-session": "^8.0.2",
     "kysely": "^0.27.4",
