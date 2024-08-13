@@ -1,6 +1,5 @@
 import events from 'node:events'
 import type http from 'node:http'
-import cors from 'cors'
 import express, { type Express } from 'express'
 import helmet from 'helmet'
 import { pino } from 'pino'
@@ -51,7 +50,6 @@ export class Server {
     // Middlewares
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
-    app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }))
     app.use(
       helmet({
         contentSecurityPolicy: {
