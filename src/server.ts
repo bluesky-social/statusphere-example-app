@@ -1,7 +1,6 @@
 import events from 'node:events'
 import type http from 'node:http'
 import express, { type Express } from 'express'
-import helmet from 'helmet'
 import { pino } from 'pino'
 
 import { createDb, migrateToLatest } from '#/db'
@@ -50,16 +49,6 @@ export class Server {
     // Middlewares
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
-    app.use(
-      helmet({
-        contentSecurityPolicy: {
-          directives: {
-            // allow oauth redirect when submitting login form
-            formAction: null,
-          },
-        },
-      })
-    )
 
     // Request logging
     app.use(requestLogger)
