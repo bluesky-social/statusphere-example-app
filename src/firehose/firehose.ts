@@ -57,7 +57,10 @@ export class Firehose {
           if (isCommit(evt) && !this.opts.excludeCommit) {
             const parsed = await parseCommit(evt)
             for (const write of parsed) {
-              if (!this.opts.filterCollections || this.opts.filterCollections.includes(write.uri.collection)) {
+              if (
+                !this.opts.filterCollections ||
+                this.opts.filterCollections.includes(write.uri.collection)
+              ) {
                 yield write
               }
             }
@@ -167,6 +170,8 @@ type Create = CommitMeta & {
 
 type Update = CommitMeta & {
   event: 'update'
+  record: RepoRecord
+  cid: CID
 }
 
 type Delete = CommitMeta & {
