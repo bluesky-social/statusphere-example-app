@@ -13,7 +13,6 @@ export const env = cleanEnv(process.env, {
   PUBLIC_URL: str({}),
   DB_PATH: str({ devDefault: ':memory:' }),
   COOKIE_SECRET: str({ devDefault: '00000000000000000000000000000000' }),
-  CORS_ORIGIN: str({ devDefault: testOnly('http://localhost:3000') }),
   COMMON_RATE_LIMIT_MAX_REQUESTS: num({ devDefault: testOnly(1000) }),
   COMMON_RATE_LIMIT_WINDOW_MS: num({ devDefault: testOnly(1000) }),
 })

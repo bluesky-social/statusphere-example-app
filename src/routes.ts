@@ -3,17 +3,30 @@ import { OAuthResolverError } from '@atproto/oauth-client-node'
 import { isValidHandle } from '@atproto/syntax'
 import express from 'express'
 import { createSession, destroySession, getSessionAgent } from '#/auth/session'
-import type { AppContext } from '#/config'
+import type { AppContext } from '#/index'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
 import { page } from '#/view'
-import { handler } from './util'
 import * as Status from '#/lexicon/types/com/example/status'
+
+const handler =
+  (fn: express.Handler) =>
+  async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    try {
+      await fn(req, res, next)
+    } catch (err) {
+      next(err)
+    }
+  }
 
 export const createRouter = (ctx: AppContext) => {
   const router = express.Router()
 
-  router.use('/public', express.static(path.join(__dirname, '..', 'public')))
+  router.use('/public', express.static(path.join(__dirname, 'pages', 'public')))
 
   router.get(
     '/client-metadata.json',
