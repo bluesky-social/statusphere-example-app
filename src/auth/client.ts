@@ -1,4 +1,3 @@
-import { JoseKey } from '@atproto/jwk-jose'
 import { NodeOAuthClient } from '@atproto/oauth-client-node'
 import type { Database } from '#/db'
 import { env } from '#/env'
