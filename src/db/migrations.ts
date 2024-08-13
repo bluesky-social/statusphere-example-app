@@ -11,10 +11,10 @@ export const migrationProvider: MigrationProvider = {
 migrations['001'] = {
   async up(db: Kysely<unknown>) {
     await db.schema
-      .createTable('user')
+      .createTable('did_cache')
       .addColumn('did', 'varchar', (col) => col.primaryKey())
-      .addColumn('handle', 'varchar', (col) => col.notNull())
-      .addColumn('indexedAt', 'varchar', (col) => col.notNull())
+      .addColumn('doc', 'varchar', (col) => col.notNull())
+      .addColumn('updatedAt', 'varchar', (col) => col.notNull())
       .execute()
     await db.schema
       .createTable('status')
@@ -38,5 +38,6 @@ migrations['001'] = {
     await db.schema.dropTable('auth_state').execute()
     await db.schema.dropTable('auth_session').execute()
     await db.schema.dropTable('post').execute()
+    await db.schema.dropTable('did_cache').execute()
   },
 }

@@ -95,11 +95,16 @@ export const createRouter = (ctx: AppContext) => {
         .orderBy('indexedAt', 'desc')
         .limit(10)
         .execute()
+      const didHandleMap = await ctx.resolver.resolveDidsToHandles(
+        statuses.map((s) => s.authorDid)
+      )
       if (!agent) {
-        return res.type('html').send(page(home({ statuses })))
+        return res.type('html').send(page(home({ statuses, didHandleMap })))
       }
       const { data: profile } = await agent.getProfile({ actor: session.did })
-      return res.type('html').send(page(home({ statuses, profile })))
+      return res
+        .type('html')
+        .send(page(home({ statuses, didHandleMap, profile })))
     })
   )
 

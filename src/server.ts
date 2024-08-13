@@ -11,8 +11,9 @@ import { Ingester } from '#/firehose/ingester'
 import errorHandler from '#/middleware/errorHandler'
 import requestLogger from '#/middleware/requestLogger'
 import { createRouter } from '#/routes'
-import { createClient } from './auth/client'
-import type { AppContext } from './config'
+import { createClient } from '#/auth/client'
+import { createResolver } from '#/ident/resolver'
+import type { AppContext } from '#/config'
 
 export class Server {
   constructor(
@@ -29,12 +30,14 @@ export class Server {
     await migrateToLatest(db)
     const ingester = new Ingester(db)
     const oauthClient = await createClient(db)
+    const resolver = await createResolver(db)
     ingester.start()
     const ctx = {
       db,
       ingester,
       logger,
       oauthClient,
+      resolver,
     }
 
     const app: Express = express()

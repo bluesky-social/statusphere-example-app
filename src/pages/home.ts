@@ -35,6 +35,7 @@ const STATUS_OPTIONS = [
 
 type Props = {
   statuses: Status[]
+  didHandleMap: Record<string, string>
   profile?: { displayName?: string; handle: string }
 }
 
@@ -45,7 +46,7 @@ export function home(props: Props) {
   })
 }
 
-function content({ statuses, profile }: Props) {
+function content({ statuses, didHandleMap, profile }: Props) {
   return html`<div id="root">
     <div class="error"></div>
     <div id="header">
@@ -119,15 +120,14 @@ function content({ statuses, profile }: Props) {
         </div>
       </div>
       ${statuses.map((status, i) => {
+        const handle = didHandleMap[status.authorDid] || status.authorDid
         return html`
           <div class=${i === 0 ? 'status-line no-line' : 'status-line'}>
             <div>
               <div class="status">${status.status}</div>
             </div>
             <div class="desc">
-              <a class="author" href=${toBskyLink(status.authorDid)}
-                >@${status.authorDid}</a
-              >
+              <a class="author" href=${toBskyLink(handle)}>@${handle}</a>
               is feeling ${status.status} on ${ts(status)}
             </div>
           </div>
