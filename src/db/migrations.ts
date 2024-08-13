@@ -37,7 +37,7 @@ migrations['001'] = {
   async down(db: Kysely<unknown>) {
     await db.schema.dropTable('auth_state').execute()
     await db.schema.dropTable('auth_session').execute()
-    await db.schema.dropTable('post').execute()
+    await db.schema.dropTable('status').execute()
     await db.schema.dropTable('did_cache').execute()
   },
 }
