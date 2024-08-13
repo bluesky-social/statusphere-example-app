@@ -19,7 +19,7 @@ export const schemaDict = {
               type: 'string',
               minLength: 1,
               maxGraphemes: 1,
-              maxLength: 10,
+              maxLength: 32,
             },
             updatedAt: {
               type: 'string',
