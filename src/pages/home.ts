@@ -3,6 +3,8 @@ import type { Status } from '#/db/schema'
 import { html } from '../view'
 import { shell } from './shell'
 
+const TODAY = new Date().toDateString()
+
 const STATUS_OPTIONS = [
   '👍',
   '👎',
@@ -89,6 +91,7 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
       </div>
       ${statuses.map((status, i) => {
         const handle = didHandleMap[status.authorDid] || status.authorDid
+        const date = ts(status)
         return html`
           <div class=${i === 0 ? 'status-line no-line' : 'status-line'}>
             <div>
@@ -96,7 +99,9 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
             </div>
             <div class="desc">
               <a class="author" href=${toBskyLink(handle)}>@${handle}</a>
-              is feeling ${status.status} on ${ts(status)}
+              ${date === TODAY
+                ? `is feeling ${status.status} today`
+                : `was feeling ${status.status} on ${date}`}
             </div>
           </div>
         `
