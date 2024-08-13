@@ -9,7 +9,17 @@ import { Ingester } from '#/firehose/ingester'
 import { createRouter } from '#/routes'
 import { createClient } from '#/auth/client'
 import { createResolver } from '#/ident/resolver'
-import type { AppContext } from '#/config'
+import type { OAuthClient } from '@atproto/oauth-client-node'
+import type { Database } from '#/db'
+import { Resolver } from '#/ident/types'
+
+export type AppContext = {
+  db: Database
+  ingester: Ingester
+  logger: pino.Logger
+  oauthClient: OAuthClient
+  resolver: Resolver
+}
 
 export class Server {
   constructor(
