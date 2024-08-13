@@ -95,6 +95,13 @@ export const createRouter = (ctx: AppContext) => {
         .orderBy('indexedAt', 'desc')
         .limit(10)
         .execute()
+      const myStatus = agent
+        ? await ctx.db
+            .selectFrom('status')
+            .selectAll()
+            .where('authorDid', '=', agent.accountDid)
+            .executeTakeFirst()
+        : undefined
       const didHandleMap = await ctx.resolver.resolveDidsToHandles(
         statuses.map((s) => s.authorDid)
       )
@@ -104,7 +111,7 @@ export const createRouter = (ctx: AppContext) => {
       const { data: profile } = await agent.getProfile({ actor: session.did })
       return res
         .type('html')
-        .send(page(home({ statuses, didHandleMap, profile })))
+        .send(page(home({ statuses, didHandleMap, profile, myStatus })))
     })
   )
 

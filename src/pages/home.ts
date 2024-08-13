@@ -3,6 +3,8 @@ import type { Status } from '#/db/schema'
 import { html } from '../view'
 import { shell } from './shell'
 
+const TODAY = new Date().toDateString()
+
 const STATUS_OPTIONS = [
   '👍',
   '👎',
@@ -37,6 +39,7 @@ type Props = {
   statuses: Status[]
   didHandleMap: Record<string, string>
   profile?: { displayName?: string; handle: string }
+  myStatus?: Status
 }
 
 export function home(props: Props) {
@@ -46,7 +49,7 @@ export function home(props: Props) {
   })
 }
 
-function content({ statuses, didHandleMap, profile }: Props) {
+function content({ statuses, didHandleMap, profile, myStatus }: Props) {
   return html`<div id="root">
     <div class="error"></div>
     <div id="header">
@@ -76,7 +79,9 @@ function content({ statuses, didHandleMap, profile }: Props) {
         ${STATUS_OPTIONS.map(
           (status) =>
             html`<div
-              class="status-option"
+              class=${myStatus?.status === status
+                ? 'status-option selected'
+                : 'status-option'}
               data-value="${status}"
               data-authed=${profile ? '1' : '0'}
             >
@@ -86,6 +91,7 @@ function content({ statuses, didHandleMap, profile }: Props) {
       </div>
       ${statuses.map((status, i) => {
         const handle = didHandleMap[status.authorDid] || status.authorDid
+        const date = ts(status)
         return html`
           <div class=${i === 0 ? 'status-line no-line' : 'status-line'}>
             <div>
@@ -93,7 +99,9 @@ function content({ statuses, didHandleMap, profile }: Props) {
             </div>
             <div class="desc">
               <a class="author" href=${toBskyLink(handle)}>@${handle}</a>
-              is feeling ${status.status} on ${ts(status)}
+              ${date === TODAY
+                ? `is feeling ${status.status} today`
+                : `was feeling ${status.status} on ${date}`}
             </div>
           </div>
         `
