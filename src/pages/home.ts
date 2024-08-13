@@ -37,6 +37,7 @@ type Props = {
   statuses: Status[]
   didHandleMap: Record<string, string>
   profile?: { displayName?: string; handle: string }
+  myStatus?: Status
 }
 
 export function home(props: Props) {
@@ -46,7 +47,7 @@ export function home(props: Props) {
   })
 }
 
-function content({ statuses, didHandleMap, profile }: Props) {
+function content({ statuses, didHandleMap, profile, myStatus }: Props) {
   return html`<div id="root">
     <div class="error"></div>
     <div id="header">
@@ -76,7 +77,9 @@ function content({ statuses, didHandleMap, profile }: Props) {
         ${STATUS_OPTIONS.map(
           (status) =>
             html`<div
-              class="status-option"
+              class=${myStatus?.status === status
+                ? 'status-option selected'
+                : 'status-option'}
               data-value="${status}"
               data-authed=${profile ? '1' : '0'}
             >

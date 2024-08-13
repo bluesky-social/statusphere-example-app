@@ -5,6 +5,8 @@ body {
   --gray-100: #fafafa;
   --gray-500: #666;
   --gray-700: #333;
+  --primary-100: #d2e7ff;
+  --primary-200: #b1d3fa;
   --primary-400: #2e8fff;
   --primary-500: #0078ff;
   --primary-600: #0066db;
@@ -146,7 +148,17 @@ button:hover, .button:hover {
 }
 
 .status-option:hover {
-  background-color: var(--gray-100);
+  background-color: var(--primary-100);
+  box-shadow: 0 0 0 1px var(--primary-400);
+}
+
+.status-option.selected {
+  box-shadow: 0 0 0 1px var(--primary-500);
+  background-color: var(--primary-100);
+}
+
+.status-option.selected:hover {
+  background-color: var(--primary-200);
 }
 
 .status-line {
