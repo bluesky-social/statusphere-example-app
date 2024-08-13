@@ -43,9 +43,6 @@ export class Server {
     // Set the application to trust the reverse proxy
     app.set('trust proxy', true)
 
-    // TODO: middleware for sqlite server
-    // TODO: middleware for OAuth
-
     // Middlewares
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
