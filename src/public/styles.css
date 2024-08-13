@@ -203,3 +203,9 @@ button:hover, .button:hover {
 .status-line .author:hover {
   text-decoration: underline;
 }
+
+.signup-cta {
+  text-align: center;
+  text-wrap: balance;
+  margin-top: 1rem;
+}
