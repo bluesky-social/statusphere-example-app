@@ -5,7 +5,7 @@ import { pino } from 'pino'
 import type { OAuthClient } from '@atproto/oauth-client-node'
 
 import { createDb, migrateToLatest } from '#/db'
-import { env } from '#/env'
+import { env } from '#/lib/env'
 import { Ingester } from '#/firehose/ingester'
 import { createRouter } from '#/routes'
 import { createClient } from '#/auth/client'

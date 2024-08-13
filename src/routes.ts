@@ -6,7 +6,7 @@ import { createSession, destroySession, getSessionAgent } from '#/auth/session'
 import type { AppContext } from '#/index'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
-import { page } from '#/view'
+import { page } from '#/lib/view'
 import * as Status from '#/lexicon/types/com/example/status'
 
 const handler =

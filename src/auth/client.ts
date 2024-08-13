@@ -1,6 +1,6 @@
 import { NodeOAuthClient } from '@atproto/oauth-client-node'
 import type { Database } from '#/db'
-import { env } from '#/env'
+import { env } from '#/lib/env'
 import { SessionStore, StateStore } from './storage'
 
 export const createClient = async (db: Database) => {
