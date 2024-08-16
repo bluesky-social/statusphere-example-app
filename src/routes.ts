@@ -11,6 +11,7 @@ import { login } from '#/pages/login'
 import { env } from '#/lib/env'
 import { page } from '#/lib/view'
 import * as Status from '#/lexicon/types/com/example/status'
+import * as Profile from '#/lexicon/types/app/bsky/actor/profile'
 
 type Session = { did: string }
 
@@ -167,15 +168,28 @@ export const createRouter = (ctx: AppContext) => {
       }
 
       // Fetch additional information about the logged-in user
-      const { data: profile } = await agent.getProfile({
-        actor: agent.accountDid,
+      const { data: profileRecord } = await agent.com.atproto.repo.getRecord({
+        repo: agent.accountDid,
+        collection: 'app.bsky.actor.profile',
+        rkey: 'self',
       })
-      didHandleMap[profile.handle] = agent.accountDid
+      const profile =
+        Profile.isRecord(profileRecord.value) &&
+        Profile.validateRecord(profileRecord.value).success
+          ? profileRecord.value
+          : {}
 
       // Serve the logged-in view
-      return res
-        .type('html')
-        .send(page(home({ statuses, didHandleMap, profile, myStatus })))
+      return res.type('html').send(
+        page(
+          home({
+            statuses,
+            didHandleMap,
+            profile,
+            myStatus,
+          })
+        )
+      )
     })
   )
 

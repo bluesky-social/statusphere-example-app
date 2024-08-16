@@ -1,4 +1,4 @@
-import type { Status } from '#/db/schema'
+import type { Status } from '#/db'
 import { html } from '../lib/view'
 import { shell } from './shell'
 
@@ -37,7 +37,7 @@ const STATUS_OPTIONS = [
 type Props = {
   statuses: Status[]
   didHandleMap: Record<string, string>
-  profile?: { displayName?: string; handle: string }
+  profile?: { displayName?: string }
   myStatus?: Status
 }
 
@@ -60,8 +60,8 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
         ${profile
           ? html`<form action="/logout" method="post" class="session-form">
               <div>
-                Hi, <strong>${profile.displayName || profile.handle}</strong>.
-                what's your status today?
+                Hi, <strong>${profile.displayName || 'friend'}</strong>. What's
+                your status today?
               </div>
               <div>
                 <button type="submit">Log out</button>
