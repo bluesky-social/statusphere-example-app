@@ -1,13 +1,18 @@
+import assert from 'node:assert'
 import path from 'node:path'
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import { OAuthResolverError } from '@atproto/oauth-client-node'
 import { isValidHandle } from '@atproto/syntax'
 import express from 'express'
-import { createSession, destroySession, getSessionAgent } from '#/auth/session'
+import { getIronSession } from 'iron-session'
 import type { AppContext } from '#/index'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
+import { env } from '#/lib/env'
 import { page } from '#/lib/view'
 import * as Status from '#/lexicon/types/com/example/status'
+
+type Session = { did: string }
 
 // Helper function for defining routes
 const handler =
@@ -23,6 +28,24 @@ const handler =
       next(err)
     }
   }
+
+// Helper function to get the Atproto Agent for the active session
+async function getSessionAgent(
+  req: IncomingMessage,
+  res: ServerResponse<IncomingMessage>,
+  ctx: AppContext
+) {
+  const session = await getIronSession<Session>(req, res, {
+    cookieName: 'sid',
+    password: env.COOKIE_SECRET,
+  })
+  if (!session.did) return null
+  return await ctx.oauthClient.restore(session.did).catch(async (err) => {
+    ctx.logger.warn({ err }, 'oauth restore failed')
+    await session.destroy()
+    return null
+  })
+}
 
 export const createRouter = (ctx: AppContext) => {
   const router = express.Router()
@@ -45,7 +68,13 @@ export const createRouter = (ctx: AppContext) => {
       const params = new URLSearchParams(req.originalUrl.split('?')[1])
       try {
         const { agent } = await ctx.oauthClient.callback(params)
-        await createSession(req, res, agent.accountDid)
+        const session = await getIronSession<Session>(req, res, {
+          cookieName: 'sid',
+          password: env.COOKIE_SECRET,
+        })
+        assert(!session.did, 'session already exists')
+        session.did = agent.accountDid
+        await session.save()
       } catch (err) {
         ctx.logger.error({ err }, 'oauth callback failed')
         return res.redirect('/?error')
@@ -96,7 +125,11 @@ export const createRouter = (ctx: AppContext) => {
   router.post(
     '/logout',
     handler(async (req, res) => {
-      await destroySession(req, res)
+      const session = await getIronSession<Session>(req, res, {
+        cookieName: 'sid',
+        password: env.COOKIE_SECRET,
+      })
+      await session.destroy()
       return res.redirect('/')
     })
   )
