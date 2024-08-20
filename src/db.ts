@@ -16,9 +16,10 @@ export type DatabaseSchema = {
 }
 
 export type Status = {
+  uri: string
   authorDid: string
   status: string
-  updatedAt: string
+  createdAt: string
   indexedAt: string
 }
 
@@ -50,9 +51,10 @@ migrations['001'] = {
   async up(db: Kysely<unknown>) {
     await db.schema
       .createTable('status')
-      .addColumn('authorDid', 'varchar', (col) => col.primaryKey())
+      .addColumn('uri', 'varchar', (col) => col.primaryKey())
+      .addColumn('authorDid', 'varchar', (col) => col.notNull())
       .addColumn('status', 'varchar', (col) => col.notNull())
-      .addColumn('updatedAt', 'varchar', (col) => col.notNull())
+      .addColumn('createdAt', 'varchar', (col) => col.notNull())
       .addColumn('indexedAt', 'varchar', (col) => col.notNull())
       .execute()
     await db.schema

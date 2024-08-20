@@ -3,6 +3,7 @@ import path from 'node:path'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { OAuthResolverError } from '@atproto/oauth-client-node'
 import { isValidHandle } from '@atproto/syntax'
+import { TID } from '@atproto/common'
 import express from 'express'
 import { getIronSession } from 'iron-session'
 import type { AppContext } from '#/index'
@@ -154,6 +155,7 @@ export const createRouter = (ctx: AppContext) => {
             .selectFrom('status')
             .selectAll()
             .where('authorDid', '=', agent.accountDid)
+            .orderBy('indexedAt', 'desc')
             .executeTakeFirst()
         : undefined
 
@@ -204,24 +206,27 @@ export const createRouter = (ctx: AppContext) => {
       }
 
       // Construct & validate their status record
+      const rkey = TID.nextStr()
       const record = {
         $type: 'com.example.status',
         status: req.body?.status,
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       }
       if (!Status.validateRecord(record).success) {
         return res.status(400).json({ error: 'Invalid status' })
       }
 
+      let uri
       try {
         // Write the status record to the user's repository
-        await agent.com.atproto.repo.putRecord({
+        const res = await agent.com.atproto.repo.putRecord({
           repo: agent.accountDid,
           collection: 'com.example.status',
-          rkey: 'self',
+          rkey,
           record,
           validate: false,
         })
+        uri = res.data.uri
       } catch (err) {
         ctx.logger.warn({ err }, 'failed to write record')
         return res.status(500).json({ error: 'Failed to write record' })
@@ -235,18 +240,12 @@ export const createRouter = (ctx: AppContext) => {
         await ctx.db
           .insertInto('status')
           .values({
+            uri,
             authorDid: agent.accountDid,
             status: record.status,
-            updatedAt: record.updatedAt,
+            createdAt: record.createdAt,
             indexedAt: new Date().toISOString(),
           })
-          .onConflict((oc) =>
-            oc.column('authorDid').doUpdateSet({
-              status: record.status,
-              updatedAt: record.updatedAt,
-              indexedAt: new Date().toISOString(),
-            })
-          )
           .execute()
       } catch (err) {
         ctx.logger.warn(

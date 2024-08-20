@@ -8,7 +8,7 @@ import { CID } from 'multiformats/cid'
 
 export interface Record {
   status: string
-  updatedAt: string
+  createdAt: string
   [k: string]: unknown
 }
 

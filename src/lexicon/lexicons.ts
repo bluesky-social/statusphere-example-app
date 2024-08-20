@@ -68,7 +68,7 @@ export const schemaDict = {
         key: 'literal:self',
         record: {
           type: 'object',
-          required: ['status', 'updatedAt'],
+          required: ['status', 'createdAt'],
           properties: {
             status: {
               type: 'string',
@@ -76,7 +76,7 @@ export const schemaDict = {
               maxGraphemes: 1,
               maxLength: 32,
             },
-            updatedAt: {
+            createdAt: {
               type: 'string',
               format: 'datetime',
             },

@@ -24,20 +24,26 @@ export class Ingester {
           await this.db
             .insertInto('status')
             .values({
+              uri: evt.uri.toString(),
               authorDid: evt.author,
               status: record.status,
-              updatedAt: record.updatedAt,
+              createdAt: record.createdAt,
               indexedAt: new Date().toISOString(),
             })
             .onConflict((oc) =>
-              oc.column('authorDid').doUpdateSet({
+              oc.column('uri').doUpdateSet({
                 status: record.status,
-                updatedAt: record.updatedAt,
                 indexedAt: new Date().toISOString(),
               })
             )
             .execute()
         }
+      } else if (
+        evt.event === 'delete' &&
+        evt.collection === 'com.example.status'
+      ) {
+        // Remove the status from our SQLite
+        await this.db.deleteFrom('status').where({ uri: evt.uri.toString() })
       }
     }
   }
