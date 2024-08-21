@@ -55,16 +55,7 @@ When somebody logs into our app, they'll give us read & write access to their pe
 
 We're going to accomplish this using OAuth ([spec](#todo)). You can find a [more extensive OAuth guide here](#todo), but for now just know that most of the OAuth flows are going to be handled for us using the [@atproto/oauth-client-node](#todo) library. This is the arrangement we're aiming toward:
 
-```
-  ┌─App Server───────────────────┐
-  │    ┌─► Session store ◄┐      │
-  │    │                  │      │    ┌───────────────┐
-  │ App code ──────►OAuth client─┼───►│ User's server │
-  └────▲─────────────────────────┘    └───────────────┘
-  ┌────┴──────────┐
-  │  Web browser  │
-  └───────────────┘
-```
+![A diagram of the OAuth elements](./docs/diagram-oauth.png)
 
 When the user logs in, the OAuth client will create a new session with their repo server and give us read/write access along with basic user info.
 
@@ -244,17 +235,7 @@ You can examine this record directly using [atproto-browser.vercel.app](https://
 
 You can think of the user repositories as collections of JSON records:
 
-```
-                                   ┌────────┐
-                               ┌───| record │
-               ┌────────────┐  │   └────────┘
-           ┌───| collection |◄─┤   ┌────────┐
-┌──────┐   │   └────────────┘  └───| record │
-│ repo |◄──┤                       └────────┘
-└──────┘   │   ┌────────────┐      ┌────────┐
-           └───┤ collection |◄─────| record │
-               └────────────┘      └────────┘
-```
+![A diagram of a repository](./docs/diagram-repo.png)
 
 Let's look again at how we read the "profile" record:
 
@@ -446,20 +427,7 @@ Now we want to fetch the status records from other users.
 
 Remember how we referred to our app as being like a Google, crawling around the repos to get their records? One advantage we have in the AT Protocol is that each repo publishes an event log of their updates.
 
-```
-┌──────┐                                       
-│ REPO │  Event stream                                     
-├──────┘                                       
-│   ┌───────────────────────────────────────────┐
-├───┼  1 PUT /app.bsky.feed.post/3l244rmrxjx2v  │
-│   └───────────────────────────────────────────┘
-│   ┌───────────────────────────────────────────┐
-├───┼  2 DEL /app.bsky.feed.post/3l244rmrxjx2v  │
-│   └───────────────────────────────────────────┘
-│   ┌───────────────────────────────────────────┐
-├───┼  3 PUT /app.bsky.actor.profile/self       │
-▼   └───────────────────────────────────────────┘
-```
+![A diagram of the event stream](./docs/diagram-event-stream.png)
 
 Using a [Relay service](#todo) we can listen to an aggregated firehose of these events across all users in the network. In our case what we're looking for are valid `com.example.status` records.
 
@@ -535,15 +503,7 @@ if (
 
 You can almost think of information flowing in a loop:
 
-```
-       ┌─────Repo put─────┐
-       │                  ▼
-┌──────┴─────┐      ┌───────────┐
-│ App server │      │ User repo │
-└────────────┘      └─────┬─────┘
-       ▲                  │
-       └────Event log─────┘
-```
+![A diagram of the flow of information](./docs/diagram-info-flow.png)
 
 Why read from the event log? Because there are other apps in the network that will write the records we're interested in. By subscribing to the event log, we ensure that we catch all the data we're interested in -- including data published by other apps.
 
@@ -603,15 +563,7 @@ ${statuses.map((status, i) => {
 
 As a final optimization, let's introduce "optimistic updates." Remember the information flow loop with the repo write and the event log? Since we're updating our users' repos locally, we can short-circuit that flow to our own database:
 
-```
-       ┌───Repo put──┬──────┐
-       │             │      ▼
-┌──────┴─────┐       │  ┌───────────┐
-│ App server │◄──────┘  │ User repo │
-└────────────┘          └───┬───────┘
-       ▲                    │        
-       └────Event log───────┘        
-```
+![A diagram illustrating optimistic updates](./docs/diagram-optimistic-update.png)
 
 This is an important optimization to make, because it ensures that the user sees their own changes while using your app. When the event eventually arrives from the firehose, we just discard it since we already have it saved locally.
 
@@ -679,15 +631,7 @@ When building your app, think in these four key steps:
 
 Remember this flow of information throughout:
 
-```
-       ┌─────Repo put─────┐
-       │                  ▼
-┌──────┴─────┐      ┌───────────┐
-│ App server │      │ User repo │
-└────────────┘      └─────┬─────┘
-       ▲                  │
-       └────Event log─────┘
-```
+![A diagram of the flow of information](./docs/diagram-info-flow.png)
 
 This is how every app in the Atmosphere works, including the [Bluesky social app](https://bsky.app).
 
