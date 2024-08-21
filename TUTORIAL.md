@@ -232,6 +232,8 @@ With that data, we can give a nice personalized welcome banner for our user:
 </div>
 ```
 
+You can examine this record directly using [atproto-browser.vercel.app](https://atproto-browser.vercel.app). For instance, [this is the profile record for @bsky.app](https://atproto-browser.vercel.app/at?u=at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.actor.profile/self).
+
 ## Step 4. Reading & writing records
 
 You can think of the user repositories as collections of JSON records:
