@@ -42,11 +42,13 @@ async function getSessionAgent(
     password: env.COOKIE_SECRET,
   })
   if (!session.did) return null
-  return await ctx.oauthClient.restore(session.did).catch(async (err) => {
+  try {
+    return await ctx.oauthClient.restore(session.did)
+  } catch (err) {
     ctx.logger.warn({ err }, 'oauth restore failed')
     await session.destroy()
     return null
-  })
+  }
 }
 
 export const createRouter = (ctx: AppContext) => {

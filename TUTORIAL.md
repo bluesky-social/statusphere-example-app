@@ -133,11 +133,13 @@ async function getSessionAgent(
   if (!session.did) return null
 
   // "Restore" the agent for the user
-  return await ctx.oauthClient.restore(session.did).catch(async (err) => {
+  try {
+    return await ctx.oauthClient.restore(session.did)
+  } catch(err) {
     ctx.logger.warn({ err }, 'oauth restore failed')
     await session.destroy()
     return null
-  })
+  }
 }
 ```
 
