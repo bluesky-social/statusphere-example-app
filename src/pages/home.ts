@@ -78,16 +78,14 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
         ${STATUS_OPTIONS.map(
           (status) =>
             html`<button
-              class=${
-                myStatus?.status === status
-                  ? 'status-option selected'
-                  : 'status-option'
-              }
+              class=${myStatus?.status === status
+                ? 'status-option selected'
+                : 'status-option'}
               name="status"
               value="${status}"
             >
               ${status}
-            </div>`
+            </button>`
         )}
       </form>
       ${statuses.map((status, i) => {

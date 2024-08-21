@@ -25,7 +25,7 @@ Think of our app like a Google. If Google's job was to say which emoji each webs
 
 The Atmosphere works the same way, except we're going to check `at://` instead of `https://`. Each user has a data repo under an `at://` URL. We'll crawl all the `at://`s in the Atmosphere for all the  "status.json" records and aggregate them into our SQLite database.
 
-> `at://` is the URL scheme of the AT Protocol.
+> `at://` is the URL scheme of the AT Protocol. Under the hood it uses common tech like HTTP and DNS, but it adds all of the features we'll be using in this tutorial.
 
 ## Step 1. Starting with our ExpressJS app
 
@@ -278,7 +278,7 @@ router.post(
     // If the user is signed in, get an agent which communicates with their server
     const agent = await getSessionAgent(req, res, ctx)
     if (!agent) {
-      return res.status(401).json({ error: 'Session required' })
+      return res.status(401).type('html').send('<h1>Error: Session required</h1>')
     }
 
     // Construct their status record
@@ -298,7 +298,7 @@ router.post(
       })
     } catch (err) {
       logger.warn({ err }, 'failed to write record')
-      return res.status(500).json({ error: 'Failed to write record' })
+      return res.status(500).type('html').send('<h1>Error: Failed to write record</h1>')
     }
 
     res.status(200).json({})
@@ -310,32 +310,13 @@ Now in our homepage we can list out the status buttons:
 
 ```html
 <!-- src/pages/home.ts -->
-<div class="status-options">
-  ${['👍', '🦋', '🥳', /*...*/].map(status => html`
-    <div class="status-option" data-value="${status}">
+<form action="/status" method="post" class="status-options">
+  ${STATUS_OPTIONS.map(status => html`
+    <button class="status-option" name="status" value="${status}">
       ${status}
-    </div>`
-  )}
-</div>
-```
-
-And write some client-side javascript to submit the status on click:
-
-```javascript
-/* src/pages/public/home.js */
-Array.from(document.querySelectorAll('.status-option'), (el) => {
-  el.addEventListener('click', async (ev) => {
-    const res = await fetch('/status', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ status: el.dataset.value }),
-    })
-    const body = await res.json()
-    if (!body?.error) {
-      location.reload()
-    }
-  })
-})
+    </button>
+  `)}
+</form>
 ```
 
 And here we are!
