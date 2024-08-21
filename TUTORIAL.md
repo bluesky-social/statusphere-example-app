@@ -2,6 +2,8 @@
 
 In this guide, we're going to build a **simple multi-user app** that publishes your current "status" as an emoji.
 
+![A screenshot of our example application](./docs/app-screenshot.png)
+
 At various points we will cover how to:
 
 - Signin via OAuth
@@ -65,6 +67,8 @@ We're going to accomplish this using OAuth ([spec](#todo)). You can find a [more
 ```
 
 When the user logs in, the OAuth client will create a new session with their repo server and give us read/write access along with basic user info.
+
+![A screenshot of the login UI](./docs/app-login.png)
 
 Our login page just asks the user for their "handle," which is the domain name associated with their account. For [Bluesky](https://bsky.app) users, these tend to look like `alice.bsky.social`, but they can be any kind of domain (eg `alice.com`).
 
@@ -232,6 +236,8 @@ With that data, we can give a nice personalized welcome banner for our user:
 </div>
 ```
 
+![A screenshot of the banner image](./docs/app-banner.png)
+
 You can examine this record directly using [atproto-browser.vercel.app](https://atproto-browser.vercel.app). For instance, [this is the profile record for @bsky.app](https://atproto-browser.vercel.app/at?u=at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.actor.profile/self).
 
 ## Step 4. Reading & writing records
@@ -348,6 +354,10 @@ Array.from(document.querySelectorAll('.status-option'), (el) => {
   })
 })
 ```
+
+And here we are!
+
+![A screenshot of the app's status options](./docs/app-status-options.png)
 
 ## Step 5. Creating a custom "status" schema
 
@@ -586,6 +596,8 @@ ${statuses.map((status, i) => {
   `
 })}
 ```
+
+![A screenshot of the app status timeline](./docs/app-status-history.png)
 
 ## Step 8. Optimistic updates
 
