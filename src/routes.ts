@@ -204,7 +204,10 @@ export const createRouter = (ctx: AppContext) => {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
       if (!agent) {
-        return res.status(401).json({ error: 'Session required' })
+        return res
+          .status(401)
+          .type('html')
+          .send('<h1>Error: Session required</h1>')
       }
 
       // Construct & validate their status record
@@ -215,7 +218,10 @@ export const createRouter = (ctx: AppContext) => {
         createdAt: new Date().toISOString(),
       }
       if (!Status.validateRecord(record).success) {
-        return res.status(400).json({ error: 'Invalid status' })
+        return res
+          .status(400)
+          .type('html')
+          .send('<h1>Error: Invalid status</h1>')
       }
 
       let uri
@@ -231,7 +237,10 @@ export const createRouter = (ctx: AppContext) => {
         uri = res.data.uri
       } catch (err) {
         ctx.logger.warn({ err }, 'failed to write record')
-        return res.status(500).json({ error: 'Failed to write record' })
+        return res
+          .status(500)
+          .type('html')
+          .send('<h1>Error: Failed to write record</h1>')
       }
 
       try {
@@ -256,7 +265,7 @@ export const createRouter = (ctx: AppContext) => {
         )
       }
 
-      res.status(200).json({})
+      return res.redirect('/')
     })
   )
 

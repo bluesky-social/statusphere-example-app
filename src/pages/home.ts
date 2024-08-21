@@ -74,20 +74,22 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
               </div>
             </div>`}
       </div>
-      <div class="status-options">
+      <form action="/status" method="post" class="status-options">
         ${STATUS_OPTIONS.map(
           (status) =>
-            html`<div
-              class=${myStatus?.status === status
-                ? 'status-option selected'
-                : 'status-option'}
-              data-value="${status}"
-              data-authed=${profile ? '1' : '0'}
+            html`<button
+              class=${
+                myStatus?.status === status
+                  ? 'status-option selected'
+                  : 'status-option'
+              }
+              name="status"
+              value="${status}"
             >
               ${status}
             </div>`
         )}
-      </div>
+      </form>
       ${statuses.map((status, i) => {
         const handle = didHandleMap[status.authorDid] || status.authorDid
         const date = ts(status)
@@ -106,7 +108,6 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
         `
       })}
     </div>
-    <script src="/public/home.js"></script>
   </div>`
 }
 
