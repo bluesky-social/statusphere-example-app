@@ -308,7 +308,7 @@ router.post(
         record,
       })
     } catch (err) {
-      ctx.logger.warn({ err }, 'failed to write record')
+      logger.warn({ err }, 'failed to write record')
       return res.status(500).json({ error: 'Failed to write record' })
     }
 
@@ -624,13 +624,13 @@ router.post(
       })
       uri = res.uri
     } catch (err) {
-      ctx.logger.warn({ err }, 'failed to write record')
+      logger.warn({ err }, 'failed to write record')
       return res.status(500).json({ error: 'Failed to write record' })
     }
 
     try {
       // Optimistically update our SQLite <-- HERE!
-      await ctx.db
+      await db
         .insertInto('status')
         .values({
           uri,
@@ -641,7 +641,7 @@ router.post(
         })
         .execute()
     } catch (err) {
-      ctx.logger.warn(
+      logger.warn(
         { err },
         'failed to update computed view; ignoring as it should be caught by the firehose'
       )
@@ -653,6 +653,31 @@ router.post(
 ```
 
 You'll notice this code looks almost exactly like what we're doing in `firehose.ts`.
+
+## Thinking in AT Proto
+
+In this tutorial we've covered the key steps to building an atproto app. Data is published in its canonical form on users' `at://` repos and then aggregated into apps' databases to produce views of the network.
+
+When building your app, think in these four key steps:
+
+- Design the [Lexicon](#) schemas for the records you'll publish into the Atmosphere.
+- Create a database for aggregating the records into useful views.
+- Build your application to write the records on your users' repos.
+- Listen to the firehose to hydrate your aggregated database.
+
+Remember this flow of information throughout:
+
+```
+       ┌─────Repo put─────┐
+       │                  ▼
+┌──────┴─────┐      ┌───────────┐
+│ App server │      │ User repo │
+└────────────┘      └─────┬─────┘
+       ▲                  │
+       └────Event log─────┘
+```
+
+This is how every app in the Atmosphere works, including the [Bluesky social app](https://bsky.app).
 
 ## Next steps
 
