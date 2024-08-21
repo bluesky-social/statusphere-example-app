@@ -119,31 +119,7 @@ With that, we're in business! We now have a session with the user's `at://` repo
 
 ## Step 3. Fetching the user's profile
 
-Why don't we learn something about our user? Let's start by getting the [Agent](#todo) object. The [Agent](#todo) is the client to the user's `at://` repo server.
-
-```typescript
-/** src/routes.ts **/
-async function getSessionAgent(
-  req: IncomingMessage,
-  res: ServerResponse<IncomingMessage>,
-  ctx: AppContext
-) {
-  // Fetch the session from their cookie
-  const session = await getIronSession(req, res)
-  if (!session.did) return null
-
-  // "Restore" the agent for the user
-  try {
-    return await ctx.oauthClient.restore(session.did)
-  } catch(err) {
-    ctx.logger.warn({ err }, 'oauth restore failed')
-    await session.destroy()
-    return null
-  }
-}
-```
-
-Users publish JSON records on their `at://` repos. In [Bluesky](https://bsky.app), they publish a "profile" record which looks like this:
+Why don't we learn something about our user? In [Bluesky](https://bsky.app), users publish a "profile" record which looks like this:
 
 ```typescript
 interface ProfileRecord {
@@ -156,7 +132,9 @@ interface ProfileRecord {
 }
 ```
 
-We're going to use the [Agent](#todo) to fetch this record to include in our app.
+You can examine this record directly using [atproto-browser.vercel.app](https://atproto-browser.vercel.app). For instance, [this is the profile record for @bsky.app](https://atproto-browser.vercel.app/at?u=at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.actor.profile/self).
+
+We're going to use the [Agent](#todo) associated with the user's OAuth session to fetch this record.
 
 ```typescript
 await agent.getRecord({
@@ -168,9 +146,9 @@ await agent.getRecord({
 
 When asking for a record, we provide three pieces of information.
 
-- The [DID](#todo) which identifies the user,
-- The collection name, and
-- The record key
+- **repo** The [DID](#todo) which identifies the user,
+- **collection** The collection name, and
+- **rkey** The record key
 
 We'll explain the collection name shortly. Record keys are strings with [some limitations](https://atproto.com/specs/record-key#record-key-syntax) and a couple of common patterns. The `"self"` pattern is used when a collection is expected to only contain one record which describes the user.
 
@@ -194,7 +172,7 @@ router.get(
     const { data: profileRecord } = await agent.getRecord({
       repo: agent.accountDid,               // our user's repo
       collection: 'app.bsky.actor.profile', // the bluesky profile record type
-      rkey: 'self',                         // the record's name
+      rkey: 'self',                         // the record's key
     })
 
     // Serve the logged-in view
@@ -206,6 +184,8 @@ router.get(
 ```
 
 With that data, we can give a nice personalized welcome banner for our user:
+
+![A screenshot of the banner image](./docs/app-banner.png)
 
 ```html
 <!-- pages/home.ts -->
@@ -228,10 +208,6 @@ With that data, we can give a nice personalized welcome banner for our user:
       </div>`}
 </div>
 ```
-
-![A screenshot of the banner image](./docs/app-banner.png)
-
-You can examine this record directly using [atproto-browser.vercel.app](https://atproto-browser.vercel.app). For instance, [this is the profile record for @bsky.app](https://atproto-browser.vercel.app/at?u=at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.actor.profile/self).
 
 ## Step 4. Reading & writing records
 
@@ -325,7 +301,7 @@ And here we are!
 
 ## Step 5. Creating a custom "status" schema
 
-The collections are typed, meaning that they have a defined schema. The `app.bsky.actor.profile` type definition [can be found here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/profile.json).
+Repo collections are typed, meaning that they have a defined schema. The `app.bsky.actor.profile` type definition [can be found here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/profile.json).
 
 Anybody can create a new schema using the [Lexicon](#todo) language, which is very similar to [JSON-Schema](#todo). The schemas use [reverse-DNS IDs](#todo) which indicate ownership, but for this demo app we're going to use `com.example` which is safe for non-production software.
 
@@ -511,7 +487,9 @@ You can almost think of information flowing in a loop:
 
 ![A diagram of the flow of information](./docs/diagram-info-flow.png)
 
-Why read from the event log? Because there are other apps in the network that will write the records we're interested in. By subscribing to the event log, we ensure that we catch all the data we're interested in -- including data published by other apps.
+Applications write to the repo. The write events are then emitted on the firehose where they're caught by the apps and ingested into their databases.
+
+Why sync from the event log like this? Because there are other apps in the network that will write the records we're interested in. By subscribing to the event log, we ensure that we catch all the data we're interested in &mdash; including data published by other apps!
 
 ## Step 7. Listing the latest statuses
 
@@ -567,7 +545,13 @@ ${statuses.map((status, i) => {
 
 ## Step 8. Optimistic updates
 
-As a final optimization, let's introduce "optimistic updates." Remember the information flow loop with the repo write and the event log? Since we're updating our users' repos locally, we can short-circuit that flow to our own database:
+As a final optimization, let's introduce "optimistic updates."
+
+Remember the information flow loop with the repo write and the event log?
+
+![A diagram of the flow of information](./docs/diagram-info-flow.png)
+
+Since we're updating our users' repos locally, we can short-circuit that flow to our own database:
 
 ![A diagram illustrating optimistic updates](./docs/diagram-optimistic-update.png)
 
@@ -633,7 +617,7 @@ When building your app, think in these four key steps:
 - Design the [Lexicon](#) schemas for the records you'll publish into the Atmosphere.
 - Create a database for aggregating the records into useful views.
 - Build your application to write the records on your users' repos.
-- Listen to the firehose to hydrate your aggregated database.
+- Listen to the firehose to aggregate data across the network.
 
 Remember this flow of information throughout:
 
