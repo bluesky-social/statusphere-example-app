@@ -336,7 +336,7 @@ Anybody can create a new schema using the [Lexicon](#todo) language, which is ve
 Let's create our schema in the `/lexicons` folder of our codebase. You can [read more about how to define schemas here](#todo).
 
 ```json
-/* lexicons/status.json */
+/** lexicons/status.json **/
 {
   "lexicon": 1,
   "id": "com.example.status",
@@ -371,7 +371,30 @@ Now let's run some code-generation using our schema:
 ./node_modules/.bin/lex gen-server ./src/lexicon ./lexicons/*
 ```
 
-This will produce Typescript interfaces as well as runtime validation functions that we can use in our `POST /status` route:
+This will produce Typescript interfaces as well as runtime validation functions that we can use in our app. Here's what that generated code looks like:
+
+```typescript
+/** src/lexicon/types/com/example/status.ts **/
+export interface Record {
+  status: string
+  createdAt: string
+  [k: string]: unknown
+}
+
+export function isRecord(v: unknown): v is Record {
+  return (
+    isObj(v) &&
+    hasProp(v, '$type') &&
+    (v.$type === 'com.example.status#main' || v.$type === 'com.example.status')
+  )
+}
+
+export function validateRecord(v: unknown): ValidationResult {
+  return lexicons.validate('com.example.status#main', v)
+}
+```
+
+Let's use that code to improve the `POST /status` route:
 
 ```typescript
 /** src/routes.ts **/
