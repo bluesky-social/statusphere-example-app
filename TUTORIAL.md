@@ -331,7 +331,7 @@ Anybody can create a new schema using the [Lexicon](#todo) language, which is ve
 
 > ### Why create a schema?
 >
-> Schemas help other applications understand the data your app is creating. By publishing your schemas, you enable compatibility with other apps and reduce the chances of bad data affecting your app.
+> Schemas help other applications understand the data your app is creating. By publishing your schemas, you make it easier for other application authors to publish data in a format your app will recognize and handle.
 
 Let's create our schema in the `/lexicons` folder of our codebase. You can [read more about how to define schemas here](#todo).
 
