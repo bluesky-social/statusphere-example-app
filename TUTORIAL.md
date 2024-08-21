@@ -21,7 +21,9 @@ Think of our app like a Google. If Google's job was to say which emoji each webs
 - `bsky.app` is feeling 🦋 according to `https://bsky.app/status.json`
 - `reddit.com` is feeling 🤓 according to `https://reddit.com/status.json`
 
-The Atmosphere works the same way, except we're going to check `at://` instead of `https://`. Each user has a data repo under an `at://` URL. We'll crawl all the `at://`s in the Atmosphere for all the  `/status.json` records and aggregate them into our SQLite database.
+The Atmosphere works the same way, except we're going to check `at://` instead of `https://`. Each user has a data repo under an `at://` URL. We'll crawl all the `at://`s in the Atmosphere for all the  "status.json" records and aggregate them into our SQLite database.
+
+> `at://` is the URL scheme of the AT Protocol.
 
 ## Step 1. Starting with our ExpressJS app
 
@@ -234,20 +236,24 @@ Let's look again at how we read the "profile" record:
 await agent.getRecord({
   repo: agent.accountDid,               // The user
   collection: 'app.bsky.actor.profile', // The collection
-  rkey: 'self',                         // The record name
+  rkey: 'self',                         // The record key
 })
 ```
 
 We write records using a similar API. Since our goal is to write "status" records, let's look at how that will happen:
 
 ```typescript
+// Generate a time-based key for our record
+const rkey = TID.nextStr()
+
+// Write the 
 await agent.putRecord({
   repo: agent.accountDid,              // The user
   collection: 'com.example.status',    // The collection
-  rkey: 'self',                        // The record name
+  rkey,                                // The record key
   record: {                            // The record value
     status: "👍",
-    updatedAt: new Date().toISOString()
+    createdAt: new Date().toISOString()
   }
 })
 ```
@@ -270,7 +276,7 @@ router.post(
     const record = {
       $type: 'com.example.status',
       status: req.body?.status,
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     }
 
     try {
@@ -278,7 +284,7 @@ router.post(
       await agent.putRecord({
         repo: agent.accountDid,
         collection: 'com.example.status',
-        rkey: 'self',
+        rkey: TID.nextStr(),
         record,
       })
     } catch (err) {
@@ -331,7 +337,7 @@ Anybody can create a new schema using the [Lexicon](#todo) language, which is ve
 
 > ### Why create a schema?
 >
-> Schemas help other applications understand the data your app is creating. By publishing your schemas, you enable compatibility and reduce the chances of bad data affecting your app.
+> Schemas help other applications understand the data your app is creating. By publishing your schemas, you enable compatibility with other apps and reduce the chances of bad data affecting your app.
 
 Let's create our schema in the `/lexicons` folder of our codebase. You can [read more about how to define schemas here](#todo).
 
@@ -343,10 +349,10 @@ Let's create our schema in the `/lexicons` folder of our codebase. You can [read
   "defs": {
     "main": {
       "type": "record",
-      "key": "literal:self",
+      "key": "tid",
       "record": {
         "type": "object",
-        "required": ["status", "updatedAt"],
+        "required": ["status", "createdAt"],
         "properties": {
           "status": {
             "type": "string",
@@ -354,7 +360,7 @@ Let's create our schema in the `/lexicons` folder of our codebase. You can [read
             "maxGraphemes": 1,
             "maxLength": 32
           },
-          "updatedAt": {
+          "createdAt": {
             "type": "string",
             "format": "datetime"
           }
@@ -387,7 +393,7 @@ router.post(
     const record = {
       $type: 'com.example.status',
       status: req.body?.status,
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     }
     if (!Status.validateRecord(record).success) {
       return res.status(400).json({ error: 'Invalid status' })
@@ -415,13 +421,13 @@ Remember how we referred to our app as being like a Google, crawling around the 
 │ REPO │  Event stream                                     
 ├──────┘                                       
 │   ┌───────────────────────────────────────────┐
-├───┼  1 PUT /com.example.status/self           │
+├───┼  1 PUT /app.bsky.feed.post/3l244rmrxjx2v  │
 │   └───────────────────────────────────────────┘
 │   ┌───────────────────────────────────────────┐
 ├───┼  2 DEL /app.bsky.feed.post/3l244rmrxjx2v  │
 │   └───────────────────────────────────────────┘
 │   ┌───────────────────────────────────────────┐
-├───┼  3 PUT /app.bsky.actor/self               │
+├───┼  3 PUT /app.bsky.actor.profile/self       │
 ▼   └───────────────────────────────────────────┘
 ```
 
@@ -459,9 +465,10 @@ Let's create a SQLite table to store these statuses:
 // Create our statuses table
 await db.schema
   .createTable('status')
-  .addColumn('authorDid', 'varchar', (col) => col.primaryKey())
+  .addColumn('uri', 'varchar', (col) => col.primaryKey())
+  .addColumn('authorDid', 'varchar', (col) => col.notNull())
   .addColumn('status', 'varchar', (col) => col.notNull())
-  .addColumn('updatedAt', 'varchar', (col) => col.notNull())
+  .addColumn('createdAt', 'varchar', (col) => col.notNull())
   .addColumn('indexedAt', 'varchar', (col) => col.notNull())
   .execute()
 ```
@@ -480,15 +487,15 @@ if (
   await db
     .insertInto('status')
     .values({
+      uri: evt.uri.toString(),
       authorDid: evt.author,
       status: record.status,
-      updatedAt: record.updatedAt,
+      createdAt: record.createdAt,
       indexedAt: new Date().toISOString(),
     })
     .onConflict((oc) =>
-      oc.column('authorDid').doUpdateSet({
+      oc.column('uri').doUpdateSet({
         status: record.status,
-        updatedAt: record.updatedAt,
         indexedAt: new Date().toISOString(),
       })
     )
@@ -546,7 +553,6 @@ Our HTML can now list these status records:
 <!-- src/pages/home.ts -->
 ${statuses.map((status, i) => {
   const handle = didHandleMap[status.authorDid] || status.authorDid
-  const date = ts(status)
   return html`
     <div class="status-line">
       <div>
@@ -587,14 +593,16 @@ router.post(
   handler(async (req, res) => {
     // ...
 
+    let uri
     try {
       // Write the status record to the user's repository
-      await agent.putRecord({
+      const res = await agent.putRecord({
         repo: agent.accountDid,
         collection: 'com.example.status',
-        rkey: 'self',
+        rkey: TID.nextStr(),
         record,
       })
+      uri = res.uri
     } catch (err) {
       ctx.logger.warn({ err }, 'failed to write record')
       return res.status(500).json({ error: 'Failed to write record' })
@@ -605,18 +613,12 @@ router.post(
       await ctx.db
         .insertInto('status')
         .values({
+          uri,
           authorDid: agent.accountDid,
           status: record.status,
-          updatedAt: record.updatedAt,
+          createdAt: record.createdAt,
           indexedAt: new Date().toISOString(),
         })
-        .onConflict((oc) =>
-          oc.column('authorDid').doUpdateSet({
-            status: record.status,
-            updatedAt: record.updatedAt,
-            indexedAt: new Date().toISOString(),
-          })
-        )
         .execute()
     } catch (err) {
       ctx.logger.warn(
