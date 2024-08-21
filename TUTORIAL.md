@@ -162,6 +162,24 @@ interface ProfileRecord {
 We're going to use the [Agent](#todo) to fetch this record to include in our app.
 
 ```typescript
+await agent.getRecord({
+  repo: agent.accountDid,               // The user
+  collection: 'app.bsky.actor.profile', // The collection
+  rkey: 'self',                         // The record key
+})
+```
+
+When asking for a record, we provide three pieces of information.
+
+- The [DID](#todo) which identifies the user,
+- The collection name, and
+- The record key
+
+We'll explain the collection name shortly. Record keys are strings with [some limitations](https://atproto.com/specs/record-key#record-key-syntax) and a couple of common patterns. The `"self"` pattern is used when a collection is expected to only contain one record which describes the user.
+
+Let's update our homepage to fetch this profile record:
+
+```typescript
 /** src/routes.ts **/
 // Homepage
 router.get(
