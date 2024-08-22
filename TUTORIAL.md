@@ -627,6 +627,18 @@ This is how every app in the Atmosphere works, including the [Bluesky social app
 
 ## Next steps
 
-TODO
+If you want to practice what you've learned, here are some additional challenges you could try:
 
+- Sync the profile records of all users so that you can show their display names instead of their handles.
+- Count the number of each status used and display the total counts.
+- Fetch the authed user's `app.bsky.graph.follow` follows and show statuses from them.
+- Create a different kind of schema, like a way to post links to websites and rate them 1 through 4 stars.
 
+You can find more information here:
+
+|Resources|-|
+|-|-|
+|[＠ ATProto docs](https://atproto.com)|Learn more about the AT Protocol.|
+|[🦋 Bluesky API docs](https://docs.bsky.app/)|See how Bluesky works as an ATProto app.|
+|[📦 ATProto monorepo](https://github.com/bluesky-social/atproto)|See the source code first-hand.|
+|[💬 ATProto discussions board](https://github.com/bluesky-social/atproto/discussions)|Ask any questions you have!|
