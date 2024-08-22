@@ -1,6 +1,6 @@
 # Tutorial
 
-In this guide, we're going to build a **simple multi-user app** that publishes your current "status" as an emoji.
+In this guide, we're going to build a simple multi-user app that publishes your current "status" as an emoji.
 
 ![A screenshot of our example application](./docs/app-screenshot.png)
 
@@ -38,14 +38,14 @@ npm i
 npm run dev # you can leave this running and it will auto-reload
 ```
 
-Our repo is a regular Web app. We're rendering our HTML server-side like it's 1999. We also have a SQLite database that we're managing with [Kysley](#todo).
+Our repo is a regular Web app. We're rendering our HTML server-side like it's 1999. We also have a SQLite database that we're managing with [Kysley](https://kysely.dev/).
 
 Our starting stack:
 
 - Typescript
-- NodeJS web server ([express](#todo))
-- SQLite database ([Kysley](#todo))
-- Server-side rendering ([uhtml](#todo))
+- NodeJS web server ([express](https://expressjs.com/))
+- SQLite database ([Kysley](https://kysely.dev/))
+- Server-side rendering ([uhtml](https://www.npmjs.com/package/uhtml))
 
 With each step we'll explain how our Web app taps into the Atmosphere. Refer to the codebase for more detailed code &mdash; again, this tutorial is going to keep it light and quick to digest.
 
@@ -53,7 +53,7 @@ With each step we'll explain how our Web app taps into the Atmosphere. Refer to 
 
 When somebody logs into our app, they'll give us read & write access to their personal `at://` repo. We'll use that to write the `status.json` record.
 
-We're going to accomplish this using OAuth ([spec](#todo)). You can find a [more extensive OAuth guide here](#todo), but for now just know that most of the OAuth flows are going to be handled for us using the [@atproto/oauth-client-node](#todo) library. This is the arrangement we're aiming toward:
+We're going to accomplish this using OAuth ([spec](https://github.com/bluesky-social/proposals/tree/main/0004-oauth)). Most of the OAuth flows are going to be handled for us using the [@atproto/oauth-client-node](https://github.com/bluesky-social/atproto/tree/main/packages/oauth/oauth-client-node) library. This is the arrangement we're aiming toward:
 
 ![A diagram of the OAuth elements](./docs/diagram-oauth.png)
 
@@ -93,7 +93,7 @@ router.post(
 
 This is the same kind of SSO flow that Google or GitHub uses. The user will be asked for their password, then asked to confirm the session with your application.
 
-When that finishes, they'll be sent back to `/oauth/callback` on our Web app. The OAuth client stores the access tokens for the server, and then we attach their account's [DID](#todo) to their cookie-session.
+When that finishes, they'll be sent back to `/oauth/callback` on our Web app. The OAuth client stores the access tokens for the server, and then we attach their account's [DID](https://atproto.com/specs/did) to their cookie-session.
 
 ```typescript
 /** src/routes.ts **/
@@ -134,7 +134,7 @@ interface ProfileRecord {
 
 You can examine this record directly using [atproto-browser.vercel.app](https://atproto-browser.vercel.app). For instance, [this is the profile record for @bsky.app](https://atproto-browser.vercel.app/at?u=at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.actor.profile/self).
 
-We're going to use the [Agent](#todo) associated with the user's OAuth session to fetch this record.
+We're going to use the [Agent](https://github.com/bluesky-social/atproto/tree/main/packages/api) associated with the user's OAuth session to fetch this record.
 
 ```typescript
 await agent.getRecord({
@@ -146,11 +146,11 @@ await agent.getRecord({
 
 When asking for a record, we provide three pieces of information.
 
-- **repo** The [DID](#todo) which identifies the user,
+- **repo** The [DID](https://atproto.com/specs/did) which identifies the user,
 - **collection** The collection name, and
 - **rkey** The record key
 
-We'll explain the collection name shortly. Record keys are strings with [some limitations](https://atproto.com/specs/record-key#record-key-syntax) and a couple of common patterns. The `"self"` pattern is used when a collection is expected to only contain one record which describes the user.
+We'll explain the collection name shortly. Record keys are strings with [some restrictions](https://atproto.com/specs/record-key#record-key-syntax) and a couple of common patterns. The `"self"` pattern is used when a collection is expected to only contain one record which describes the user.
 
 Let's update our homepage to fetch this profile record:
 
@@ -303,13 +303,13 @@ And here we are!
 
 Repo collections are typed, meaning that they have a defined schema. The `app.bsky.actor.profile` type definition [can be found here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/profile.json).
 
-Anybody can create a new schema using the [Lexicon](#todo) language, which is very similar to [JSON-Schema](#todo). The schemas use [reverse-DNS IDs](#todo) which indicate ownership, but for this demo app we're going to use `com.example` which is safe for non-production software.
+Anybody can create a new schema using the [Lexicon](https://atproto.com/specs/lexicon) language, which is very similar to [JSON-Schema](http://json-schema.org/). The schemas use [reverse-DNS IDs](https://atproto.com/specs/nsid) which indicate ownership, but for this demo app we're going to use `com.example` which is safe for non-production software.
 
 > ### Why create a schema?
 >
 > Schemas help other applications understand the data your app is creating. By publishing your schemas, you make it easier for other application authors to publish data in a format your app will recognize and handle.
 
-Let's create our schema in the `/lexicons` folder of our codebase. You can [read more about how to define schemas here](#todo).
+Let's create our schema in the `/lexicons` folder of our codebase. You can [read more about how to define schemas here](https://atproto.com/guides/lexicon).
 
 ```json
 /** lexicons/status.json **/
@@ -411,7 +411,7 @@ Remember how we referred to our app as being like a Google, crawling around the 
 
 ![A diagram of the event stream](./docs/diagram-event-stream.png)
 
-Using a [Relay service](#todo) we can listen to an aggregated firehose of these events across all users in the network. In our case what we're looking for are valid `com.example.status` records.
+Using a [Relay service](https://docs.bsky.app/docs/advanced-guides/federation-architecture#relay) we can listen to an aggregated firehose of these events across all users in the network. In our case what we're looking for are valid `com.example.status` records.
 
 
 ```typescript
@@ -493,7 +493,7 @@ Why sync from the event log like this? Because there are other apps in the netwo
 
 ## Step 7. Listing the latest statuses
 
-Now that we have statuses populating our SQLite, we can produce a timeline of status updates by users. We also use a [DID](#todo)-to-handle resolver so we can show a nice username with the statuses:
+Now that we have statuses populating our SQLite, we can produce a timeline of status updates by users. We also use a [DID](https://atproto.com/specs/did)-to-handle resolver so we can show a nice username with the statuses:
 
 ```typescript
 /** src/routes.ts **/
