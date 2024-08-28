@@ -1,6 +1,7 @@
 import assert from 'node:assert'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { getIronSession } from 'iron-session'
+import { Agent } from '@atproto/api'
 import { env } from '#/lib/env'
 import { AppContext } from '#/index'
 
@@ -43,11 +44,14 @@ export async function getSessionAgent(
 ) {
   const session = await getSessionRaw(req, res)
   if (!session.did) return null
-  return await ctx.oauthClient.restore(session.did).catch(async (err) => {
+  try {
+    const oauthSession = await ctx.oauthClient.restore(session.did)
+    return oauthSession ? new Agent(oauthSession) : null
+  } catch (err) {
     ctx.logger.warn({ err }, 'oauth restore failed')
     await destroySession(req, res)
     return null
-  })
+  }
 }
 
 async function getSessionRaw(

@@ -44,8 +44,8 @@ export const createRouter = (ctx: AppContext) => {
     handler(async (req, res) => {
       const params = new URLSearchParams(req.originalUrl.split('?')[1])
       try {
-        const { agent } = await ctx.oauthClient.callback(params)
-        await createSession(req, res, agent.accountDid)
+        const { session } = await ctx.oauthClient.callback(params)
+        await createSession(req, res, session.did)
       } catch (err) {
         ctx.logger.error({ err }, 'oauth callback failed')
         return res.redirect('/?error')
@@ -74,7 +74,9 @@ export const createRouter = (ctx: AppContext) => {
 
       // Initiate the OAuth flow
       try {
-        const url = await ctx.oauthClient.authorize(handle)
+        const url = await ctx.oauthClient.authorize(handle, {
+          scope: 'atproto transition:generic'
+        })
         return res.redirect(url.toString())
       } catch (err) {
         ctx.logger.error({ err }, 'oauth authorize failed')
@@ -119,7 +121,7 @@ export const createRouter = (ctx: AppContext) => {
         ? await ctx.db
             .selectFrom('status')
             .selectAll()
-            .where('authorDid', '=', agent.accountDid)
+            .where('authorDid', '=', agent.assertDid)
             .executeTakeFirst()
         : undefined
 
@@ -135,9 +137,9 @@ export const createRouter = (ctx: AppContext) => {
 
       // Fetch additional information about the logged-in user
       const { data: profile } = await agent.getProfile({
-        actor: agent.accountDid,
+        actor: agent.assertDid,
       })
-      didHandleMap[profile.handle] = agent.accountDid
+      didHandleMap[profile.handle] = agent.assertDid
 
       // Serve the logged-in view
       return res
@@ -169,7 +171,7 @@ export const createRouter = (ctx: AppContext) => {
       try {
         // Write the status record to the user's repository
         await agent.com.atproto.repo.putRecord({
-          repo: agent.accountDid,
+          repo: agent.assertDid,
           collection: 'com.example.status',
           rkey: 'self',
           record,
@@ -188,7 +190,7 @@ export const createRouter = (ctx: AppContext) => {
         await ctx.db
           .insertInto('status')
           .values({
-            authorDid: agent.accountDid,
+            authorDid: agent.assertDid,
             status: record.status,
             updatedAt: record.updatedAt,
             indexedAt: new Date().toISOString(),
