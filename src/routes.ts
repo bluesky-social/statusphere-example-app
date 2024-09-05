@@ -12,7 +12,7 @@ import { home } from '#/pages/home'
 import { login } from '#/pages/login'
 import { env } from '#/lib/env'
 import { page } from '#/lib/view'
-import * as Status from '#/lexicon/types/com/example/status'
+import * as Status from '#/lexicon/types/xyz/statusphere/status'
 import * as Profile from '#/lexicon/types/app/bsky/actor/profile'
 
 type Session = { did: string }
@@ -217,7 +217,7 @@ export const createRouter = (ctx: AppContext) => {
       // Construct & validate their status record
       const rkey = TID.nextStr()
       const record = {
-        $type: 'com.example.status',
+        $type: 'xyz.statusphere.status',
         status: req.body?.status,
         createdAt: new Date().toISOString(),
       }
@@ -233,7 +233,7 @@ export const createRouter = (ctx: AppContext) => {
         // Write the status record to the user's repository
         const res = await agent.com.atproto.repo.putRecord({
           repo: agent.assertDid,
-          collection: 'com.example.status',
+          collection: 'xyz.statusphere.status',
           rkey,
           record,
           validate: false,

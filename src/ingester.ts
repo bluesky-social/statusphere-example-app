@@ -2,7 +2,7 @@ import pino from 'pino'
 import { IdResolver } from '@atproto/identity'
 import { Firehose } from '@atproto/sync'
 import type { Database } from '#/db'
-import * as Status from '#/lexicon/types/com/example/status'
+import * as Status from '#/lexicon/types/xyz/statusphere/status'
 
 export function createIngester(db: Database, idResolver: IdResolver) {
   const logger = pino({ name: 'firehose ingestion' })
@@ -15,7 +15,7 @@ export function createIngester(db: Database, idResolver: IdResolver) {
 
         // If the write is a valid status update
         if (
-          evt.collection === 'com.example.status' &&
+          evt.collection === 'xyz.statusphere.status' &&
           Status.isRecord(record) &&
           Status.validateRecord(record).success
         ) {
@@ -39,7 +39,7 @@ export function createIngester(db: Database, idResolver: IdResolver) {
         }
       } else if (
         evt.event === 'delete' &&
-        evt.collection === 'com.example.status'
+        evt.collection === 'xyz.statusphere.status'
       ) {
         // Remove the status from our SQLite
         await db.deleteFrom('status').where({ uri: evt.uri.toString() })
@@ -48,7 +48,7 @@ export function createIngester(db: Database, idResolver: IdResolver) {
     onError: (err) => {
       logger.error({ err }, 'error on firehose ingestion')
     },
-    filterCollections: ['com.example.status'],
+    filterCollections: ['xyz.statusphere.status'],
     excludeIdentity: true,
     excludeAccount: true,
   })

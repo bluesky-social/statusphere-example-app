@@ -59,13 +59,13 @@ export const schemaDict = {
       },
     },
   },
-  ComExampleStatus: {
+  XyzStatusphereStatus: {
     lexicon: 1,
-    id: 'com.example.status',
+    id: 'xyz.statusphere.status',
     defs: {
       main: {
         type: 'record',
-        key: 'literal:self',
+        key: 'tid',
         record: {
           type: 'object',
           required: ['status', 'createdAt'],
@@ -90,5 +90,5 @@ export const schemas: LexiconDoc[] = Object.values(schemaDict) as LexiconDoc[]
 export const lexicons: Lexicons = new Lexicons(schemas)
 export const ids = {
   AppBskyActorProfile: 'app.bsky.actor.profile',
-  ComExampleStatus: 'com.example.status',
+  XyzStatusphereStatus: 'xyz.statusphere.status',
 }
