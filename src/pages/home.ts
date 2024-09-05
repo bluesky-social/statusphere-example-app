@@ -1,4 +1,4 @@
-import type { Status } from '#/db/schema'
+import type { Status } from '#/db'
 import { html } from '../lib/view'
 import { shell } from './shell'
 
@@ -37,7 +37,7 @@ const STATUS_OPTIONS = [
 type Props = {
   statuses: Status[]
   didHandleMap: Record<string, string>
-  profile?: { displayName?: string; handle: string }
+  profile?: { displayName?: string }
   myStatus?: Status
 }
 
@@ -60,8 +60,8 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
         ${profile
           ? html`<form action="/logout" method="post" class="session-form">
               <div>
-                Hi, <strong>${profile.displayName || profile.handle}</strong>.
-                what's your status today?
+                Hi, <strong>${profile.displayName || 'friend'}</strong>. What's
+                your status today?
               </div>
               <div>
                 <button type="submit">Log out</button>
@@ -74,20 +74,20 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
               </div>
             </div>`}
       </div>
-      <div class="status-options">
+      <form action="/status" method="post" class="status-options">
         ${STATUS_OPTIONS.map(
           (status) =>
-            html`<div
+            html`<button
               class=${myStatus?.status === status
                 ? 'status-option selected'
                 : 'status-option'}
-              data-value="${status}"
-              data-authed=${profile ? '1' : '0'}
+              name="status"
+              value="${status}"
             >
               ${status}
-            </div>`
+            </button>`
         )}
-      </div>
+      </form>
       ${statuses.map((status, i) => {
         const handle = didHandleMap[status.authorDid] || status.authorDid
         const date = ts(status)
@@ -106,7 +106,6 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
         `
       })}
     </div>
-    <script src="/public/home.js"></script>
   </div>`
 }
 

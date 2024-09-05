@@ -139,6 +139,7 @@ button:hover, .button:hover {
   font-size: 2rem;
   width: 3rem;
   height: 3rem;
+  padding: 0;
   background-color: #fff;
   border: 1px solid var(--border-color);
   border-radius: 3rem;

@@ -1,13 +1,20 @@
+import assert from 'node:assert'
 import path from 'node:path'
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import { OAuthResolverError } from '@atproto/oauth-client-node'
 import { isValidHandle } from '@atproto/syntax'
+import { TID } from '@atproto/common'
 import express from 'express'
-import { createSession, destroySession, getSessionAgent } from '#/auth/session'
+import { getIronSession } from 'iron-session'
 import type { AppContext } from '#/index'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
+import { env } from '#/lib/env'
 import { page } from '#/lib/view'
 import * as Status from '#/lexicon/types/com/example/status'
+import * as Profile from '#/lexicon/types/app/bsky/actor/profile'
+
+type Session = { did: string }
 
 // Helper function for defining routes
 const handler =
@@ -23,6 +30,26 @@ const handler =
       next(err)
     }
   }
+
+// Helper function to get the Atproto Agent for the active session
+async function getSessionAgent(
+  req: IncomingMessage,
+  res: ServerResponse<IncomingMessage>,
+  ctx: AppContext
+) {
+  const session = await getIronSession<Session>(req, res, {
+    cookieName: 'sid',
+    password: env.COOKIE_SECRET,
+  })
+  if (!session.did) return null
+  try {
+    return await ctx.oauthClient.restore(session.did)
+  } catch (err) {
+    ctx.logger.warn({ err }, 'oauth restore failed')
+    await session.destroy()
+    return null
+  }
+}
 
 export const createRouter = (ctx: AppContext) => {
   const router = express.Router()
@@ -45,7 +72,13 @@ export const createRouter = (ctx: AppContext) => {
       const params = new URLSearchParams(req.originalUrl.split('?')[1])
       try {
         const { agent } = await ctx.oauthClient.callback(params)
-        await createSession(req, res, agent.accountDid)
+        const session = await getIronSession<Session>(req, res, {
+          cookieName: 'sid',
+          password: env.COOKIE_SECRET,
+        })
+        assert(!session.did, 'session already exists')
+        session.did = agent.accountDid
+        await session.save()
       } catch (err) {
         ctx.logger.error({ err }, 'oauth callback failed')
         return res.redirect('/?error')
@@ -96,7 +129,11 @@ export const createRouter = (ctx: AppContext) => {
   router.post(
     '/logout',
     handler(async (req, res) => {
-      await destroySession(req, res)
+      const session = await getIronSession<Session>(req, res, {
+        cookieName: 'sid',
+        password: env.COOKIE_SECRET,
+      })
+      await session.destroy()
       return res.redirect('/')
     })
   )
@@ -120,6 +157,7 @@ export const createRouter = (ctx: AppContext) => {
             .selectFrom('status')
             .selectAll()
             .where('authorDid', '=', agent.accountDid)
+            .orderBy('indexedAt', 'desc')
             .executeTakeFirst()
         : undefined
 
@@ -134,15 +172,28 @@ export const createRouter = (ctx: AppContext) => {
       }
 
       // Fetch additional information about the logged-in user
-      const { data: profile } = await agent.getProfile({
-        actor: agent.accountDid,
+      const { data: profileRecord } = await agent.com.atproto.repo.getRecord({
+        repo: agent.accountDid,
+        collection: 'app.bsky.actor.profile',
+        rkey: 'self',
       })
-      didHandleMap[profile.handle] = agent.accountDid
+      const profile =
+        Profile.isRecord(profileRecord.value) &&
+        Profile.validateRecord(profileRecord.value).success
+          ? profileRecord.value
+          : {}
 
       // Serve the logged-in view
-      return res
-        .type('html')
-        .send(page(home({ statuses, didHandleMap, profile, myStatus })))
+      return res.type('html').send(
+        page(
+          home({
+            statuses,
+            didHandleMap,
+            profile,
+            myStatus,
+          })
+        )
+      )
     })
   )
 
@@ -153,31 +204,43 @@ export const createRouter = (ctx: AppContext) => {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
       if (!agent) {
-        return res.status(401).json({ error: 'Session required' })
+        return res
+          .status(401)
+          .type('html')
+          .send('<h1>Error: Session required</h1>')
       }
 
       // Construct & validate their status record
+      const rkey = TID.nextStr()
       const record = {
         $type: 'com.example.status',
         status: req.body?.status,
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       }
       if (!Status.validateRecord(record).success) {
-        return res.status(400).json({ error: 'Invalid status' })
+        return res
+          .status(400)
+          .type('html')
+          .send('<h1>Error: Invalid status</h1>')
       }
 
+      let uri
       try {
         // Write the status record to the user's repository
-        await agent.com.atproto.repo.putRecord({
+        const res = await agent.com.atproto.repo.putRecord({
           repo: agent.accountDid,
           collection: 'com.example.status',
-          rkey: 'self',
+          rkey,
           record,
           validate: false,
         })
+        uri = res.data.uri
       } catch (err) {
         ctx.logger.warn({ err }, 'failed to write record')
-        return res.status(500).json({ error: 'Failed to write record' })
+        return res
+          .status(500)
+          .type('html')
+          .send('<h1>Error: Failed to write record</h1>')
       }
 
       try {
@@ -188,18 +251,12 @@ export const createRouter = (ctx: AppContext) => {
         await ctx.db
           .insertInto('status')
           .values({
+            uri,
             authorDid: agent.accountDid,
             status: record.status,
-            updatedAt: record.updatedAt,
+            createdAt: record.createdAt,
             indexedAt: new Date().toISOString(),
           })
-          .onConflict((oc) =>
-            oc.column('authorDid').doUpdateSet({
-              status: record.status,
-              updatedAt: record.updatedAt,
-              indexedAt: new Date().toISOString(),
-            })
-          )
           .execute()
       } catch (err) {
         ctx.logger.warn(
@@ -208,7 +265,7 @@ export const createRouter = (ctx: AppContext) => {
         )
       }
 
-      res.status(200).json({})
+      return res.redirect('/')
     })
   )
 
