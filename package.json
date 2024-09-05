@@ -18,6 +18,7 @@
     "@atproto/lexicon": "0.4.1-rc.0",
     "@atproto/oauth-client-node": "0.0.2-rc.2",
     "@atproto/repo": "0.4.2-rc.0",
+    "@atproto/sync": "^0.1.0",
     "@atproto/syntax": "^0.3.0",
     "@atproto/xrpc-server": "0.5.4-rc.0",
     "better-sqlite3": "^11.1.2",

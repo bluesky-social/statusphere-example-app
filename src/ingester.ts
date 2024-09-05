@@ -1,15 +1,14 @@
+import pino from 'pino'
+import { IdResolver } from '@atproto/identity'
+import { Firehose } from '@atproto/sync'
 import type { Database } from '#/db'
-import { Firehose } from '#/firehose/firehose'
 import * as Status from '#/lexicon/types/com/example/status'
 
-export class Ingester {
-  firehose: Firehose | undefined
-  constructor(public db: Database) {}
-
-  async start() {
-    const firehose = new Firehose({})
-
-    for await (const evt of firehose.run()) {
+export function createIngester(db: Database, idResolver: IdResolver) {
+  const logger = pino({ name: 'firehose ingestion' })
+  return new Firehose({
+    idResolver,
+    handleEvent: async(evt) => {
       // Watch for write events
       if (evt.event === 'create' || evt.event === 'update') {
         const record = evt.record
@@ -21,10 +20,10 @@ export class Ingester {
           Status.validateRecord(record).success
         ) {
           // Store the status in our SQLite
-          await this.db
+          await db
             .insertInto('status')
             .values({
-              authorDid: evt.author,
+              authorDid: evt.did,
               status: record.status,
               updatedAt: record.updatedAt,
               indexedAt: new Date().toISOString(),
@@ -39,10 +38,12 @@ export class Ingester {
             .execute()
         }
       }
-    }
-  }
-
-  destroy() {
-    this.firehose?.destroy()
-  }
+    },
+    onError: (err) => {
+      logger.error({err}, 'error on firehose ingestion')
+    },
+    filterCollections: ['com.example.status'],
+    excludeIdentity: true,
+    excludeAccount: true,
+  })
 }
