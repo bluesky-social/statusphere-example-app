@@ -71,14 +71,14 @@ export const createRouter = (ctx: AppContext) => {
     handler(async (req, res) => {
       const params = new URLSearchParams(req.originalUrl.split('?')[1])
       try {
-        const { agent } = await ctx.oauthClient.callback(params)
-        const session = await getIronSession<Session>(req, res, {
+        const { session } = await ctx.oauthClient.callback(params)
+        const clientSession = await getIronSession<Session>(req, res, {
           cookieName: 'sid',
           password: env.COOKIE_SECRET,
         })
-        assert(!session.did, 'session already exists')
-        session.did = agent.accountDid
-        await session.save()
+        assert(!clientSession.did, 'session already exists')
+        clientSession.did = session.did
+        await clientSession.save()
       } catch (err) {
         ctx.logger.error({ err }, 'oauth callback failed')
         return res.redirect('/?error')
@@ -107,7 +107,9 @@ export const createRouter = (ctx: AppContext) => {
 
       // Initiate the OAuth flow
       try {
-        const url = await ctx.oauthClient.authorize(handle)
+        const url = await ctx.oauthClient.authorize(handle, {
+          scope: 'atproto transition:generic',
+        })
         return res.redirect(url.toString())
       } catch (err) {
         ctx.logger.error({ err }, 'oauth authorize failed')
@@ -156,7 +158,7 @@ export const createRouter = (ctx: AppContext) => {
         ? await ctx.db
             .selectFrom('status')
             .selectAll()
-            .where('authorDid', '=', agent.accountDid)
+            .where('authorDid', '=', agent.assertDid)
             .orderBy('indexedAt', 'desc')
             .executeTakeFirst()
         : undefined
@@ -173,7 +175,7 @@ export const createRouter = (ctx: AppContext) => {
 
       // Fetch additional information about the logged-in user
       const { data: profileRecord } = await agent.com.atproto.repo.getRecord({
-        repo: agent.accountDid,
+        repo: agent.assertDid,
         collection: 'app.bsky.actor.profile',
         rkey: 'self',
       })
@@ -228,7 +230,7 @@ export const createRouter = (ctx: AppContext) => {
       try {
         // Write the status record to the user's repository
         const res = await agent.com.atproto.repo.putRecord({
-          repo: agent.accountDid,
+          repo: agent.assertDid,
           collection: 'com.example.status',
           rkey,
           record,
@@ -252,7 +254,7 @@ export const createRouter = (ctx: AppContext) => {
           .insertInto('status')
           .values({
             uri,
-            authorDid: agent.accountDid,
+            authorDid: agent.assertDid,
             status: record.status,
             createdAt: record.createdAt,
             indexedAt: new Date().toISOString(),

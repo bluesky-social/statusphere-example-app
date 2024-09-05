@@ -14,7 +14,7 @@ export const createClient = async (db: Database) => {
         : `http://localhost?redirect_uri=${encodeURIComponent(`${url}/oauth/callback`)}`,
       client_uri: url,
       redirect_uris: [`${url}/oauth/callback`],
-      scope: 'profile offline_access',
+      scope: 'atproto transition:generic',
       grant_types: ['authorization_code', 'refresh_token'],
       response_types: ['code'],
       application_type: 'web',
