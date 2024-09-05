@@ -1,15 +1,21 @@
-# AT Protocol Express App
+# AT Protocol "Statusphere" Example App
 
-A demo application covering:
- - public firehose ingestion
- - identity and login with OAuth
- - writing to the network
+An example application covering:
+
+- Signin via OAuth
+- Fetch information about users (profiles)
+- Listen to the network firehose for new data
+- Publish data on the user's account using a custom schema
+
+See https://atproto.com/guides/applications for a guide through the codebase.
 
 ## Getting Started
-### Development
+
 ```sh
-pnpm i
+git clone https://github.com/bluesky-social/statusphere-example-app.git
+cd statusphere-example-app
 cp .env.template .env
-pnpm run dev
+npm install
+npm run dev
 # Navigate to http://localhost:8080
 ```
