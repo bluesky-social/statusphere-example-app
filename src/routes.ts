@@ -4,6 +4,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { OAuthResolverError } from '@atproto/oauth-client-node'
 import { isValidHandle } from '@atproto/syntax'
 import { TID } from '@atproto/common'
+import { Agent } from '@atproto/api'
 import express from 'express'
 import { getIronSession } from 'iron-session'
 import type { AppContext } from '#/index'
@@ -43,7 +44,8 @@ async function getSessionAgent(
   })
   if (!session.did) return null
   try {
-    return await ctx.oauthClient.restore(session.did)
+    const oauthSession = await ctx.oauthClient.restore(session.did)
+    return oauthSession ? new Agent(oauthSession) : null
   } catch (err) {
     ctx.logger.warn({ err }, 'oauth restore failed')
     await session.destroy()
