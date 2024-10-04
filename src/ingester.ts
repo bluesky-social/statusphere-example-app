@@ -11,6 +11,7 @@ export function createIngester(db: Database, idResolver: IdResolver) {
     handleEvent: async (evt) => {
       // Watch for write events
       if (evt.event === 'create' || evt.event === 'update') {
+        const now = new Date()
         const record = evt.record
 
         // If the write is a valid status update
@@ -27,12 +28,12 @@ export function createIngester(db: Database, idResolver: IdResolver) {
               authorDid: evt.did,
               status: record.status,
               createdAt: record.createdAt,
-              indexedAt: new Date().toISOString(),
+              indexedAt: now.toISOString(),
             })
             .onConflict((oc) =>
               oc.column('uri').doUpdateSet({
                 status: record.status,
-                indexedAt: new Date().toISOString(),
+                indexedAt: now.toISOString(),
               })
             )
             .execute()
@@ -42,7 +43,7 @@ export function createIngester(db: Database, idResolver: IdResolver) {
         evt.collection === 'xyz.statusphere.status'
       ) {
         // Remove the status from our SQLite
-        await db.deleteFrom('status').where({ uri: evt.uri.toString() })
+        await db.deleteFrom('status').where('uri', '=', evt.uri.toString()).execute()
       }
     },
     onError: (err) => {
