@@ -114,8 +114,8 @@ function toBskyLink(did: string) {
 }
 
 function ts(status: Status) {
+  const createdAt = new Date(status.createdAt)
   const indexedAt = new Date(status.indexedAt)
-  const updatedAt = new Date(status.updatedAt)
-  if (updatedAt > indexedAt) return updatedAt.toDateString()
+  if (createdAt < indexedAt) return createdAt.toDateString()
   return indexedAt.toDateString()
 }
