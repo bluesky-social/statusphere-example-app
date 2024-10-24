@@ -14,12 +14,12 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
-    "@atproto/common": "^0.4.1",
     "@atproto/api": "^0.13.4",
+    "@atproto/common": "^0.4.1",
     "@atproto/identity": "^0.4.0",
     "@atproto/lexicon": "^0.4.2",
     "@atproto/oauth-client-node": "^0.1.0",
-    "@atproto/sync": "^0.1.0",
+    "@atproto/sync": "^0.1.4",
     "@atproto/syntax": "^0.3.0",
     "@atproto/xrpc-server": "^0.6.3",
     "better-sqlite3": "^11.1.2",
