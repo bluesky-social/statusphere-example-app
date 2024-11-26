@@ -18,11 +18,13 @@ export class Server {
   xrpc: XrpcServer
   app: AppNS
   xyz: XyzNS
+  com: ComNS
 
   constructor(options?: XrpcOptions) {
     this.xrpc = createXrpcServer(schemas, options)
     this.app = new AppNS(this)
     this.xyz = new XyzNS(this)
+    this.com = new ComNS(this)
   }
 }
 
@@ -65,6 +67,34 @@ export class XyzNS {
 }
 
 export class XyzStatusphereNS {
+  _server: Server
+
+  constructor(server: Server) {
+    this._server = server
+  }
+}
+
+export class ComNS {
+  _server: Server
+  atproto: ComAtprotoNS
+
+  constructor(server: Server) {
+    this._server = server
+    this.atproto = new ComAtprotoNS(server)
+  }
+}
+
+export class ComAtprotoNS {
+  _server: Server
+  repo: ComAtprotoRepoNS
+
+  constructor(server: Server) {
+    this._server = server
+    this.repo = new ComAtprotoRepoNS(server)
+  }
+}
+
+export class ComAtprotoRepoNS {
   _server: Server
 
   constructor(server: Server) {
