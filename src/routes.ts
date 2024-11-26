@@ -77,6 +77,9 @@ export const createRouter = (ctx: AppContext) => {
         const clientSession = await getIronSession<Session>(req, res, {
           cookieName: 'sid',
           password: env.COOKIE_SECRET,
+          cookieOptions: {
+            secure: env.isDev ? false : true
+          },
         })
         assert(!clientSession.did, 'session already exists')
         clientSession.did = session.did
