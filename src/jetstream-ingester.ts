@@ -16,9 +16,7 @@ export function createJetstreamIngester(db: Database) {
         (evt.commit?.operation === 'create' || evt.commit?.operation === 'update') &&
         evt.commit?.collection === 'xyz.statusphere.status' &&
         Status.isRecord(record) &&
-        Status.validateRecord(record).success &&
-        record &&
-        record.$type === 'xyz.statusphere.status' // Replace with a proper type check if available
+        Status.validateRecord(record).success
       ) {
         await db
           .insertInto('status')
@@ -83,10 +81,7 @@ export class Jetstream {
 
   start() {
     if (this.isStarted) return;
-    const logger = pino({ name: 'start function' });
-    logger.info("STARTING");
     this.isStarted = true;
-    const wsUrl = `wss://jetstream2.us-east.bsky.network/subscribe`;
     this.ws = new WebSocket(this.constructUrlWithQuery());
 
     this.ws.on('open', () => {
