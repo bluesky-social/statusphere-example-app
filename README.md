@@ -1,5 +1,7 @@
 # AT Protocol "Statusphere" Example App
 
+[![Test](https://github.com/bluesky-social/statusphere-example-app/actions/workflows/test.yml/badge.svg)](https://github.com/bluesky-social/statusphere-example-app/actions/workflows/test.yml)
+
 An example application covering:
 
 - Signin via OAuth
