@@ -172,8 +172,8 @@ export const createRouter = (ctx: AppContext) => {
 
       if (!agent) {
         // Serve the logged-out view
-        return res.type('html').send(page(home({ statuses, didHandleMap })))
-      }
+        return res.type('html').send(page(login({})))
+        }
 
       // Fetch additional information about the logged-in user
       const { data: profileRecord } = await agent.com.atproto.repo.getRecord({
