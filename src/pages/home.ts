@@ -37,7 +37,7 @@ const STATUS_OPTIONS = [
 type Props = {
   statuses: Status[]
   didHandleMap: Record<string, string>
-  profile?: { displayName?: string }
+  profile: { displayName?: string }
   myStatus?: Status
 }
 
@@ -57,22 +57,15 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
     </div>
     <div class="container">
       <div class="card">
-        ${profile
-          ? html`<form action="/logout" method="post" class="session-form">
+       <form action="/logout" method="post" class="session-form">
               <div>
-                Hi, <strong>${profile.displayName || 'friend'}</strong>. What's
+                Hi, <strong>${profile.displayName}</strong>. What's
                 your status today?
               </div>
               <div>
                 <button type="submit">Log out</button>
               </div>
-            </form>`
-          : html`<div class="session-form">
-              <div><a href="/login">Log in</a> to set your status!</div>
-              <div>
-                <a href="/login" class="button">Log in</a>
-              </div>
-            </div>`}
+            </form>
       </div>
       <form action="/status" method="post" class="status-options">
         ${STATUS_OPTIONS.map(
