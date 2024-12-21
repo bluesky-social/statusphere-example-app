@@ -14,11 +14,11 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
-    "@atproto/api": "^0.13.20",
+    "@atproto/api": "^0.13.22",
     "@atproto/common": "^0.4.5",
     "@atproto/identity": "^0.4.3",
     "@atproto/lexicon": "^0.4.4",
-    "@atproto/oauth-client-node": "^0.2.4",
+    "@atproto/oauth-client-node": "^0.2.5",
     "@atproto/sync": "^0.1.7",
     "@atproto/syntax": "^0.3.1",
     "@atproto/xrpc-server": "^0.7.4",
@@ -33,7 +33,7 @@
     "uhtml": "^4.7.0"
   },
   "devDependencies": {
-    "@atproto/lex-cli": "^0.5.3",
+    "@atproto/lex-cli": "^0.5.4",
     "@types/better-sqlite3": "^7.6.12",
     "@types/express": "^4.17.21",
     "pino-pretty": "^13.0.0",
