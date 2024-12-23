@@ -8,7 +8,7 @@ export function createIngester(db: Database, idResolver: IdResolver) {
   const logger = pino({ name: 'firehose ingestion' })
   return new Firehose({
     idResolver,
-    handleEvent: async (evt) => {
+    handleEvent: async (evt: any) => {
       // Watch for write events
       if (evt.event === 'create' || evt.event === 'update') {
         const now = new Date()
@@ -46,7 +46,7 @@ export function createIngester(db: Database, idResolver: IdResolver) {
         await db.deleteFrom('status').where('uri', '=', evt.uri.toString()).execute()
       }
     },
-    onError: (err) => {
+    onError: (err: Error) => {
       logger.error({ err }, 'error on firehose ingestion')
     },
     filterCollections: ['xyz.statusphere.status'],
