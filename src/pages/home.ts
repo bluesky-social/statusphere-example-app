@@ -57,12 +57,11 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
     </div>
     <div class="container">
       <div class="card">
-        <p class="m-2">
+        <div class="m-2">
           Hi, <strong>${profile.displayName}</strong>. What's your status today?
-        </p>
+        </div>
         <form action="/logout" method="post" class="session-form">
           <div class="m-2">
-            
             <button type="submit" class="btn btn-primary">Log out</button>
           </div>
         </form>
@@ -70,8 +69,7 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
       <form action="/status" method="post" class="status-options">
         ${STATUS_OPTIONS.map(
           (status) =>
-            html`<button class="m-2 rounded-circle border border-primary btn btn-lg" style="--bs-border-opacity: .5;"
-              
+            html`<button class="m-1 p-2 rounded-circle border border-primary btn btn-lg" style="--bs-border-opacity: .5;"
               name="status"
               value="${status}"
             >
