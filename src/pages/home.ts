@@ -83,11 +83,9 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
         const handle = didHandleMap[status.authorDid] || status.authorDid
         const date = ts(status)
         return html`
-          <div class=${i === 0 ? 'status-line no-line' : 'status-line'}>
-            <div>
-              <div class="status">${status.status}</div>
-            </div>
-            <div class="desc">
+          <div>
+            <div class="p-1">
+              ${status.status}
               <a class="author" href=${toBskyLink(handle)}>${handle}</a>
               ${date === TODAY
                 ? `is feeling ${status.status} today`
