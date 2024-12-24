@@ -51,29 +51,27 @@ export function home(props: Props) {
 function content({ statuses, didHandleMap, profile, myStatus }: Props) {
   return html`<div id="root">
     <div class="error"></div>
-    <div id="header">
+    <div id="header" class="text-center">
       <h1>Statusphere</h1>
       <p>Set your status on the Atmosphere.</p>
     </div>
     <div class="container">
       <div class="card">
-       <form action="/logout" method="post" class="session-form">
-              <div>
-                Hi, <strong>${profile.displayName}</strong>. What's
-                your status today?
-              </div>
-              <div>
-                <button type="submit">Log out</button>
-              </div>
-            </form>
+        <p class="m-2">
+          Hi, <strong>${profile.displayName}</strong>. What's your status today?
+        </p>
+        <form action="/logout" method="post" class="session-form">
+          <div class="m-2">
+            
+            <button type="submit" class="btn btn-primary">Log out</button>
+          </div>
+        </form>
       </div>
       <form action="/status" method="post" class="status-options">
         ${STATUS_OPTIONS.map(
           (status) =>
-            html`<button
-              class=${myStatus?.status === status
-                ? 'status-option selected'
-                : 'status-option'}
+            html`<button class="m-2 rounded-circle border border-primary btn btn-lg" style="--bs-border-opacity: .5;"
+              
               name="status"
               value="${status}"
             >
@@ -90,7 +88,7 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
               <div class="status">${status.status}</div>
             </div>
             <div class="desc">
-              <a class="author" href=${toBskyLink(handle)}>@${handle}</a>
+              <a class="author" href=${toBskyLink(handle)}>${handle}</a>
               ${date === TODAY
                 ? `is feeling ${status.status} today`
                 : `was feeling ${status.status} on ${date}`}
