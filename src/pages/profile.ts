@@ -15,13 +15,19 @@ function content({ error }: Props) {
   <!-- start here -->
     <div class="container-fluid">
       <div class="row text-center my-2">
-        <div class="col border border-primary rounded ms-2">
+        <div class="col border border-primary rounded ms-2"> <!-- left content goes here -->
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">An item</li>
+            <li class="list-group-item">A second item</li>
+            <li class="list-group-item">A third item</li>
+            <li class="list-group-item">A fourth item</li>
+            <li class="list-group-item">And a fifth one</li>
+          </ul>
           <form action="/logout" method="post" class="session-form">
             <div class="m-2">
               <button type="submit" class="btn btn-primary">Log out</button>
             </div>
           </form>
-        
         </div>
           
         <div class="col-6 border border-primary rounded ms-2"><!-- center content goes here -->
