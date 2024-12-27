@@ -14,7 +14,7 @@ function content({ error }: Props) {
   return html`<div id="root">
   <!-- start here -->
     <div class="container-fluid">
-      <div class="row text-center my-2">
+      <div class="row my-2">
         <div class="col border border-primary rounded ms-2"> <!-- left content goes here -->
           <ul class="list-group list-group-flush">
             <li class="list-group-item">An item</li>
