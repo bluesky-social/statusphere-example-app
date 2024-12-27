@@ -10,6 +10,7 @@ import { getIronSession } from 'iron-session'
 import type { AppContext } from '#/index'
 import { home } from '#/pages/home'
 import { blank } from '#/pages/blank'
+import { profile } from '#/pages/profile'
 import { login } from '#/pages/login'
 import { env } from '#/lib/env'
 import { page } from '#/lib/view'
@@ -285,6 +286,19 @@ export const createRouter = (ctx: AppContext) => {
         return res.type('html').send(page(login({})))
       }
       return res.type('html').send(page(blank({})))
+    })
+  )
+
+  router.get(
+    '/profile',
+    handler(async (req, res) => {
+      // If the user is signed in, get an agent which communicates with their server
+      const agent = await getSessionAgent(req, res, ctx)
+      // If the user is not logged in send them to the login page.
+      if (!agent) {
+        return res.type('html').send(page(login({})))
+      }
+      return res.type('html').send(page(profile({})))
     })
   )
 
