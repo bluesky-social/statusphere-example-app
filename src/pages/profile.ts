@@ -29,7 +29,6 @@ function content({ error }: Props) {
             </div>
           </form>
         </div>
-          
         <div class="col-6 border border-primary rounded ms-2"><!-- center content goes here -->
           <div id="header" class="text-center">
             <h1>A New Profile Page</h1>
