@@ -36,17 +36,13 @@ export function shell({ title, content }: { title: string; content: Hole }) {
             <div class="col-6 border border-primary rounded ms-2"><!-- center content goes here -->
               ${content}
             </div>
-            <div class="col border border-primary rounded mx-2">
-              right side content goes here
-              
-                  <button type="button" class="btn" data-bs-theme-value="light" aria-pressed="false">
-                    <i class="bi bi-sun-fill"></i><span class="ms-2">Light</span>
-                  </button>
-                
-                  <button type="button" class="btn" data-bs-theme-value="dark" aria-pressed="true">
-                    <i class="bi bi-moon-stars-fill"></i><span class="ms-2">Dark</span>
-                  </button>
-                
+            <div class="col border border-primary rounded mx-2"> <!-- right side content goes here -->
+              <button type="button" class="btn" data-bs-theme-value="light" aria-pressed="false">
+                <i class="bi bi-sun-fill"></i><span class="ms-2">Light</span>
+              </button>
+              <button type="button" class="btn" data-bs-theme-value="dark" aria-pressed="true">
+                <i class="bi bi-moon-stars-fill"></i><span class="ms-2">Dark</span>
+              </button>
             </div>
           </div>
         </div>
