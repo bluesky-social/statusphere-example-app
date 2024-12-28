@@ -56,7 +56,7 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
       <p>Set your status on the Atmosphere.</p>
     </div>
     <div class="container">
-      <div class="card">
+      <div class="card mb-3">
         <div class="m-2">
           Hi, <strong>${profile.displayName}</strong>. What's your status today?
         </div>
