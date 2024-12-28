@@ -11,7 +11,7 @@ export function blank(props: Props) {
 }
 
 function content({ error }: Props) {
-  return html`<div id="root">
+  return html`
     <div id="header" class="text-center">
       <h1>A New Blank Page</h1>
       <p>It's time to build your next page.</p>
@@ -25,5 +25,5 @@ function content({ error }: Props) {
         <a href="https://bsky.app">Sign up for Bluesky</a> to create one now!
       </div>
     </div>
-  </div>`
+  `
 }
