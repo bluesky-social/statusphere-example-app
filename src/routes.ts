@@ -13,6 +13,7 @@ import { blank } from '#/pages/blank'
 import { profile } from '#/pages/profile'
 import { login } from '#/pages/login'
 import { search } from './pages/search'
+import { notifications } from './pages/notifications'
 import { env } from '#/lib/env'
 import { page } from '#/lib/view'
 import * as Status from '#/lexicon/types/xyz/statusphere/status'
@@ -287,6 +288,20 @@ export const createRouter = (ctx: AppContext) => {
         return res.type('html').send(page(login({})))
       }
       return res.type('html').send(page(blank({})))
+    })
+  )
+
+  // Notifications page
+  router.get(
+    '/notifications',
+    handler(async (req, res) => {
+      // If the user is signed in, get an agent which communicates with their server
+      const agent = await getSessionAgent(req, res, ctx)
+      // If the user is not logged in send them to the login page.
+      if (!agent) {
+        return res.type('html').send(page(login({})))
+      }
+      return res.type('html').send(page(notifications({})))
     })
   )
 
