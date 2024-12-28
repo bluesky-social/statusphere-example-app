@@ -16,13 +16,17 @@ function content({ error }: Props) {
     <div class="container-fluid">
       <div class="row my-2">
         <div class="col border border-primary rounded ms-2"> <!-- left content goes here -->
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item">An item</li>
-            <li class="list-group-item">A second item</li>
-            <li class="list-group-item">A third item</li>
-            <li class="list-group-item">A fourth item</li>
-            <li class="list-group-item">And a fifth one</li>
-          </ul>
+          <div class="list-group list-group-flush">
+            <a href="/" class="list-group-item list-group-item-action list-group-item-light">Home</a>
+            <a href="/search" class="list-group-item list-group-item-action list-group-item-light">Search</a>
+            <a href="/notifications" class="list-group-item list-group-item-action list-group-item-light">Notifications</a>
+            <a href="/chat" class="list-group-item list-group-item-action list-group-item-light">Chat</a>
+            <a href="/feeds" class="list-group-item list-group-item-action list-group-item-light">Feeds</a>
+            <a href="/lists" class="list-group-item list-group-item-action list-group-item-light">Lists</a>
+            <a href="/profile" class="list-group-item list-group-item-action list-group-item-light">Profile</a>
+            <a href="/settings" class="list-group-item list-group-item-action list-group-item-light">Settings</a>
+            <a href="/marketplace" class="list-group-item list-group-item-action list-group-item-light">Marketplace</a>
+          </div>
           <form action="/logout" method="post" class="session-form">
             <div class="m-2">
               <button type="submit" class="btn btn-primary">Log out</button>
