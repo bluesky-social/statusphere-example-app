@@ -1,5 +1,5 @@
 import { html } from '../lib/view'
-import { shell } from './shell'
+import { shell } from './shell.logout'
 
 type Props = { error?: string }
 
