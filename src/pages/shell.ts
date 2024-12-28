@@ -1,8 +1,9 @@
 import { type Hole, html } from '../lib/view'
 
 export function shell({ title, content }: { title: string; content: Hole }) {
-  return html`<html>
+  return html`<html data-bs-theme="dark">
     <head>
+      <script src="/public/js/bootstrap.bundle.min.js"></script>
       <script src="/public/js/color-modes.js"></script>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -37,6 +38,15 @@ export function shell({ title, content }: { title: string; content: Hole }) {
             </div>
             <div class="col border border-primary rounded mx-2">
               right side content goes here
+              
+                  <button type="button" class="btn" data-bs-theme-value="light" aria-pressed="false">
+                    <i class="bi bi-sun-fill"></i><span class="ms-2">Light</span>
+                  </button>
+                
+                  <button type="button" class="btn" data-bs-theme-value="dark" aria-pressed="true">
+                    <i class="bi bi-moon-stars-fill"></i><span class="ms-2">Dark</span>
+                  </button>
+                
             </div>
           </div>
         </div>
