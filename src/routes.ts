@@ -17,6 +17,7 @@ import { notifications } from './pages/notifications'
 import { chat } from './pages/chat'
 import { feeds } from './pages/feeds'
 import { lists } from './pages/lists'
+import { settings } from './pages/settings'
 import { env } from '#/lib/env'
 import { page } from '#/lib/view'
 import * as Status from '#/lexicon/types/xyz/statusphere/status'
@@ -291,6 +292,20 @@ export const createRouter = (ctx: AppContext) => {
         return res.type('html').send(page(login({})))
       }
       return res.type('html').send(page(blank({})))
+    })
+  )
+
+  // Settings page
+  router.get(
+    '/settings',
+    handler(async (req, res) => {
+      // If the user is signed in, get an agent which communicates with their server
+      const agent = await getSessionAgent(req, res, ctx)
+      // If the user is not logged in send them to the login page.
+      if (!agent) {
+        return res.type('html').send(page(login({})))
+      }
+      return res.type('html').send(page(settings({})))
     })
   )
 
