@@ -19,3 +19,6 @@ npm install
 npm run dev
 # Navigate to http://localhost:8080
 ```
+
+"npm run build" is a command used in Node.js development to generate a production-ready version of your application. It compiles your TypeScript code into JavaScript, optimizes the code for performance, and bundles all the necessary assets into a single file or multiple files. This process helps ensure that your application runs efficiently in a production environment.
+
