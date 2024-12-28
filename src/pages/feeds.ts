@@ -20,10 +20,6 @@ function content({ error }: Props) {
       <div>
         You can add your content here.
       </div>
-      <div class="text-center">
-        Don't have an account on the Atmosphere?
-        <a href="https://bsky.app">Sign up for Bluesky</a> to create one now!
-      </div>
     </div>
   `
 }
