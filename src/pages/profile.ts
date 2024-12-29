@@ -11,7 +11,7 @@ type Props = {
   followersCount?: number
   followsCount?: number
   postsCount?: number
-
+  createdAt?: string
 }
 
 export function profile(props: Props) {
@@ -21,7 +21,8 @@ export function profile(props: Props) {
   })
 }
 
-function content({ error, banner, avatar, displayName, handle, description, followersCount, followsCount, postsCount }: Props) {
+function content({ error, banner, avatar, displayName, handle, description, followersCount, followsCount, postsCount, createdAt }: Props) {
+  const date = ts(createdAt?? new Date().toISOString())
   return html`
     <div class="container px-0">
       <div class="row">
@@ -39,10 +40,17 @@ function content({ error, banner, avatar, displayName, handle, description, foll
         </div>
       </div>
       <div class="row">
-        ${displayName}
+        <div class="col">
+          ${displayName}
+        </div>
+        <div class="col">
+          Member since: ${date}
+        </div>
       </div>
       <div class="row">
-        @${handle}
+        <div class="col">
+          @${handle}
+        </div>
       </div>
       <div class="row">
         <div class="col">
@@ -55,9 +63,16 @@ function content({ error, banner, avatar, displayName, handle, description, foll
           ${postsCount} posts
         </div>
       </div>
-      <div class="row">
-        ${description}
+      <div class="row py-2">
+        <div class="col">
+          ${description}
+        </div>
       </div>
     </div>
   `
+}
+
+function ts(createdAt: string) {
+  const created = new Date(createdAt)
+  return created.toDateString()
 }
