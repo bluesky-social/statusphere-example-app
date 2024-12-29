@@ -8,6 +8,10 @@ type Props = {
   avatar?: string
   banner?: string
   description?: string
+  followersCount?: number
+  followsCount?: number
+  postsCount?: number
+
 }
 
 export function profile(props: Props) {
@@ -17,7 +21,7 @@ export function profile(props: Props) {
   })
 }
 
-function content({ error, banner, avatar, displayName, handle, description }: Props) {
+function content({ error, banner, avatar, displayName, handle, description, followersCount, followsCount, postsCount }: Props) {
   return html`
     <div class="container">
       <div class="row">
@@ -42,13 +46,13 @@ function content({ error, banner, avatar, displayName, handle, description }: Pr
       </div>
       <div class="row">
         <div class="col">
-          Followers...
+          ${followersCount} followers
         </div>
         <div class="col">
-          Following...
+          ${followsCount} following
         </div>
         <div class="col">
-          Posts...
+          ${postsCount} posts
         </div>
       </div>
       <div class="row">
