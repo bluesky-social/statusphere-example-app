@@ -19,16 +19,40 @@ export function profile(props: Props) {
 
 function content({ error, banner, avatar, displayName, handle, description }: Props) {
   return html`
-    <div class="container p-0">
-      <div class="card">
+    <div class="container">
+      <div class="row">
         <img src="${banner}" class="card-img-top" alt="castle">
-        <div class="card-body">
+      </div>
+      <div class="row">
+        <div class="col-3" style="margin-top: -10%; position: relative;">
           <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
-          <h5 class="card-title">${displayName}</h5>
-          <p>@${handle}</p>
-          <p class="card-text">${description}</p>
-          <a href="#" class="btn">Go somewhere</a>
         </div>
+        <div class="col">
+          Edit profile
+        </div>
+        <div class="col">
+          ...
+        </div>
+      </div>
+      <div class="row">
+        ${displayName}
+      </div>
+      <div class="row">
+        @${handle}
+      </div>
+      <div class="row">
+        <div class="col">
+          Followers...
+        </div>
+        <div class="col">
+          Following...
+        </div>
+        <div class="col">
+          Posts...
+        </div>
+      </div>
+      <div class="row">
+        ${description}
       </div>
     </div>
   `
