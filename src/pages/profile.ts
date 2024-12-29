@@ -19,15 +19,16 @@ export function profile(props: Props) {
 
 function content({ error, banner, avatar, displayName, handle, description }: Props) {
   return html`
-    <div id="header">
-      <img src="${banner}" class="img-fluid" alt="Kitten" />
-    </div>
-    <div class="container">
-      <div>
-        <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
-        ${displayName ? html`<h1>${displayName}</h1>` : ''}
-        ${handle ? html`<h2>${handle}</h2>` : ''}
-        ${description ? html`<h2>${description}</h2>` : ''}
+    <div class="container p-0">
+      <div class="card">
+        <img src="${banner}" class="card-img-top" alt="castle">
+        <div class="card-body">
+          <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
+          <h5 class="card-title">${displayName}</h5>
+          <p>@${handle}</p>
+          <p class="card-text">${description}</p>
+          <a href="#" class="btn">Go somewhere</a>
+        </div>
       </div>
     </div>
   `
