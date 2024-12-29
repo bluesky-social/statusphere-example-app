@@ -29,14 +29,15 @@ export function shell({ title, content }: { title: string; content: Hole }) {
               </div>
               <form action="/logout" method="post" class="session-form">
                 <div class="m-2">
-                  <button type="submit" class="btn btn-primary">Log out</button>
+                  <button type="submit" class="btn text-danger-emphasis"><i class="bi bi-box-arrow-right"></i> Log out</button>
+                  <button type="submit" class="btn btn-success float-end"><i class="bi bi-pencil"></i> New Post</button>
                 </div>
               </form>
             </div>
             <div class="col-6 border border-primary rounded ms-2"><!-- center content goes here -->
               ${content}
             </div>
-            <div class="col border border-primary rounded mx-2"> <!-- right side content goes here -->
+            <div class="col border border-primary rounded mx-2 text-center"> <!-- right side content goes here -->
               <button type="button" class="btn" data-bs-theme-value="light" aria-pressed="false">
                 <i class="bi bi-sun-fill"></i><span class="ms-2">Light</span>
               </button>
