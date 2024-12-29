@@ -23,12 +23,12 @@ export function profile(props: Props) {
 
 function content({ error, banner, avatar, displayName, handle, description, followersCount, followsCount, postsCount }: Props) {
   return html`
-    <div class="container">
+    <div class="container px-0">
       <div class="row">
-        <img src="${banner}" class="card-img-top" alt="castle">
+        <img src="${banner}" class="rounded-top px-0" alt="castle">
       </div>
       <div class="row">
-        <div class="col-3" style="margin-top: -10%; position: relative;">
+        <div class="col-3" style="margin-top: -12%; position: relative;">
           <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
         </div>
         <div class="col">
