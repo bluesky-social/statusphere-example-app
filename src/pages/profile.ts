@@ -7,6 +7,7 @@ type Props = {
   handle?: string
   avatar?: string
   banner?: string
+  description?: string
 }
 
 export function profile(props: Props) {
@@ -16,7 +17,7 @@ export function profile(props: Props) {
   })
 }
 
-function content({ error, banner, avatar, displayName, handle }: Props) {
+function content({ error, banner, avatar, displayName, handle, description }: Props) {
   return html`
     <div id="header">
       <img src="${banner}" class="img-fluid" alt="Kitten" />
@@ -26,6 +27,7 @@ function content({ error, banner, avatar, displayName, handle }: Props) {
         <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
         ${displayName ? html`<h1>${displayName}</h1>` : ''}
         ${handle ? html`<h2>${handle}</h2>` : ''}
+        ${description ? html`<h2>${description}</h2>` : ''}
       </div>
     </div>
   `
