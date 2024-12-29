@@ -76,8 +76,8 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
         const handle = didHandleMap[status.authorDid] || status.authorDid
         const date = ts(status)
         return html`
-          <div>
-            <div class="p-1">
+          <div class="card mt-2">
+            <div class="card-body">
               ${status.status}
               <a class="author" href=${toBskyLink(handle)}>${handle}</a>
               ${date === TODAY
