@@ -1,7 +1,13 @@
 import { html } from '../lib/view'
 import { shell } from './shell'
 
-type Props = { error?: string }
+type Props = { 
+  error?: string 
+  displayName?: string
+  handle?: string
+  avatar?: string
+  banner?: string
+}
 
 export function profile(props: Props) {
   return shell({
@@ -10,15 +16,16 @@ export function profile(props: Props) {
   })
 }
 
-function content({ error }: Props) {
+function content({ error, banner, avatar, displayName, handle }: Props) {
   return html`
-    <div id="header" class="text-center">
-      <h1>A New Profile Page</h1>
-      <p>It's time to build your next page.</p>
+    <div id="header">
+      <img src="${banner}" class="img-fluid" alt="Kitten" />
     </div>
     <div class="container">
       <div>
-        You can add your content here.
+        <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
+        ${displayName ? html`<h1>${displayName}</h1>` : ''}
+        ${handle ? html`<h2>${handle}</h2>` : ''}
       </div>
     </div>
   `

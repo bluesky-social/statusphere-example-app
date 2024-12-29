@@ -403,7 +403,10 @@ export const createRouter = (ctx: AppContext) => {
       if (!agent) {
         return res.type('html').send(page(login({})))
       }
-      return res.type('html').send(page(profile({})))
+      const id: string = agent.sessionManager.did!
+      const { data } = await agent.getProfile({ actor: id })
+      const { did, handle, displayName, avatar, banner, ...rest } = data
+      return res.type('html').send(page(profile({ handle, displayName, avatar, banner })))
     })
   )
 
