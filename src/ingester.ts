@@ -42,7 +42,7 @@ export function createIngester(db: Database, idResolver: IdResolver, dbm: MongoC
             // Store the status in mongodb
             try {
               const collection = dbm.db('statusphere').collection('status')
-              const insertResult = await collection.insertOne({
+              await collection.insertOne({
                 uri: evt.uri.toString(),
                 authorDid: evt.did,
                 status: record.status,
@@ -53,7 +53,6 @@ export function createIngester(db: Database, idResolver: IdResolver, dbm: MongoC
               logger.error({ error }, 'Failed to insert status into MongoDB')
               throw error
             }
-              
         }
       } else if (
         evt.event === 'delete' &&
