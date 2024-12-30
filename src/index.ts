@@ -4,7 +4,6 @@ import express, { type Express } from 'express'
 import { pino } from 'pino'
 import type { OAuthClient } from '@atproto/oauth-client-node'
 import { Firehose } from '@atproto/sync'
-
 import { createDb, migrateToLatest } from '#/db'
 import { env } from '#/lib/env'
 import { createIngester } from '#/ingester'
