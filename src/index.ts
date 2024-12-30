@@ -42,13 +42,7 @@ export class Server {
     const dbm = new MongoClient(env.MONGO_URL)
     await dbm.connect()
     console.log('Connected successfully to the mongodb server')
-    const dbName = dbm.db('statusphere')
-    console.log(`Database '${dbName.databaseName}' created!`)
-    const collection = dbName.collection('status')
-    console.log(`Collection '${collection.collectionName}' created!`)
-    const insertResult = await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }])
-    console.log('Inserted documents =>', insertResult)
-
+    
     // Create the atproto utilities
     const oauthClient = await createClient(db)
     const baseIdResolver = createIdResolver()
