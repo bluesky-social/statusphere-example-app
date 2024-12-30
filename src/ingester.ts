@@ -60,6 +60,10 @@ export function createIngester(db: Database, idResolver: IdResolver, dbm: MongoC
       ) {
         // Remove the status from our SQLite
         await db.deleteFrom('status').where('uri', '=', evt.uri.toString()).execute()
+        // Remove the status from mongodb
+        const collection = dbm.db('statusphere').collection('status')
+        const deleteResult = await collection.deleteOne({ uri: evt.uri.toString()});
+        console.log('Deleted documents =>', deleteResult);
       }
     },
     onError: (err: Error) => {
