@@ -11,6 +11,7 @@ import { createRouter } from '#/routes'
 import { createClient } from '#/auth/client'
 import { createBidirectionalResolver, createIdResolver, BidirectionalResolver } from '#/id-resolver'
 import type { Database } from '#/db'
+import { MongoClient } from 'mongodb'
 import { IdResolver, MemoryCache } from '@atproto/identity'
 
 // Application state passed to the router and elsewhere
@@ -20,6 +21,7 @@ export type AppContext = {
   logger: pino.Logger
   oauthClient: OAuthClient
   resolver: BidirectionalResolver
+  dbm: MongoClient
 }
 
 export class Server {
