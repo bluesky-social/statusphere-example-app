@@ -38,7 +38,6 @@ type Props = {
   statuses: Status[]
   didHandleMap: Record<string, string>
   profile: { displayName?: string }
-  myStatus?: Status
 }
 
 export function home(props: Props) {
@@ -48,7 +47,7 @@ export function home(props: Props) {
   })
 }
 
-function content({ statuses, didHandleMap, profile, myStatus }: Props) {
+function content({ statuses, didHandleMap, profile }: Props) {
   return html`<div id="root">
     <div class="error"></div>
     <div id="header" class="text-center">

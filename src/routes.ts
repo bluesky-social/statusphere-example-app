@@ -165,15 +165,10 @@ export const createRouter = (ctx: AppContext) => {
         .orderBy('indexedAt', 'desc')
         .limit(10)
         .execute()
-      const myStatus = agent
-        ? await ctx.db
-            .selectFrom('status')
-            .selectAll()
-            .where('authorDid', '=', agent.assertDid)
-            .orderBy('indexedAt', 'desc')
-            .executeTakeFirst()
-        : undefined
 
+      // Fetch data stored in mongodb
+      
+ 
       // Map user DIDs to their domain-name handles
       const didHandleMap = await ctx.resolver.resolveDidsToHandles(
         statuses.map((s) => s.authorDid)
@@ -203,7 +198,6 @@ export const createRouter = (ctx: AppContext) => {
             statuses,
             didHandleMap,
             profile,
-            myStatus,
           })
         )
       )
