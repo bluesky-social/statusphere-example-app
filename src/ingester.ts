@@ -2,9 +2,10 @@ import pino from 'pino'
 import { IdResolver } from '@atproto/identity'
 import { Firehose } from '@atproto/sync'
 import type { Database } from '#/db'
+import { MongoClient } from 'mongodb'
 import * as Status from '#/lexicon/types/xyz/statusphere/status'
 
-export function createIngester(db: Database, idResolver: IdResolver) {
+export function createIngester(db: Database, idResolver: IdResolver, dbm: MongoClient) {
   const logger = pino({ name: 'firehose ingestion' })
   return new Firehose({
     idResolver,
@@ -37,6 +38,22 @@ export function createIngester(db: Database, idResolver: IdResolver) {
               })
             )
             .execute()
+
+            // Store the status in mongodb
+            try {
+              const collection = dbm.db('statusphere').collection('status')
+              const insertResult = await collection.insertOne({
+                uri: evt.uri.toString(),
+                authorDid: evt.did,
+                status: record.status,
+                createdAt: record.createdAt,
+                indexedAt: now.toISOString(),
+              })
+            } catch (error) {
+              logger.error({ error }, 'Failed to insert status into MongoDB')
+              throw error
+            }
+              
         }
       } else if (
         evt.event === 'delete' &&
