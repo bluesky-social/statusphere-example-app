@@ -34,7 +34,6 @@ export type AuthState = {
 }
 
 type AuthStateJson = string
-
 type AuthSessionJson = string
 
 // Migrations
