@@ -52,7 +52,7 @@ export class Server {
     // Create the atproto utilities
     const oauthClient = await createClient(db)
     const baseIdResolver = createIdResolver()
-    const ingester = createIngester(db, baseIdResolver)
+    const ingester = createIngester(db, baseIdResolver, dbm)
     const resolver = createBidirectionalResolver(baseIdResolver)
     const ctx = {
       db,
