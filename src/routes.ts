@@ -159,16 +159,27 @@ export const createRouter = (ctx: AppContext) => {
       const agent = await getSessionAgent(req, res, ctx)
 
       // Fetch data stored in our SQLite
-      const statuses = await ctx.db
+/*      const statuses = await ctx.db
         .selectFrom('status')
         .selectAll()
         .orderBy('indexedAt', 'desc')
         .limit(10)
         .execute()
-
+*/
       // Fetch data stored in mongodb
-      
- 
+      const db = ctx.dbm.db('statusphere')
+      const collection = db.collection('status')
+      const statuses = await collection.find({})
+      .sort({ indexedAt: -1 })
+      .toArray()
+      .then(docs => docs.map(doc => ({
+        uri: doc.uri,
+        authorDid: doc.authorDid,
+        status: doc.status,
+        createdAt: doc.createdAt,
+        indexedAt: doc.indexedAt
+      })))
+             
       // Map user DIDs to their domain-name handles
       const didHandleMap = await ctx.resolver.resolveDidsToHandles(
         statuses.map((s) => s.authorDid)
@@ -234,6 +245,7 @@ export const createRouter = (ctx: AppContext) => {
       let uri
       try {
         // Write the status record to the user's repository
+        // This is where the new record gets sent to the PDS and goes to the firehose
         const res = await agent.com.atproto.repo.putRecord({
           repo: agent.assertDid,
           collection: 'xyz.statusphere.status',
@@ -265,6 +277,27 @@ export const createRouter = (ctx: AppContext) => {
             indexedAt: new Date().toISOString(),
           })
           .execute()
+      } catch (err) {
+        ctx.logger.warn(
+          { err },
+          'failed to update computed view; ignoring as it should be caught by the firehose'
+        )
+      }
+
+      try {
+        // Optimistically update our mongodb database
+        // This isn't strictly necessary because the write event will be
+        // handled in #/firehose/ingestor.ts, but it ensures that future reads
+        // will be up-to-date after this method finishes.
+        const db = ctx.dbm.db('statusphere')
+        const collection = db.collection('status')
+        await collection.insertOne({
+          uri: uri,
+          authorDid: agent.assertDid,
+          status: record.status,
+          createdAt: record.createdAt,
+          indexedAt: new Date().toISOString(),
+        })
       } catch (err) {
         ctx.logger.warn(
           { err },
