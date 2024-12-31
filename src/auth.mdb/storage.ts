@@ -24,7 +24,7 @@ export class StateStore implements NodeSavedStateStore {
   
   async set(key: string, val: NodeSavedState) {
     const state = JSON.stringify(val)
-    await this.collection.insertOne({key: key, state: val})
+    await this.collection.insertOne({key: key, state: state})
   }
   
   async del(key: string) {
@@ -33,21 +33,26 @@ export class StateStore implements NodeSavedStateStore {
 }
 
 export class SessionStore implements NodeSavedSessionStore {
-  constructor( private dbm: MongoClient) {}
+  private db
+  private collection
+
+  constructor(private dbm: MongoClient) {
+    this.db = this.dbm.db('statusphere')
+    this.collection = this.db.collection('auth_session')
+  }
+  
   async get(key: string): Promise<NodeSavedSession | undefined> {
-    const result = await this.db.selectFrom('auth_session').selectAll().where('key', '=', key).executeTakeFirst()
+    const result = await this.collection.findOne({ key })
     if (!result) return
     return JSON.parse(result.session) as NodeSavedSession
   }
+
   async set(key: string, val: NodeSavedSession) {
     const session = JSON.stringify(val)
-    await this.db
-      .insertInto('auth_session')
-      .values({ key, session })
-      .onConflict((oc) => oc.doUpdateSet({ session }))
-      .execute()
+    await this.collection.insertOne({key: key, session: session})
   }
+  
   async del(key: string) {
-    await this.db.deleteFrom('auth_session').where('key', '=', key).execute()
+    await this.collection.deleteOne({ key: key})
   }
 }
