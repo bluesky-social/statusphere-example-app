@@ -21,7 +21,7 @@ export function createIngester(db: Database, idResolver: IdResolver, dbm: MongoC
           Status.isRecord(record) &&
           Status.validateRecord(record).success
         ) {
-          // Store the status in our SQLite
+          //** */ Store the status in our SQLite
           await db
             .insertInto('status')
             .values({
@@ -58,8 +58,9 @@ export function createIngester(db: Database, idResolver: IdResolver, dbm: MongoC
         evt.event === 'delete' &&
         evt.collection === 'xyz.statusphere.status'
       ) {
-        // Remove the status from our SQLite
+        //** */ Remove the status from our SQLite
         await db.deleteFrom('status').where('uri', '=', evt.uri.toString()).execute()
+
         // Remove the status from mongodb
         const collection = dbm.db('statusphere').collection('status')
         const deleteResult = await collection.deleteOne({ uri: evt.uri.toString()});
