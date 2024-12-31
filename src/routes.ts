@@ -262,7 +262,7 @@ export const createRouter = (ctx: AppContext) => {
           .send('<h1>Error: Failed to write record</h1>')
       }
 
-      try {
+      /*try {
         // Optimistically update our mongodb database
         // This isn't strictly necessary because the write event will be
         // handled in #/firehose/ingestor.ts, but it ensures that future reads
@@ -282,6 +282,7 @@ export const createRouter = (ctx: AppContext) => {
           'failed to update computed view; ignoring as it should be caught by the firehose'
         )
       }
+      */
 
       return res.redirect('/')
     })
