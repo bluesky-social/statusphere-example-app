@@ -8,7 +8,7 @@ import { createDb, migrateToLatest } from '#/db'
 import { env } from '#/lib/env'
 import { createIngester } from '#/ingester'
 import { createRouter } from '#/routes'
-import { createClient } from '#/auth/client'
+import { createClient } from '#/auth.mdb/client'
 import { createBidirectionalResolver, createIdResolver, BidirectionalResolver } from '#/id-resolver'
 import type { Database } from '#/db'
 import { MongoClient } from 'mongodb'
@@ -44,7 +44,7 @@ export class Server {
     console.log('Connected successfully to the mongodb server')
     
     // Create the atproto utilities
-    const oauthClient = await createClient(db)
+    const oauthClient = await createClient(dbm)
     const baseIdResolver = createIdResolver()
     const ingester = createIngester(db, baseIdResolver, dbm)
     const resolver = createBidirectionalResolver(baseIdResolver)

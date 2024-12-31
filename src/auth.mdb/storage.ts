@@ -6,24 +6,29 @@ import type {
 } from '@atproto/oauth-client-node'
 import type { Database } from '#/db'
 import { MongoClient } from 'mongodb'
+import { GetOptions, Awaitable } from '@atproto-labs/simple-store'
 
 export class StateStore implements NodeSavedStateStore {
-  constructor( private dbm: MongoClient) {}
+  private db
+  private collection
+
+  constructor(private dbm: MongoClient) {
+    this.db = this.dbm.db('statusphere')
+    this.collection = this.db.collection('auth_state')
+  }
   async get(key: string): Promise<NodeSavedState | undefined> {
-    const result = await this.db.selectFrom('auth_state').selectAll().where('key', '=', key).executeTakeFirst()
+    const result = await this.collection.findOne({ key })
     if (!result) return
     return JSON.parse(result.state) as NodeSavedState
   }
+  
   async set(key: string, val: NodeSavedState) {
     const state = JSON.stringify(val)
-    await this.db
-      .insertInto('auth_state')
-      .values({ key, state })
-      .onConflict((oc) => oc.doUpdateSet({ state }))
-      .execute()
+    await this.collection.insertOne({key: key, state: val})
   }
+  
   async del(key: string) {
-    await this.db.deleteFrom('auth_state').where('key', '=', key).execute()
+    await this.collection.deleteOne({ key: key})
   }
 }
 
