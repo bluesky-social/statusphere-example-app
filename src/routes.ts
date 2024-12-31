@@ -263,28 +263,6 @@ export const createRouter = (ctx: AppContext) => {
       }
 
       try {
-        // Optimistically update our SQLite
-        // This isn't strictly necessary because the write event will be
-        // handled in #/firehose/ingestor.ts, but it ensures that future reads
-        // will be up-to-date after this method finishes.
-        await ctx.db
-          .insertInto('status')
-          .values({
-            uri,
-            authorDid: agent.assertDid,
-            status: record.status,
-            createdAt: record.createdAt,
-            indexedAt: new Date().toISOString(),
-          })
-          .execute()
-      } catch (err) {
-        ctx.logger.warn(
-          { err },
-          'failed to update computed view; ignoring as it should be caught by the firehose'
-        )
-      }
-
-      try {
         // Optimistically update our mongodb database
         // This isn't strictly necessary because the write event will be
         // handled in #/firehose/ingestor.ts, but it ensures that future reads
