@@ -4,9 +4,7 @@ import type {
   NodeSavedState,
   NodeSavedStateStore,
 } from '@atproto/oauth-client-node'
-import type { Database } from '#/db'
 import { MongoClient } from 'mongodb'
-import { GetOptions, Awaitable } from '@atproto-labs/simple-store'
 
 export class StateStore implements NodeSavedStateStore {
   private db
@@ -51,7 +49,7 @@ export class SessionStore implements NodeSavedSessionStore {
     const session = JSON.stringify(val)
     await this.collection.insertOne({key: key, session: session})
   }
-  
+
   async del(key: string) {
     await this.collection.deleteOne({ key: key})
   }
