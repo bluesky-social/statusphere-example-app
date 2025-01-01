@@ -157,15 +157,7 @@ export const createRouter = (ctx: AppContext) => {
     handler(async (req, res) => {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
-
-      // Fetch data stored in our SQLite
-/*      const statuses = await ctx.db
-        .selectFrom('status')
-        .selectAll()
-        .orderBy('indexedAt', 'desc')
-        .limit(10)
-        .execute()
-*/
+      
       // Fetch data stored in mongodb
       const db = ctx.dbm.db('statusphere')
       const collection = db.collection('status')
@@ -261,29 +253,6 @@ export const createRouter = (ctx: AppContext) => {
           .type('html')
           .send('<h1>Error: Failed to write record</h1>')
       }
-
-      /*try {
-        // Optimistically update our mongodb database
-        // This isn't strictly necessary because the write event will be
-        // handled in #/firehose/ingestor.ts, but it ensures that future reads
-        // will be up-to-date after this method finishes.
-        const db = ctx.dbm.db('statusphere')
-        const collection = db.collection('status')
-        await collection.insertOne({
-          uri: uri,
-          authorDid: agent.assertDid,
-          status: record.status,
-          createdAt: record.createdAt,
-          indexedAt: new Date().toISOString(),
-        })
-      } catch (err) {
-        ctx.logger.warn(
-          { err },
-          'failed to update computed view; ignoring as it should be caught by the firehose'
-        )
-      }
-      */
-
       return res.redirect('/')
     })
   )
