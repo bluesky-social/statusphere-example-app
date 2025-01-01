@@ -1,7 +1,3 @@
-import {
-  Kysely,
-} from 'kysely'
-
 // Types
 
 export type DatabaseSchema = {
@@ -31,4 +27,4 @@ export type AuthState = {
 type AuthStateJson = string
 type AuthSessionJson = string
 
-export type Database = Kysely<DatabaseSchema>
+export type Database = DatabaseSchema
