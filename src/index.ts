@@ -4,19 +4,16 @@ import express, { type Express } from 'express'
 import { pino } from 'pino'
 import type { OAuthClient } from '@atproto/oauth-client-node'
 import { Firehose } from '@atproto/sync'
-import { createDb, migrateToLatest } from '#/db'
 import { env } from '#/lib/env'
 import { createIngester } from '#/ingester'
 import { createRouter } from '#/routes'
 import { createClient } from '#/auth/client'
 import { createBidirectionalResolver, createIdResolver, BidirectionalResolver } from '#/id-resolver'
-import type { Database } from '#/db'
 import { MongoClient } from 'mongodb'
 import { IdResolver, MemoryCache } from '@atproto/identity'
 
 // Application state passed to the router and elsewhere
 export type AppContext = {
-  db: Database
   ingester: Firehose
   logger: pino.Logger
   oauthClient: OAuthClient
@@ -34,10 +31,7 @@ export class Server {
   static async create() {
     const { NODE_ENV, HOST, PORT, DB_PATH } = env
     const logger = pino({ name: 'server start' })
-
-    // Set up the SQLite database
-    const db = createDb(DB_PATH)
-    await migrateToLatest(db)
+    
     // Set up the mongodb database
     const dbm = new MongoClient(env.MONGO_URL)
     await dbm.connect()
@@ -49,7 +43,6 @@ export class Server {
     const ingester = createIngester( baseIdResolver, dbm)
     const resolver = createBidirectionalResolver(baseIdResolver)
     const ctx = {
-      db,
       ingester,
       logger,
       oauthClient,
