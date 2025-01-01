@@ -16,17 +16,21 @@ export class StateStore implements NodeSavedStateStore {
   }
   async get(key: string): Promise<NodeSavedState | undefined> {
     const result = await this.collection.findOne({ key })
+    console.log('get-result:', result)
     if (!result) return
     return JSON.parse(result.state) as NodeSavedState
   }
   
   async set(key: string, val: NodeSavedState) {
     const state = JSON.stringify(val)
-    await this.collection.insertOne({key: key, state: state})
+    const result = await this.collection.insertOne({key: key, state: state})
+    console.log('set-result:', result)
   }
   
   async del(key: string) {
-    await this.collection.deleteOne({ key: key})
+    console.log('del-key:', key)
+    const result = await this.collection.deleteOne({ key: key})
+    console.log('del-result:', result)
   }
 }
 
