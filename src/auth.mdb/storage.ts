@@ -53,7 +53,7 @@ export class SessionStore implements NodeSavedSessionStore {
       { $set: { session: session } },
       { upsert: true }
     )
-    console.log('session-set-result:', result)
+    //console.log('session-set-result:', result)
   }
 
   async del(key: string) {
