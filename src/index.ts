@@ -44,7 +44,7 @@ export class Server {
     console.log('Connected successfully to the mongodb server')
     
     // Create the atproto utilities
-    const oauthClient = await createClient(db)
+    const oauthClient = await createClient(dbm)
     const baseIdResolver = createIdResolver()
     const ingester = createIngester(db, baseIdResolver, dbm)
     const resolver = createBidirectionalResolver(baseIdResolver)
