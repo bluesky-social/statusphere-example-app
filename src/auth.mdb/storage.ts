@@ -4,7 +4,7 @@ import type {
   NodeSavedState,
   NodeSavedStateStore,
 } from '@atproto/oauth-client-node'
-import { MongoClient } from 'mongodb'
+  import { MongoClient } from 'mongodb'
 
 export class StateStore implements NodeSavedStateStore {
   private db
@@ -45,16 +45,24 @@ export class SessionStore implements NodeSavedSessionStore {
   
   async get(key: string): Promise<NodeSavedSession | undefined> {
     const result = await this.collection.findOne({ key })
+    console.log('session-get-result:', result)
     if (!result) return
     return JSON.parse(result.session) as NodeSavedSession
   }
 
   async set(key: string, val: NodeSavedSession) {
     const session = JSON.stringify(val)
-    await this.collection.insertOne({key: key, session: session})
+    const result = await this.collection.updateOne(
+      { key: key },
+      { $set: { session: session } },
+      { upsert: true }
+    )
+    console.log('session-set-result:', result)
   }
 
   async del(key: string) {
-    await this.collection.deleteOne({ key: key})
+    console.log('session-del-key:', key)
+    const result = await this.collection.deleteOne({ key: key})
+    console.log('session-del-result:', result)
   }
 }
