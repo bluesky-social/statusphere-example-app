@@ -29,7 +29,7 @@ export class Server {
   ) {}
 
   static async create() {
-    const { NODE_ENV, HOST, PORT, DB_PATH } = env
+    const { NODE_ENV, HOST, PORT } = env
     const logger = pino({ name: 'server start' })
     
     // Set up the mongodb database
