@@ -8,7 +8,7 @@ export function shell({ title, content }: { title: string; content: Hole }) {
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>${title}</title>
       <link rel="stylesheet" href="/public/css/bootstrap.min.css" />
-      <link rel="stylesheet" href="/public/css/bootstrap-icons.min.css">
+      <link rel="stylesheet" href="/icons/bootstrap-icons.min.css">
     </head>
     <body>
       ${content}

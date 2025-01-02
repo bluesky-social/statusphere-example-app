@@ -67,6 +67,8 @@ export const createRouter = (ctx: AppContext) => {
 
   // Static assets
   router.use('/public', express.static(path.join(__dirname, 'pages', 'public')))
+  router.use("/js",express.static("./node_modules/bootstrap/dist/js"))
+  router.use("/icons",express.static("./node_modules/bootstrap-icons/font"))
 
   // OAuth metadata
   router.get(
