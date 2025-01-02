@@ -12,25 +12,42 @@ export function login(props: Props) {
 
 function content({ error }: Props) {
   return html`<div id="root">
-    <div id="header" class="text-center">
-      <h1>Statusphere</h1>
-      <p>Set your status on the Atmosphere.</p>
-    </div>
-    <div class="container">
+    <div class="container border border-primary rounded mt-3 p-3">
+      <div id="header" class="row">
+        <div class="col text-center">
+          <h1>Statusphere</h1>
+          <p>Set your status on the Atmosphere.</p>
+        </div>
+      </div>
+
       <form action="/login" method="post" class="login-form">
-        <input class="form-control mb-2"
-          type="text"
-          name="handle"
-          placeholder="Enter your handle (eg alice.bsky.social)"
-          required
-        />
-        <button type="submit" class="btn btn-primary">Log in</button>
+        <div id="middle" class="row">
+          <div class="col">
+          </div>
+          <div class="col-6">
+            <input class="form-control mb-2"
+            type="text"
+            name="handle"
+            placeholder="Enter your handle (eg alice.bsky.social)"
+            required
+            />
+          </div>
+          <div class="col">
+            <button type="submit" class="btn btn-primary">Log in</button>
+          </div>
+        </div>
         ${error ? html`<p>Error: <i>${error}</i></p>` : undefined}
       </form>
-      <div class="text-center">
-        Don't have an account on the Atmosphere?
-        <a href="https://bsky.app">Sign up for Bluesky</a> to create one now!
+
+      <div class="row mt-5" id="footer">
+        <div class="col text-center">
+          Don't have an account on the Atmosphere?
+          <a href="https://bsky.app">Sign up for Bluesky</a> to create one now!
+        </div>
       </div>
     </div>
+
+    
+    
   </div>`
 }
