@@ -24,6 +24,7 @@
     "@atproto/xrpc-server": "^0.7.4",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "bootswatch": "^5.3.3",
     "dotenv": "^16.4.7",
     "envalid": "^8.0.0",
     "express": "^4.21.2",
