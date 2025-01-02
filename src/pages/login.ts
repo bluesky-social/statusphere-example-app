@@ -46,8 +46,5 @@ function content({ error }: Props) {
         </div>
       </div>
     </div>
-
-    
-    
   </div>`
 }
