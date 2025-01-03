@@ -1,3 +1,4 @@
+import { FeedViewPost } from '@atproto/api/dist/client/types/app/bsky/feed/defs'
 import { html } from '../lib/view'
 import { shell } from './shell'
 
@@ -12,7 +13,7 @@ type Props = {
   followsCount?: number
   postsCount?: number
   createdAt?: string
-  postsArray?: any[]
+  postsArray?: FeedViewPost[]
 }
 
 export function profile(props: Props) {
@@ -87,7 +88,7 @@ function content({
       return html`
       <div class="card mt-2">
         <div class="card-body">
-          ${post}
+          ${post.post.record}
           <a class="author" href="">Just testing</a>
           
         </div>
