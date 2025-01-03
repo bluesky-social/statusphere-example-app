@@ -396,23 +396,14 @@ export const createRouter = (ctx: AppContext) => {
       })
       
       const { feed: postsArray, cursor: nextPage } = feed.data
-      console.log(postsArray[0])
+      //console.log(postsArray[0])
            
-
-      /*
-      const posts = feed.map((post) => {
-        const { uri, cid, author, record, indexedAt, ...rest } = post
-        return {
-          uri,
-          cid,
-          author,
-          record,
-          indexedAt,
-          ...rest,
-        }
-      })
+      //const posts = feed.data.feed.map((post) => {
+    /*    const posts = feed.data.feed.map(post => ({
+          text: post.record.text,
+          // Add other fields you want to display
+        }))
       */
-
       return res.type('html').send(page(profile({ 
         handle, 
         displayName, 
