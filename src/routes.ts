@@ -384,7 +384,47 @@ export const createRouter = (ctx: AppContext) => {
       const id: string = agent.sessionManager.did!
       const { data } = await agent.getProfile({ actor: id })
       const { did, handle, displayName, avatar, banner, description, followersCount, followsCount, postsCount, createdAt, ...rest } = data
-      return res.type('html').send(page(profile({ handle, displayName, avatar, banner, description, followersCount, followsCount, postsCount, createdAt, })))
+
+      // let's try getting my feed
+      //console.log(agent)
+
+      //https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
+      const feed = await agent.getAuthorFeed({
+        actor: id,
+        filter: 'posts_and_author_threads',
+        limit: 10,
+      })
+      
+      const { feed: postsArray, cursor: nextPage } = feed.data
+      console.log(postsArray[0])
+           
+
+      /*
+      const posts = feed.map((post) => {
+        const { uri, cid, author, record, indexedAt, ...rest } = post
+        return {
+          uri,
+          cid,
+          author,
+          record,
+          indexedAt,
+          ...rest,
+        }
+      })
+      */
+
+      return res.type('html').send(page(profile({ 
+        handle, 
+        displayName, 
+        avatar, 
+        banner, 
+        description, 
+        followersCount, 
+        followsCount, 
+        postsCount, 
+        createdAt,
+        postsArray,
+      })))
     })
   )
 

@@ -12,6 +12,7 @@ type Props = {
   followsCount?: number
   postsCount?: number
   createdAt?: string
+  postsArray?: any[]
 }
 
 export function profile(props: Props) {
@@ -21,7 +22,19 @@ export function profile(props: Props) {
   })
 }
 
-function content({ error, banner, avatar, displayName, handle, description, followersCount, followsCount, postsCount, createdAt }: Props) {
+function content({ 
+  error, 
+  banner, 
+  avatar, 
+  displayName, 
+  handle, 
+  description, 
+  followersCount, 
+  followsCount, 
+  postsCount, 
+  createdAt,
+  postsArray 
+}: Props) {
   const date = ts(createdAt?? new Date().toISOString())
   return html`
     <div class="container px-0">
@@ -69,6 +82,18 @@ function content({ error, banner, avatar, displayName, handle, description, foll
         </div>
       </div>
     </div>
+  
+  ${postsArray?.map((post, i) => {
+      return html`
+      <div class="card mt-2">
+        <div class="card-body">
+          ${post}
+          <a class="author" href="">Just testing</a>
+          
+        </div>
+      </div>
+    `
+  })}
   `
 }
 
