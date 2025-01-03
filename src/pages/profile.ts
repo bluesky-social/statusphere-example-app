@@ -83,7 +83,7 @@ function content({
       </div>
     </div>
   
-  ${postsArray?.map((post, i) => {
+  ${postsArray?.map((post) => {
       return html`
       <div class="card mt-2">
         <div class="card-body">
