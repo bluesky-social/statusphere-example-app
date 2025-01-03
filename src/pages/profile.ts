@@ -1,6 +1,11 @@
 import { FeedViewPost } from '@atproto/api/dist/client/types/app/bsky/feed/defs'
 import { html } from '../lib/view'
 import { shell } from './shell'
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
+TimeAgo.addDefaultLocale(en)
+
+const timeAgo = new TimeAgo('en-US')
 
 type Props = { 
   error?: string 
@@ -58,7 +63,7 @@ function content({
           ${displayName}
         </div>
         <div class="col">
-          Member since: ${date}
+          Joined: ${date}
         </div>
       </div>
       <div class="row">
@@ -99,7 +104,7 @@ function content({
                 <h6 class="card-subtitle mb-2 text-body-secondary">@${(post.post.author as { handle: string }).handle}</h6>
               </div>
               <div class="col">
-                &#183; ${(post.post.record as { createdAt: string }).createdAt}
+                &#183; ${timeAgo.format(new Date((post.post.record as { createdAt: string }).createdAt))}
               </div>
             </div>
           </div>
