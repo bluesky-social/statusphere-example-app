@@ -88,7 +88,7 @@ function content({
       return html`
       <div class="card mt-2">
         <div class="card-body">
-          ${post.post.record}
+          ${(post.post.record as { text: string }).text}
           <a class="author" href="">Just testing</a>
           
         </div>
