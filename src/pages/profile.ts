@@ -85,12 +85,29 @@ function content({
     </div>
   
   ${postsArray?.map((post) => {
+    console.log(post)
       return html`
       <div class="card mt-2">
         <div class="card-body">
-          ${(post.post.record as { text: string }).text}
-          <a class="author" href="">Just testing</a>
-          
+          <div class="container">
+            <div class="row align-items-start">
+              <div class="col">
+                <img src="${(post.post.author as { avatar: string }).avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
+              </div>
+              <div class="col">
+                <h5 class="card-title">${(post.post.author as { displayName: string }).displayName}</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">@${(post.post.author as { handle: string }).handle}</h6>
+              </div>
+              <div class="col">
+                &#183; ${(post.post.record as { createdAt: string }).createdAt}
+              </div>
+            </div>
+          </div>
+          <p class= "card-text"> ${(post.post.record as { text: string }).text} </p>
+          <img src="..." class="card-img-top" alt="...">
+        </div>
+        <div class="card-footer">
+          Comments | reposts & Quotes | Likes | ...
         </div>
       </div>
     `
