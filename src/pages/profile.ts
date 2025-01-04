@@ -113,7 +113,6 @@ function content({
           </div>
           <p class= "card-text"> ${(post.post.record as { text: string }).text} </p>
           <img src="${post.post.embed.images[0].fullsize}" class="card-img-top" alt="...">
-  ${console.log(post.post.embed.images[0].fullsize)}
         </div>
         <div class="card-footer">
           Comments | reposts & Quotes | Likes | ...
