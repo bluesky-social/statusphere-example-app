@@ -3,6 +3,8 @@ import { html } from '../lib/view'
 import { shell } from './shell'
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
+import type AppBskyFeedPost from '@atproto/api'
+import type AppBskyEmbedImages from '@atproto/api'
 
 
 TimeAgo.addDefaultLocale(en)
@@ -19,7 +21,7 @@ type Props = {
   followsCount?: number
   postsCount?: number
   createdAt?: string
-  postsArray?: FeedViewPost[]
+  postsArray?: []
 }
 
 export function profile(props: Props) {
@@ -90,8 +92,8 @@ function content({
       </div>
     </div>
   
-  ${postsArray?.map((post: FeedViewPost) => {
-    console.log(post)
+  ${postsArray?.map((post) => {
+    //console.log(post)
       return html`
       <div class="card mt-2">
         <div class="card-body">
@@ -110,7 +112,8 @@ function content({
             </div>
           </div>
           <p class= "card-text"> ${(post.post.record as { text: string }).text} </p>
-          <img src="..." class="card-img-top" alt="...">
+          <img src="${post.post.embed.images[0].fullsize}" class="card-img-top" alt="...">
+  ${console.log(post.post.embed.images[0].fullsize)}
         </div>
         <div class="card-footer">
           Comments | reposts & Quotes | Likes | ...

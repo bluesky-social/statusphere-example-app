@@ -391,12 +391,12 @@ export const createRouter = (ctx: AppContext) => {
       //https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
       const feed = await agent.getAuthorFeed({
         actor: id,
-        filter: 'posts_and_author_threads',
+        filter: 'posts_with_media',
         limit: 10,
       })
       
       const { feed: postsArray, cursor: nextPage } = feed.data
-      //console.log(postsArray[0])
+      //console.log(postsArray[1])
             
       return res.type('html').send(page(profile({ 
         handle, 
