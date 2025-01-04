@@ -112,13 +112,8 @@ function content({
             </div>
           </div>
           <p class= "card-text"> ${(post.post.record as { text: string }).text} </p>
-           
-
           ${post.post.embed?.images ? html`${post.post.embed.images.map(img => html`
-  <img src="${img.fullsize}" class="card-img-top" alt="...">
-`)}` : ''}
-
-          
+          <img src="${img.fullsize}" class="card-img-top" alt="...">`)}` : ''}
         </div>
         <div class="card-footer">
           Comments | reposts & Quotes | Likes | ...
