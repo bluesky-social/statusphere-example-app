@@ -3,8 +3,9 @@ import { html } from '../lib/view'
 import { shell } from './shell'
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-TimeAgo.addDefaultLocale(en)
 
+
+TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo('en-US')
 
 type Props = { 
@@ -89,7 +90,7 @@ function content({
       </div>
     </div>
   
-  ${postsArray?.map((post) => {
+  ${postsArray?.map((post: FeedViewPost) => {
     console.log(post)
       return html`
       <div class="card mt-2">
@@ -97,14 +98,14 @@ function content({
           <div class="container">
             <div class="row align-items-start">
               <div class="col">
-                <img src="${(post.post.author as { avatar: string }).avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
+                <img src="${post.post.author.avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
               </div>
-              <div class="col">
-                <h5 class="card-title">${(post.post.author as { displayName: string }).displayName}</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary">@${(post.post.author as { handle: string }).handle}</h6>
+              <div class="col-7">
+                <h5 class="card-title">${post.post.author.displayName}</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">@${post.post.author.handle}</h6>
               </div>
-              <div class="col">
-                &#183; ${timeAgo.format(new Date((post.post.record as { createdAt: string }).createdAt))}
+              <div class="col-3">
+                &#183; ${timeAgo.format(new Date(post.post.indexedAt))}
               </div>
             </div>
           </div>
