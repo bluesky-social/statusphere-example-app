@@ -53,6 +53,8 @@ function content({
         <div class="col-3" style="margin-top: -12%; position: relative;">
           <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
         </div>
+        <div class="col-4">          
+        </div>
         <div class="col">
           <a href="/" class= "btn text-primary">Edit profile</a>
         </div>
@@ -75,12 +77,12 @@ function content({
       </div>
       <div class="row">
         <div class="col">
-          ${followersCount} followers
+          <a href= "/">${followersCount} followers</a>
         </div>
         <div class="col">
-          ${followsCount} following
+          <a href= "/">${followsCount} following</a>
         </div>
-        <div class="col">
+        <div class="col text-primary">
           ${postsCount} posts
         </div>
       </div>
@@ -128,7 +130,7 @@ function content({
         </div>
         <div class="card-footer d-flex justify-content-between">
           <a href="/" class= "btn text-primary"><i class="bi bi-chat-left"></i> ${post.post.replyCount}</a> 
-          <a href="/" class= "btn text-primary"><i class="bi bi-arrow-left-right"></i> ${post.post.repostCount + post.post.quoteCount} reposts & Quotes</a> 
+          <a href="/" class= "btn text-primary"><i class="bi bi-arrow-left-right"></i> ${post.post.repostCount + post.post.quoteCount}</a> 
           <a href="/" class= "btn text-primary"><i class="bi bi-heart"></i> ${post.post.likeCount}</i></a> 
           <a href="/" class= "btn text-primary"><i class="bi bi-three-dots"></i></a>
         </div>
