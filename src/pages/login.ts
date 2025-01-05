@@ -33,7 +33,7 @@ function content({ error }: Props) {
             />
           </div>
           <div class="col">
-            <button type="submit" class="btn btn-primary">Log in</button>
+            <button type="submit" class="btn btn-primary">Sign in</button>
           </div>
         </div>
         ${error ? html`<p>Error: <i>${error}</i></p>` : undefined}
