@@ -54,10 +54,10 @@ function content({
           <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
         </div>
         <div class="col">
-          Edit profile
+          <a href="/" class= "">Edit profile</a>
         </div>
         <div class="col">
-          ...
+          <a href="/"><i class="bi bi-three-dots"></i></a>
         </div>
       </div>
       <div class="row">
@@ -127,7 +127,7 @@ function content({
 
         </div>
         <div class="card-footer">
-          Comments | reposts & Quotes | Likes | ...
+          <a href="/"><i class="bi bi-chat-left"></i></a> | <a href="/"><i class="bi bi-arrow-repeat"></i> reposts & Quotes</a> | <a href="/"><i class="bi bi-heart"></i> Likes</i></a> | <a href="/"><i class="bi bi-three-dots"></i></a>
         </div>
       </div>
     `
