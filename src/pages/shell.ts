@@ -5,11 +5,14 @@ export function shell({ title, content }: { title: string; content: Hole }) {
     <head>
       <script src="/js/bootstrap.bundle.min.js"></script>
       <script src="/public/js/color-modes.js"></script>
+      <script src="/vid/video.min.js"></script>
+      
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>${title}</title>
       <link rel="stylesheet" href="/css/bootstrap.min.css" />
       <link rel="stylesheet" href="/icons/bootstrap-icons.min.css">
+      <link rel="stylesheet" href="/vid/video-js.min.css">
     </head>
     <body>
       <div id="root">

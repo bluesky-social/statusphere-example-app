@@ -127,6 +127,18 @@ function content({
             </div>
           </div>` : ''}
 
+          ${post.post.record.embed?.video ? html`
+          <div class="card">
+            <video
+              id="my-player"
+              class="video-js"
+              controls
+              preload="auto"
+              poster="${post.post.embed.thumbnail}"
+              data-setup='{}'>
+              <source src="${post.post.embed.playlist}" type="application/x-mpegURL"></source>              
+            </video>
+          </div>` : ''}
         </div>
         <div class="card-footer d-flex justify-content-between">
           <a href="/" class= "btn text-primary"><i class="bi bi-chat-left"></i> ${post.post.replyCount}</a> 
