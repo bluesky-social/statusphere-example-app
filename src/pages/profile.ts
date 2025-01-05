@@ -6,7 +6,6 @@ import en from 'javascript-time-ago/locale/en'
 import type AppBskyFeedPost from '@atproto/api'
 import type AppBskyEmbedImages from '@atproto/api'
 
-
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo('en-US')
 
@@ -93,7 +92,7 @@ function content({
     </div>
   
   ${postsArray?.map((post) => {
-    //console.log(post)
+   // console.log(post)
       return html`
       <div class="card mt-2">
         <div class="card-body">
@@ -112,8 +111,20 @@ function content({
             </div>
           </div>
           <p class= "card-text"> ${(post.post.record as { text: string }).text} </p>
+          
           ${post.post.embed?.images ? html`${post.post.embed.images.map(img => html`
-          <img src="${img.fullsize}" class="card-img-top" alt="...">`)}` : ''}
+          <img src="${img.fullsize}" class="rounded img-fluid w-100 mx-0" alt="...">`)}` : ''}
+
+          ${post.post.embed?.external ? html`
+          <div class="card">
+            <img src="${post.post.embed.external.thumb}" class="img-fluid rounded-top" alt="a link to an external site">
+            <div class="card-body">
+              <h5 class="card-title">${post.post.embed.external.title}</h5>
+              <p class="card-text">${post.post.embed.external.description}</p>
+              <a href="${post.post.embed.external.uri}" class="btn"><i class="bi bi-globe"></i> ${post.post.embed.external.uri}</a>
+            </div>
+          </div>` : ''}
+
         </div>
         <div class="card-footer">
           Comments | reposts & Quotes | Likes | ...
