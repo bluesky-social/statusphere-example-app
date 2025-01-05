@@ -29,7 +29,7 @@ export function shell({ title, content }: { title: string; content: Hole }) {
               </div>
               <form action="/logout" method="post" class="session-form">
                 <div class="m-2">
-                  <button type="submit" class="btn text-danger-emphasis"><i class="bi bi-box-arrow-right"></i> Log out</button>
+                  <button type="submit" class="btn text-danger-emphasis"><i class="bi bi-box-arrow-right"></i> Sign out</button>
                   <button type="submit" class="btn btn-success float-end"><i class="bi bi-pencil"></i> New Post</button>
                 </div>
               </form>
