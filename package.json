@@ -45,7 +45,8 @@
     "ts-node": "^10.9.2",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "video.js": "^8.21.0"
   },
   "tsup": {
     "entry": [
