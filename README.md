@@ -1,6 +1,6 @@
 # AT Protocol "Statusphere" App
 
-An example application covering:
+An application covering:
 
 - Signin via OAuth
 - Fetch information about users (profiles)
