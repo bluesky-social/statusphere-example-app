@@ -128,10 +128,11 @@ function content({
           </div>` : ''}
 
           ${post.post.record.embed?.video ? html`
-          <div class="card">
+          <div class="card border-0">
             <video
               id="my-player"
-              class="video-js"
+              class="video-js rounded"
+              style= "background-color: inherit;"
               controls
               preload="auto"
               poster="${post.post.embed.thumbnail}"
