@@ -1,17 +1,17 @@
-import { html } from '../lib/view'
-import { shell } from './shell.logout'
+import { html } from "../lib/view";
+import { shell } from "./shell.logout";
 
-type Props = { error?: string }
+type Props = { error?: string };
 
 export function login(props: Props) {
-  return shell({
-    title: 'Log in',
-    content: content(props),
-  })
+	return shell({
+		title: "Log in",
+		content: content(props),
+	});
 }
 
 function content({ error }: Props) {
-  return html`<div id="root">
+	return html`<div id="root">
     <div class="container border border-primary rounded mt-3 p-3">
       <div id="header" class="row">
         <div class="col text-center">
@@ -46,5 +46,5 @@ function content({ error }: Props) {
         </div>
       </div>
     </div>
-  </div>`
+  </div>`;
 }

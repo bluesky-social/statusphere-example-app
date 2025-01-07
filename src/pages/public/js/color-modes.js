@@ -5,7 +5,6 @@
  */
 
 (() => {
-
 	const getStoredTheme = () => localStorage.getItem("theme");
 	const setStoredTheme = (theme) => localStorage.setItem("theme", theme);
 

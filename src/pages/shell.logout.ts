@@ -1,7 +1,7 @@
-import { type Hole, html } from '../lib/view'
+import { type Hole, html } from "../lib/view";
 
 export function shell({ title, content }: { title: string; content: Hole }) {
-  return html`<html data-bs-theme="dark">
+	return html`<html data-bs-theme="dark">
     <head>
       <script src="/public/js/color-modes.js"></script>
       <meta charset="utf-8" />
@@ -13,5 +13,5 @@ export function shell({ title, content }: { title: string; content: Hole }) {
     <body>
       ${content}
     </body>
-  </html>`
+  </html>`;
 }

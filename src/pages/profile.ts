@@ -1,52 +1,52 @@
-import { FeedViewPost } from '@atproto/api/dist/client/types/app/bsky/feed/defs'
-import { html } from '../lib/view'
-import { shell } from './shell'
-import TimeAgo from 'javascript-time-ago'
-import en from 'javascript-time-ago/locale/en'
-import { AppBskyFeedPost } from '@atproto/api'
-import type AppBskyEmbedImages from '@atproto/api'
-import { AppBskyEmbedExternal } from '@atproto/api'
-import { PostView } from '@atproto/api/dist/client/types/app/bsky/feed/defs'
+import { FeedViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { html } from "../lib/view";
+import { shell } from "./shell";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
+import { AppBskyFeedPost } from "@atproto/api";
+import type AppBskyEmbedImages from "@atproto/api";
+import { AppBskyEmbedExternal } from "@atproto/api";
+import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 
-TimeAgo.addDefaultLocale(en)
-const timeAgo = new TimeAgo('en-US')
+TimeAgo.addDefaultLocale(en);
+const timeAgo = new TimeAgo("en-US");
 
-type Props = { 
-  error?: string 
-  displayName?: string
-  handle?: string
-  avatar?: string
-  banner?: string
-  description?: string
-  followersCount?: number
-  followsCount?: number
-  postsCount?: number
-  createdAt?: string
-  postsArray?: FeedViewPost[]
-}
+type Props = {
+	error?: string;
+	displayName?: string;
+	handle?: string;
+	avatar?: string;
+	banner?: string;
+	description?: string;
+	followersCount?: number;
+	followsCount?: number;
+	postsCount?: number;
+	createdAt?: string;
+	postsArray?: FeedViewPost[];
+};
 
 export function profile(props: Props) {
-  return shell({
-    title: 'Profile page',
-    content: content(props),
-  })
+	return shell({
+		title: "Profile page",
+		content: content(props),
+	});
 }
 
-function content({ 
-  error, 
-  banner, 
-  avatar, 
-  displayName, 
-  handle, 
-  description, 
-  followersCount, 
-  followsCount, 
-  postsCount, 
-  createdAt,
-  postsArray 
+function content({
+	error,
+	banner,
+	avatar,
+	displayName,
+	handle,
+	description,
+	followersCount,
+	followsCount,
+	postsCount,
+	createdAt,
+	postsArray,
 }: Props) {
-  const date = ts(createdAt?? new Date().toISOString())
-  return html`
+	const date = ts(createdAt ?? new Date().toISOString());
+	return html`
     <div class="container px-0">
       <div class="row">
         <img src="${banner}" class="rounded-top px-0" alt="castle">
@@ -96,8 +96,8 @@ function content({
     </div>
   
   ${postsArray?.map((post) => {
-   // console.log(post)
-      return html`
+		// console.log(post)
+		return html`
       <div class="card mt-2">
         <div class="card-body">
           <div class="container">
@@ -116,20 +116,32 @@ function content({
           </div>
           <p class= "card-text"> ${(post.post.record as { text: string }).text} </p>
           
-          ${post.post.embed?.$type === 'app.bsky.embed.images#view' ? html`${post.post.embed.images.map(img => html`
-          <img src="${img.fullsize}" class="rounded img-fluid w-100 mx-0" alt="...">`)}` : ''}          
+          ${
+						post.post.embed?.$type === "app.bsky.embed.images#view"
+							? html`${post.post.embed.images.map(
+									(img) => html`
+          <img src="${img.fullsize}" class="rounded img-fluid w-100 mx-0" alt="...">`,
+								)}`
+							: ""
+					}          
 
-          ${post.post.embed?.$type === 'app.bsky.embed.external#view' ? html`          
+          ${
+						post.post.embed?.$type === "app.bsky.embed.external#view"
+							? html`          
           <div class="card">
-            <img src="${(post.post.embed.external.thumb)}" class="img-fluid rounded-top" alt="a link to an external site">
+            <img src="${post.post.embed.external.thumb}" class="img-fluid rounded-top" alt="a link to an external site">
             <div class="card-body">
               <h5 class="card-title">${post.post.embed.external.title}</h5>
               <p class="card-text">${post.post.embed.external.description}</p>
               <a href="${post.post.embed.external.uri}" class="btn"><i class="bi bi-globe"></i> ${post.post.embed.external.uri}</a>
             </div>
-          </div>` : ''}
+          </div>`
+							: ""
+					}
 
-          ${post.post.embed?.$type === 'app.bsky.embed.video#view' ? html`
+          ${
+						post.post.embed?.$type === "app.bsky.embed.video#view"
+							? html`
           <div class="card border-0">
             <video
               id="my-player"
@@ -141,21 +153,23 @@ function content({
               data-setup='{}'>
               <source src="${post.post.embed.playlist}" type="application/x-mpegURL"></source>              
             </video>
-          </div>` : ''}
+          </div>`
+							: ""
+					}
         </div>
         <div class="card-footer d-flex justify-content-between">
           <a href="/" class= "btn text-primary"><i class="bi bi-chat-left"></i> ${post.post.replyCount}</a> 
-          <a href="/" class= "btn text-primary"><i class="bi bi-arrow-left-right"></i> ${(post.post.repostCount?? 0) + (post.post.quoteCount?? 0)}</a> 
+          <a href="/" class= "btn text-primary"><i class="bi bi-arrow-left-right"></i> ${(post.post.repostCount ?? 0) + (post.post.quoteCount ?? 0)}</a> 
           <a href="/" class= "btn text-primary"><i class="bi bi-heart"></i> ${post.post.likeCount}</i></a> 
           <a href="/" class= "btn text-primary"><i class="bi bi-three-dots"></i></a>
         </div>
       </div>
-    `
-  })}
-  `
+    `;
+	})}
+  `;
 }
 
 function ts(createdAt: string) {
-  const created = new Date(createdAt)
-  return created.toDateString()
+	const created = new Date(createdAt);
+	return created.toDateString();
 }
