@@ -3,8 +3,10 @@ import { html } from '../lib/view'
 import { shell } from './shell'
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-import type AppBskyFeedPost from '@atproto/api'
+import { AppBskyFeedPost } from '@atproto/api'
 import type AppBskyEmbedImages from '@atproto/api'
+import { AppBskyEmbedExternal } from '@atproto/api'
+import { PostView } from '@atproto/api/dist/client/types/app/bsky/feed/defs'
 
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo('en-US')
@@ -20,7 +22,7 @@ type Props = {
   followsCount?: number
   postsCount?: number
   createdAt?: string
-  postsArray?: []
+  postsArray?: FeedViewPost[]
 }
 
 export function profile(props: Props) {
@@ -114,12 +116,12 @@ function content({
           </div>
           <p class= "card-text"> ${(post.post.record as { text: string }).text} </p>
           
-          ${post.post.embed?.images ? html`${post.post.embed.images.map(img => html`
-          <img src="${img.fullsize}" class="rounded img-fluid w-100 mx-0" alt="...">`)}` : ''}
+          ${post.post.embed?.$type === 'app.bsky.embed.images#view' ? html`${post.post.embed.images.map(img => html`
+          <img src="${img.fullsize}" class="rounded img-fluid w-100 mx-0" alt="...">`)}` : ''}          
 
-          ${post.post.embed?.external ? html`
+          ${post.post.embed?.$type === 'app.bsky.embed.external#view' ? html`          
           <div class="card">
-            <img src="${post.post.embed.external.thumb}" class="img-fluid rounded-top" alt="a link to an external site">
+            <img src="${(post.post.embed.external.thumb)}" class="img-fluid rounded-top" alt="a link to an external site">
             <div class="card-body">
               <h5 class="card-title">${post.post.embed.external.title}</h5>
               <p class="card-text">${post.post.embed.external.description}</p>
@@ -127,7 +129,7 @@ function content({
             </div>
           </div>` : ''}
 
-          ${post.post.record.embed?.video ? html`
+          ${post.post.embed?.$type === 'app.bsky.embed.video#view' ? html`
           <div class="card border-0">
             <video
               id="my-player"
@@ -143,7 +145,7 @@ function content({
         </div>
         <div class="card-footer d-flex justify-content-between">
           <a href="/" class= "btn text-primary"><i class="bi bi-chat-left"></i> ${post.post.replyCount}</a> 
-          <a href="/" class= "btn text-primary"><i class="bi bi-arrow-left-right"></i> ${post.post.repostCount + post.post.quoteCount}</a> 
+          <a href="/" class= "btn text-primary"><i class="bi bi-arrow-left-right"></i> ${(post.post.repostCount?? 0) + (post.post.quoteCount?? 0)}</a> 
           <a href="/" class= "btn text-primary"><i class="bi bi-heart"></i> ${post.post.likeCount}</i></a> 
           <a href="/" class= "btn text-primary"><i class="bi bi-three-dots"></i></a>
         </div>

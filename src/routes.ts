@@ -397,7 +397,7 @@ export const createRouter = (ctx: AppContext) => {
       })
       
       const { feed: postsArray, cursor: nextPage } = feed.data
-      //console.log(postsArray[1])
+      //console.log(JSON.stringify(postsArray[4], null, 2))
             
       return res.type('html').send(page(profile({ 
         handle, 
