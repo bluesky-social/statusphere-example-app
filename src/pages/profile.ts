@@ -145,7 +145,7 @@ function content({
           <div class="card border-0">
             <video
               id="my-player"
-              class="video-js rounded"
+              class="video-js rounded justify-content-start w-100"
               style= "background-color: inherit;"
               controls
               preload="auto"
