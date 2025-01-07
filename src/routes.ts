@@ -1,418 +1,440 @@
-import assert from 'node:assert'
-import path from 'node:path'
-import type { IncomingMessage, ServerResponse } from 'node:http'
-import { OAuthResolverError } from '@atproto/oauth-client-node'
-import { isValidHandle } from '@atproto/syntax'
-import { TID } from '@atproto/common'
-import { Agent } from '@atproto/api'
-import express from 'express'
-import { getIronSession } from 'iron-session'
-import type { AppContext } from '#/index'
-import { home } from '#/pages/home'
-import { blank } from '#/pages/blank'
-import { profile } from '#/pages/profile'
-import { login } from '#/pages/login'
-import { search } from './pages/search'
-import { notifications } from './pages/notifications'
-import { chat } from './pages/chat'
-import { feeds } from './pages/feeds'
-import { lists } from './pages/lists'
-import { settings } from './pages/settings'
-import { marketplace } from './pages/marketplace'
-import { env } from '#/lib/env'
-import { page } from '#/lib/view'
-import * as Status from '#/lexicon/types/xyz/statusphere/status'
-import * as Profile from '#/lexicon/types/app/bsky/actor/profile'
+import assert from "node:assert";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import path from "node:path";
+import { Agent } from "@atproto/api";
+import { TID } from "@atproto/common";
+import { OAuthResolverError } from "@atproto/oauth-client-node";
+import { isValidHandle } from "@atproto/syntax";
+import express from "express";
+import { getIronSession } from "iron-session";
+import type { AppContext } from "#/index";
+import * as Profile from "#/lexicon/types/app/bsky/actor/profile";
+import * as Status from "#/lexicon/types/xyz/statusphere/status";
+import { env } from "#/lib/env";
+import { page } from "#/lib/view";
+import { blank } from "#/pages/blank";
+import { home } from "#/pages/home";
+import { login } from "#/pages/login";
+import { profile } from "#/pages/profile";
+import { chat } from "./pages/chat";
+import { feeds } from "./pages/feeds";
+import { lists } from "./pages/lists";
+import { marketplace } from "./pages/marketplace";
+import { notifications } from "./pages/notifications";
+import { search } from "./pages/search";
+import { settings } from "./pages/settings";
 
-type Session = { did: string }
+type Session = { did: string };
 
 // Helper function for defining routes
 const handler =
-  (fn: express.Handler) =>
-  async (
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    try {
-      await fn(req, res, next)
-    } catch (err) {
-      next(err)
-    }
-  }
+	(fn: express.Handler) =>
+	async (
+		req: express.Request,
+		res: express.Response,
+		next: express.NextFunction,
+	) => {
+		try {
+			await fn(req, res, next);
+		} catch (err) {
+			next(err);
+		}
+	};
 
 // Helper function to get the Atproto Agent for the active session
 async function getSessionAgent(
-  req: IncomingMessage,
-  res: ServerResponse<IncomingMessage>,
-  ctx: AppContext
+	req: IncomingMessage,
+	res: ServerResponse<IncomingMessage>,
+	ctx: AppContext,
 ) {
-  const session = await getIronSession<Session>(req, res, {
-    cookieName: 'sid',
-    password: env.COOKIE_SECRET,
-  })
-  if (!session.did) return null
-  try {
-    const oauthSession = await ctx.oauthClient.restore(session.did)
-    return oauthSession ? new Agent(oauthSession) : null
-  } catch (err) {
-    ctx.logger.warn({ err }, 'oauth restore failed')
-    await session.destroy()
-    return null
-  }
+	const session = await getIronSession<Session>(req, res, {
+		cookieName: "sid",
+		password: env.COOKIE_SECRET,
+	});
+	if (!session.did) return null;
+	try {
+		const oauthSession = await ctx.oauthClient.restore(session.did);
+		return oauthSession ? new Agent(oauthSession) : null;
+	} catch (err) {
+		ctx.logger.warn({ err }, "oauth restore failed");
+		await session.destroy();
+		return null;
+	}
 }
 
 export const createRouter = (ctx: AppContext) => {
-  const router = express.Router()
+	const router = express.Router();
 
-  // Static assets
-  router.use('/public', express.static(path.join(__dirname, 'pages', 'public')))
-  router.use("/js",express.static("./node_modules/bootstrap/dist/js"))
-  router.use("/vid",express.static("./node_modules/video.js/dist"))
-  router.use("/icons",express.static("./node_modules/bootstrap-icons/font"))
-  router.use("/css",express.static("./node_modules/bootswatch/dist/united"))
-  
-  // OAuth metadata
-  router.get(
-    '/client-metadata.json',
-    handler((_req, res) => {
-      return res.json(ctx.oauthClient.clientMetadata)
-    })
-  )
+	// Static assets
+	router.use(
+		"/public",
+		express.static(path.join(__dirname, "pages", "public")),
+	);
+	router.use("/js", express.static("./node_modules/bootstrap/dist/js"));
+	router.use("/vid", express.static("./node_modules/video.js/dist"));
+	router.use("/icons", express.static("./node_modules/bootstrap-icons/font"));
+	router.use("/css", express.static("./node_modules/bootswatch/dist/united"));
 
-  // OAuth callback to complete session creation
-  router.get(
-    '/oauth/callback',
-    handler(async (req, res) => {
-      const params = new URLSearchParams(req.originalUrl.split('?')[1])
-      try {
-        const { session } = await ctx.oauthClient.callback(params)
-        const clientSession = await getIronSession<Session>(req, res, {
-          cookieName: 'sid',
-          password: env.COOKIE_SECRET,
-        })
-        assert(!clientSession.did, 'session already exists')
-        clientSession.did = session.did
-        await clientSession.save()
-      } catch (err) {
-        ctx.logger.error({ err }, 'oauth callback failed')
-        return res.redirect('/?error')
-      }
-      return res.redirect('/')
-    })
-  )
+	// OAuth metadata
+	router.get(
+		"/client-metadata.json",
+		handler((_req, res) => {
+			return res.json(ctx.oauthClient.clientMetadata);
+		}),
+	);
 
-  // Login page
-  router.get(
-    '/login',
-    handler(async (_req, res) => {
-      return res.type('html').send(page(login({})))
-    })
-  )
+	// OAuth callback to complete session creation
+	router.get(
+		"/oauth/callback",
+		handler(async (req, res) => {
+			const params = new URLSearchParams(req.originalUrl.split("?")[1]);
+			try {
+				const { session } = await ctx.oauthClient.callback(params);
+				const clientSession = await getIronSession<Session>(req, res, {
+					cookieName: "sid",
+					password: env.COOKIE_SECRET,
+				});
+				assert(!clientSession.did, "session already exists");
+				clientSession.did = session.did;
+				await clientSession.save();
+			} catch (err) {
+				ctx.logger.error({ err }, "oauth callback failed");
+				return res.redirect("/?error");
+			}
+			return res.redirect("/");
+		}),
+	);
 
-  // Login handler
-  router.post(
-    '/login',
-    handler(async (req, res) => {
-      // Validate
-      const handle = req.body?.handle
-      if (typeof handle !== 'string' || !isValidHandle(handle)) {
-        return res.type('html').send(page(login({ error: 'invalid handle' })))
-      }
+	// Login page
+	router.get(
+		"/login",
+		handler(async (_req, res) => {
+			return res.type("html").send(page(login({})));
+		}),
+	);
 
-      // Initiate the OAuth flow
-      try {
-        const url = await ctx.oauthClient.authorize(handle, {
-          scope: 'atproto transition:generic',
-        })
-        return res.redirect(url.toString())
-      } catch (err) {
-        ctx.logger.error({ err }, 'oauth authorize failed')
-        return res.type('html').send(
-          page(
-            login({
-              error:
-                err instanceof OAuthResolverError
-                  ? err.message
-                  : "couldn't initiate login",
-            })
-          )
-        )
-      }
-    })
-  )
+	// Login handler
+	router.post(
+		"/login",
+		handler(async (req, res) => {
+			// Validate
+			const handle = req.body?.handle;
+			if (typeof handle !== "string" || !isValidHandle(handle)) {
+				return res.type("html").send(page(login({ error: "invalid handle" })));
+			}
 
-  // Logout handler
-  router.post(
-    '/logout',
-    handler(async (req, res) => {
-      const session = await getIronSession<Session>(req, res, {
-        cookieName: 'sid',
-        password: env.COOKIE_SECRET,
-      })
-      await session.destroy()
-      return res.redirect('/')
-    })
-  )
+			// Initiate the OAuth flow
+			try {
+				const url = await ctx.oauthClient.authorize(handle, {
+					scope: "atproto transition:generic",
+				});
+				return res.redirect(url.toString());
+			} catch (err) {
+				ctx.logger.error({ err }, "oauth authorize failed");
+				return res.type("html").send(
+					page(
+						login({
+							error:
+								err instanceof OAuthResolverError
+									? err.message
+									: "couldn't initiate login",
+						}),
+					),
+				);
+			}
+		}),
+	);
 
-  // Homepage
-  router.get(
-    '/',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      
-      // Fetch data stored in mongodb
-      const db = ctx.dbm.db('statusphere')
-      const collection = db.collection('status')
-      const statuses = await collection.find({})
-      .sort({ indexedAt: -1 })
-      .toArray()
-      .then(docs => docs.map(doc => ({
-        uri: doc.uri,
-        authorDid: doc.authorDid,
-        status: doc.status,
-        createdAt: doc.createdAt,
-        indexedAt: doc.indexedAt
-      })))
-             
-      // Map user DIDs to their domain-name handles
-      const didHandleMap = await ctx.resolver.resolveDidsToHandles(
-        statuses.map((s) => s.authorDid)
-      )
+	// Logout handler
+	router.post(
+		"/logout",
+		handler(async (req, res) => {
+			const session = await getIronSession<Session>(req, res, {
+				cookieName: "sid",
+				password: env.COOKIE_SECRET,
+			});
+			await session.destroy();
+			return res.redirect("/");
+		}),
+	);
 
-      if (!agent) {
-        // Serve the logged-out view
-        return res.type('html').send(page(login({})))
-        }
+	// Homepage
+	router.get(
+		"/",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
 
-      // Fetch additional information about the logged-in user
-      const { data: profileRecord } = await agent.com.atproto.repo.getRecord({
-        repo: agent.assertDid,
-        collection: 'app.bsky.actor.profile',
-        rkey: 'self',
-      })
-      const profile =
-        Profile.isRecord(profileRecord.value) &&
-        Profile.validateRecord(profileRecord.value).success
-          ? profileRecord.value
-          : {}
+			// Fetch data stored in mongodb
+			const db = ctx.dbm.db("statusphere");
+			const collection = db.collection("status");
+			const statuses = await collection
+				.find({})
+				.sort({ indexedAt: -1 })
+				.toArray()
+				.then((docs) =>
+					docs.map((doc) => ({
+						uri: doc.uri,
+						authorDid: doc.authorDid,
+						status: doc.status,
+						createdAt: doc.createdAt,
+						indexedAt: doc.indexedAt,
+					})),
+				);
 
-      // Serve the logged-in view
-      return res.type('html').send(
-        page(
-          home({
-            statuses,
-            didHandleMap,
-            profile,
-          })
-        )
-      )
-    })
-  )
+			// Map user DIDs to their domain-name handles
+			const didHandleMap = await ctx.resolver.resolveDidsToHandles(
+				statuses.map((s) => s.authorDid),
+			);
 
-  // "Set status" handler
-  router.post(
-    '/status',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      if (!agent) {
-        return res
-          .status(401)
-          .type('html')
-          .send('<h1>Error: Session required</h1>')
-      }
+			if (!agent) {
+				// Serve the logged-out view
+				return res.type("html").send(page(login({})));
+			}
 
-      // Construct & validate their status record
-      const rkey = TID.nextStr()
-      const record = {
-        $type: 'xyz.statusphere.status',
-        status: req.body?.status,
-        createdAt: new Date().toISOString(),
-      }
-      if (!Status.validateRecord(record).success) {
-        return res
-          .status(400)
-          .type('html')
-          .send('<h1>Error: Invalid status</h1>')
-      }
+			// Fetch additional information about the logged-in user
+			const { data: profileRecord } = await agent.com.atproto.repo.getRecord({
+				repo: agent.assertDid,
+				collection: "app.bsky.actor.profile",
+				rkey: "self",
+			});
+			const profile =
+				Profile.isRecord(profileRecord.value) &&
+				Profile.validateRecord(profileRecord.value).success
+					? profileRecord.value
+					: {};
 
-      let uri
-      try {
-        // Write the status record to the user's repository
-        // This is where the new record gets sent to the PDS and goes to the firehose
-        const res = await agent.com.atproto.repo.putRecord({
-          repo: agent.assertDid,
-          collection: 'xyz.statusphere.status',
-          rkey,
-          record,
-          validate: false,
-        })
-        uri = res.data.uri
-      } catch (err) {
-        ctx.logger.warn({ err }, 'failed to write record')
-        return res
-          .status(500)
-          .type('html')
-          .send('<h1>Error: Failed to write record</h1>')
-      }
-      return res.redirect('/')
-    })
-  )
+			// Serve the logged-in view
+			return res.type("html").send(
+				page(
+					home({
+						statuses,
+						didHandleMap,
+						profile,
+					}),
+				),
+			);
+		}),
+	);
 
-  // Blank page
-  router.get(
-    '/blank',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      // If the user is not logged in send them to the login page.
-      if (!agent) {
-        return res.type('html').send(page(login({})))
-      }
-      return res.type('html').send(page(blank({})))
-    })
-  )
+	// "Set status" handler
+	router.post(
+		"/status",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			if (!agent) {
+				return res
+					.status(401)
+					.type("html")
+					.send("<h1>Error: Session required</h1>");
+			}
 
-  // Marketplace page
-  router.get(
-    '/marketplace',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      // If the user is not logged in send them to the login page.
-      if (!agent) {
-        return res.type('html').send(page(login({})))
-      }
-      return res.type('html').send(page(marketplace({})))
-    })
-  )
+			// Construct & validate their status record
+			const rkey = TID.nextStr();
+			const record = {
+				$type: "xyz.statusphere.status",
+				status: req.body?.status,
+				createdAt: new Date().toISOString(),
+			};
+			if (!Status.validateRecord(record).success) {
+				return res
+					.status(400)
+					.type("html")
+					.send("<h1>Error: Invalid status</h1>");
+			}
 
-  // Settings page
-  router.get(
-    '/settings',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      // If the user is not logged in send them to the login page.
-      if (!agent) {
-        return res.type('html').send(page(login({})))
-      }
-      return res.type('html').send(page(settings({})))
-    })
-  )
+			let uri;
+			try {
+				// Write the status record to the user's repository
+				// This is where the new record gets sent to the PDS and goes to the firehose
+				const res = await agent.com.atproto.repo.putRecord({
+					repo: agent.assertDid,
+					collection: "xyz.statusphere.status",
+					rkey,
+					record,
+					validate: false,
+				});
+				uri = res.data.uri;
+			} catch (err) {
+				ctx.logger.warn({ err }, "failed to write record");
+				return res
+					.status(500)
+					.type("html")
+					.send("<h1>Error: Failed to write record</h1>");
+			}
+			return res.redirect("/");
+		}),
+	);
 
-  // Lists page
-  router.get(
-    '/lists',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      // If the user is not logged in send them to the login page.
-      if (!agent) {
-        return res.type('html').send(page(login({})))
-      }
-      return res.type('html').send(page(lists({})))
-    })
-  )
+	// Blank page
+	router.get(
+		"/blank",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+			return res.type("html").send(page(blank({})));
+		}),
+	);
 
-  // Feeds page
-  router.get(
-    '/feeds',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      // If the user is not logged in send them to the login page.
-      if (!agent) {
-        return res.type('html').send(page(login({})))
-      }
-      return res.type('html').send(page(feeds({})))
-    })
-  )
+	// Marketplace page
+	router.get(
+		"/marketplace",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+			return res.type("html").send(page(marketplace({})));
+		}),
+	);
 
-  // Chat page
-  router.get(
-    '/chat',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      // If the user is not logged in send them to the login page.
-      if (!agent) {
-        return res.type('html').send(page(login({})))
-      }
-      return res.type('html').send(page(chat({})))
-    })
-  )
+	// Settings page
+	router.get(
+		"/settings",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+			return res.type("html").send(page(settings({})));
+		}),
+	);
 
-  // Notifications page
-  router.get(
-    '/notifications',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      // If the user is not logged in send them to the login page.
-      if (!agent) {
-        return res.type('html').send(page(login({})))
-      }
-      return res.type('html').send(page(notifications({})))
-    })
-  )
+	// Lists page
+	router.get(
+		"/lists",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+			return res.type("html").send(page(lists({})));
+		}),
+	);
 
-  // Search page
-  router.get(
-    '/search',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      // If the user is not logged in send them to the login page.
-      if (!agent) {
-        return res.type('html').send(page(login({})))
-      }
-      return res.type('html').send(page(search({})))
-    })
-  )
+	// Feeds page
+	router.get(
+		"/feeds",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+			return res.type("html").send(page(feeds({})));
+		}),
+	);
 
-  router.get(
-    '/profile',
-    handler(async (req, res) => {
-      // If the user is signed in, get an agent which communicates with their server
-      const agent = await getSessionAgent(req, res, ctx)
-      // If the user is not logged in send them to the login page.
-      if (!agent) {
-        return res.type('html').send(page(login({})))
-      }
-      const id: string = agent.sessionManager.did!
-      const { data } = await agent.getProfile({ actor: id })
-      const { did, handle, displayName, avatar, banner, description, followersCount, followsCount, postsCount, createdAt, ...rest } = data
+	// Chat page
+	router.get(
+		"/chat",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+			return res.type("html").send(page(chat({})));
+		}),
+	);
 
-      // let's try getting my feed
-      //console.log(agent)
+	// Notifications page
+	router.get(
+		"/notifications",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+			return res.type("html").send(page(notifications({})));
+		}),
+	);
 
-      //https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
-      const feed = await agent.getAuthorFeed({
-        actor: id,
-        filter: 'posts_no_replies',
-        limit: 50,
-      })
-      
-      const { feed: postsArray, cursor: nextPage } = feed.data
-      //console.log(JSON.stringify(postsArray[4], null, 2))
-            
-      return res.type('html').send(page(profile({ 
-        handle, 
-        displayName, 
-        avatar, 
-        banner, 
-        description, 
-        followersCount, 
-        followsCount, 
-        postsCount, 
-        createdAt,
-        postsArray,
-      })))
-    })
-  )
+	// Search page
+	router.get(
+		"/search",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+			return res.type("html").send(page(search({})));
+		}),
+	);
 
-  return router
-}
+	router.get(
+		"/profile",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+			const id: string = agent.sessionManager.did!;
+			const { data } = await agent.getProfile({ actor: id });
+			const {
+				did,
+				handle,
+				displayName,
+				avatar,
+				banner,
+				description,
+				followersCount,
+				followsCount,
+				postsCount,
+				createdAt,
+				...rest
+			} = data;
+
+			// let's try getting my feed
+			//console.log(agent)
+
+			//https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
+			const feed = await agent.getAuthorFeed({
+				actor: id,
+				filter: "posts_no_replies",
+				limit: 50,
+			});
+
+			const { feed: postsArray, cursor: nextPage } = feed.data;
+			//console.log(JSON.stringify(postsArray[4], null, 2))
+
+			return res.type("html").send(
+				page(
+					profile({
+						handle,
+						displayName,
+						avatar,
+						banner,
+						description,
+						followersCount,
+						followsCount,
+						postsCount,
+						createdAt,
+						postsArray,
+					}),
+				),
+			);
+		}),
+	);
+
+	return router;
+};
