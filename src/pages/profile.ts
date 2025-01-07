@@ -129,11 +129,11 @@ function content({
 						post.post.embed?.$type === "app.bsky.embed.external#view"
 							? html`          
           <div class="card">
-            <img src="${post.post.embed.external.thumb}" class="img-fluid rounded-top" alt="a link to an external site">
+            <img src="${(post.post.embed.external as AppBskyEmbedExternal.ViewExternal).thumb}" class="img-fluid rounded-top" alt="a link to an external site">
             <div class="card-body">
-              <h5 class="card-title">${post.post.embed.external.title}</h5>
-              <p class="card-text">${post.post.embed.external.description}</p>
-              <a href="${post.post.embed.external.uri}" class="btn"><i class="bi bi-globe"></i> ${post.post.embed.external.uri}</a>
+              <h5 class="card-title">${(post.post.embed.external as AppBskyEmbedExternal.ViewExternal).title}</h5>
+              <p class="card-text">${(post.post.embed.external as AppBskyEmbedExternal.ViewExternal).description}</p>
+              <a href="${(post.post.embed.external as AppBskyEmbedExternal.ViewExternal).uri}" class="btn"><i class="bi bi-globe"></i> ${(post.post.embed.external as AppBskyEmbedExternal.ViewExternal).uri}</a>
             </div>
           </div>`
 							: ""
