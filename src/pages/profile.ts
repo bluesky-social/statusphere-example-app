@@ -118,7 +118,7 @@ function content({
           
           ${
 						post.post.embed?.$type === "app.bsky.embed.images#view"
-							? html`${post.post.embed.images.map(
+							? html`${(post.post.embed as { images: { fullsize: string }[] }).images.map(
 									(img) => html`
           <img src="${img.fullsize}" class="rounded img-fluid w-100 mx-0" alt="...">`,
 								)}`
