@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@atproto/lex-cli": "^0.5.4",
+    "@biomejs/biome": "1.9.4",
     "@types/better-sqlite3": "^7.6.12",
     "@types/express": "^4.17.21",
     "@types/node": "^22.10.5",
