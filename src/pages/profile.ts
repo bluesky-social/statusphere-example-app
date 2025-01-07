@@ -1,12 +1,12 @@
-import { FeedViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
-import { html } from "../lib/view";
-import { shell } from "./shell";
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
 import { AppBskyFeedPost } from "@atproto/api";
 import type AppBskyEmbedImages from "@atproto/api";
 import { AppBskyEmbedExternal } from "@atproto/api";
+import type { FeedViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
+import { html } from "../lib/view";
+import { shell } from "./shell";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
