@@ -4,7 +4,7 @@ import type {
 	NodeSavedState,
 	NodeSavedStateStore,
 } from "@atproto/oauth-client-node";
-import { MongoClient } from "mongodb";
+import type { MongoClient } from "mongodb";
 
 export class StateStore implements NodeSavedStateStore {
 	private db;
