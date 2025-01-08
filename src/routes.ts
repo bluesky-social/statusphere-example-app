@@ -342,7 +342,28 @@ export const createRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-			return res.type("html").send(page(feeds({})));
+			// Fetch the user's feeds
+			const id: string = agent.did!;
+
+			const feed = await agent.app.bsky.feed.getActorFeeds({
+				actor: id,
+				limit: 50,
+			});
+
+			const { feed: postsArray, cursor: nextPage } = feed.data;
+			//console.log(postsArray);
+
+			const preferences = await agent.app.bsky.actor.getPreferences();
+			const savedFeeds = preferences.data.preferences;
+
+			console.log(JSON.stringify(savedFeeds, null, 2));
+
+
+
+			return res.type("html").send(page(feeds({
+
+
+			})));
 		}),
 	);
 
@@ -397,7 +418,7 @@ export const createRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-			const id: string = agent.sessionManager.did!;
+			const id: string = agent.did!;
 			const { data } = await agent.getProfile({ actor: id });
 			const {
 				did,
