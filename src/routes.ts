@@ -6,6 +6,7 @@ import { TID } from "@atproto/common";
 import { OAuthResolverError } from "@atproto/oauth-client-node";
 import { isValidHandle } from "@atproto/syntax";
 import express from "express";
+import { rateLimit } from "express-rate-limit";
 import { getIronSession } from "iron-session";
 import type { AppContext } from "#/index";
 import * as Profile from "#/lexicon/types/app/bsky/actor/profile";
@@ -23,6 +24,13 @@ import { marketplace } from "./pages/marketplace";
 import { notifications } from "./pages/notifications";
 import { search } from "./pages/search";
 import { settings } from "./pages/settings";
+
+const limiter = rateLimit({
+	windowMs: 60 * 60 * 1000,
+	limit: 1666,
+	standardHeaders: "draft-8",
+	legacyHeaders: false,
+});
 
 type Session = { did: string };
 
@@ -64,6 +72,7 @@ async function getSessionAgent(
 
 export const createRouter = (ctx: AppContext) => {
 	const router = express.Router();
+	router.use(limiter);
 
 	// Static assets
 	router.use(

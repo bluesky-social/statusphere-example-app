@@ -4,7 +4,7 @@ import { IdResolver, MemoryCache } from "@atproto/identity";
 import type { OAuthClient } from "@atproto/oauth-client-node";
 import type { Firehose } from "@atproto/sync";
 import express, { type Express } from "express";
-import { rateLimit } from "express-rate-limit";
+
 import { MongoClient } from "mongodb";
 import { pino } from "pino";
 import { createClient } from "#/auth/client";
@@ -16,13 +16,6 @@ import {
 import { createIngester } from "#/ingester";
 import { env } from "#/lib/env";
 import { createRouter } from "#/routes";
-
-const limiter = rateLimit({
-	windowMs: 60 * 60 * 1000,
-	limit: 1666,
-	standardHeaders: "draft-8",
-	legacyHeaders: false,
-});
 
 // Application state passed to the router and elsewhere
 export type AppContext = {
@@ -67,7 +60,7 @@ export class Server {
 
 		// Create our server
 		const app: Express = express();
-		app.set("trust proxy", true);
+		app.set("trust proxy", false);
 
 		// Routes & middlewares
 		const router = createRouter(ctx);
@@ -75,7 +68,6 @@ export class Server {
 		app.use(express.urlencoded({ extended: true }));
 		app.use(router);
 		app.use((_req, res) => res.sendStatus(404));
-		app.use(limiter);
 
 		// Bind our server to the port
 		const server = app.listen(env.PORT);
