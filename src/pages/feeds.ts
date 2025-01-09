@@ -1,7 +1,13 @@
+import { AppBskyActorDefs } from "@atproto/api";
 import { html } from "../lib/view";
 import { shell } from "./shell";
+import type AppBskyActorDefsSavedFeedPrefv2 from "@atproto/api";
 
-type Props = { error?: string };
+type Props = { 
+  error?: string;
+  savedFeeds?: AppBskyActorDefsSavedFeedPrefv2[];
+
+};
 
 export function feeds(props: Props) {
 	return shell({
