@@ -2,6 +2,8 @@ import assert from "node:assert";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import { Agent } from "@atproto/api";
+import { AppBskyActorDefs } from "@atproto/api";
+import type { SavedFeedsPrefV2 } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { TID } from "@atproto/common";
 import { OAuthResolverError } from "@atproto/oauth-client-node";
 import { isValidHandle } from "@atproto/syntax";
@@ -253,7 +255,6 @@ export const createRouter = (ctx: AppContext) => {
 					.send("<h1>Error: Invalid status</h1>");
 			}
 
-			let uri;
 			try {
 				// Write the status record to the user's repository
 				// This is where the new record gets sent to the PDS and goes to the firehose
@@ -264,7 +265,7 @@ export const createRouter = (ctx: AppContext) => {
 					record,
 					validate: false,
 				});
-				uri = res.data.uri;
+				const uri = res.data.uri;
 			} catch (err) {
 				ctx.logger.warn({ err }, "failed to write record");
 				return res
@@ -342,28 +343,11 @@ export const createRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-			// Fetch the user's feeds
-			const id: string = agent.did!;
-
-			const feed = await agent.app.bsky.feed.getActorFeeds({
-				actor: id,
-				limit: 50,
-			});
-
-			const { feed: postsArray, cursor: nextPage } = feed.data;
-			//console.log(postsArray);
 
 			const preferences = await agent.app.bsky.actor.getPreferences();
-			const savedFeeds = preferences.data.preferences;
+			const { items } = preferences.data.preferences[9] as SavedFeedsPrefV2;
 
-			console.log(JSON.stringify(savedFeeds, null, 2));
-
-
-
-			return res.type("html").send(page(feeds({
-
-
-			})));
+			return res.type("html").send(page(feeds({ items })));
 		}),
 	);
 
@@ -418,7 +402,7 @@ export const createRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-			const id: string = agent.did!;
+			const id: string = agent.did ?? "";
 			const { data } = await agent.getProfile({ actor: id });
 			const {
 				did,
@@ -435,7 +419,6 @@ export const createRouter = (ctx: AppContext) => {
 			} = data;
 
 			// let's try getting my feed
-			//console.log(agent)
 
 			//https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
 			const feed = await agent.getAuthorFeed({
@@ -445,7 +428,6 @@ export const createRouter = (ctx: AppContext) => {
 			});
 
 			const { feed: postsArray, cursor: nextPage } = feed.data;
-			//console.log(JSON.stringify(postsArray[4], null, 2))
 
 			return res.type("html").send(
 				page(
