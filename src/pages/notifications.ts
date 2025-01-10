@@ -12,9 +12,8 @@ export function notifications(props: Props) {
 
 function content({ error }: Props) {
 	return html`
-    <div id="header" class="text-center">
-      <h1>A New Notifications Page</h1>
-      <p>It's time to build your next page.</p>
+    <div id="header" class="text-center border-bottom border-primary">      
+      <p class= "fs-2"><i class="bi bi-caret-left-fill text-primary" onclick="history.back()"></i>Notifications</p>    
     </div>
     <div class="container">
       <div>
