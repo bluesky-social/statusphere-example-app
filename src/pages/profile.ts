@@ -1,6 +1,6 @@
 import { AppBskyFeedPost } from "@atproto/api";
 import type AppBskyEmbedImages from "@atproto/api";
-import { AppBskyEmbedExternal } from "@atproto/api";
+import type { AppBskyEmbedExternal } from "@atproto/api";
 import type { FeedViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import TimeAgo from "javascript-time-ago";
@@ -23,7 +23,7 @@ type Props = {
 	postsCount?: number;
 	createdAt?: string;
 	postsArray?: FeedViewPost[];
-  feedName?: string;
+	feedName?: string;
 };
 
 export function profile(props: Props) {
@@ -45,11 +45,13 @@ function content({
 	postsCount,
 	createdAt,
 	postsArray,
-  feedName,
+	feedName,
 }: Props) {
 	const date = ts(createdAt ?? new Date().toISOString());
 	return html`
-    ${banner ? html`<div class="container px-0">
+    ${
+			banner
+				? html`<div class="container px-0">
       <div class="row">
         <img src="${banner}" class="rounded-top px-0" alt="castle">
       </div>
@@ -95,9 +97,11 @@ function content({
           ${description}
         </div>
       </div>
-    </div>` : html`<div id="header" class="text-center border-bottom border-primary">      
+    </div>`
+				: html`<div id="header" class="text-center border-bottom border-primary">      
       <p class= "fs-2"><i class="bi bi-caret-left-fill text-primary" onclick="history.back()"></i>${feedName}</p>    
-    </div>`}
+    </div>`
+		}
     
   
   ${postsArray?.map((post) => {
@@ -123,7 +127,9 @@ function content({
           
           ${
 						post.post.embed?.$type === "app.bsky.embed.images#view"
-							? html`${(post.post.embed as { images: { fullsize: string }[] }).images.map(
+							? html`${(
+									post.post.embed as { images: { fullsize: string }[] }
+								).images.map(
 									(img) => html`
           <img src="${img.fullsize}" class="rounded img-fluid w-100 mx-0" alt="...">`,
 								)}`

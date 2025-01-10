@@ -1,11 +1,11 @@
 import { AppBskyActorDefs } from "@atproto/api";
+import type { SavedFeed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { html } from "../lib/view";
 import { shell } from "./shell";
-import type { SavedFeed } from '@atproto/api/dist/client/types/app/bsky/actor/defs';
 
-type Props = { 
-  error?: string;
-  items: SavedFeed[];
+type Props = {
+	error?: string;
+	items: SavedFeed[];
 };
 
 export function feeds(props: Props) {
@@ -23,8 +23,9 @@ function content({ error, items }: Props) {
     <div class="container">
       <div>        
         ${items.map((item, i) => {
-                const getLastPart = (value: string) => value.substring(value.lastIndexOf('/') + 1);
-                return html`
+					const getLastPart = (value: string) =>
+						value.substring(value.lastIndexOf("/") + 1);
+					return html`
                   <div class="card mt-2">
                   <div class="card-body">
                     <button class="btn btn-primary">
@@ -35,17 +36,21 @@ function content({ error, items }: Props) {
                       <input type="hidden" name="type" value="${item.type}">
                       <input type="hidden" name="pinned" value="${item.pinned}">
                       <input type="hidden" name="id" value="${item.id}">
-                      ${item.type === 'feed' ? html`<button class="btn" type="submit">
+                      ${
+												item.type === "feed"
+													? html`<button class="btn" type="submit">
                         ${getLastPart(item.value)}
-                      </button>` : getLastPart(item.value)}
+                      </button>`
+													: getLastPart(item.value)
+											}
                       
                     </form>    
-                    ${item.pinned ? html`<i class="bi bi-pin-angle-fill"></i>` : ''}
+                    ${item.pinned ? html`<i class="bi bi-pin-angle-fill"></i>` : ""}
                      
                   </div>
                   </div>
                 `;
-        })}
+				})}
       </div>
     </div>
   `;
