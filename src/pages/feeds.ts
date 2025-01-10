@@ -28,15 +28,21 @@ function content({ error, items }: Props) {
                   <div class="card mt-2">
                   <div class="card-body">
                     <button class="btn btn-primary">
-                    <i class="bi bi-list-stars"></i>
+                      <i class="bi bi-list-stars"></i>
                     </button>
-                    ${getLastPart(item.value)}
-                    <div>
-                    ${item.value}
-                    </div>
-                    ${item.type}
+                    <form action="/feeds" method="post" class="">
+                      <input type="hidden" name="value" value="${item.value}">
+                      <input type="hidden" name="type" value="${item.type}">
+                      <input type="hidden" name="pinned" value="${item.pinned}">
+                      <input type="hidden" name="id" value="${item.id}">
+                      <button class="btn" type="submit">
+                        ${getLastPart(item.value)}
+                      </button>
+                    </form>
+                    
+                    
                     ${item.pinned ? html`<i class="bi bi-pin-angle-fill"></i>` : ''}
-                    ${item.id} 
+                     
                   </div>
                   </div>
                 `;
