@@ -26,9 +26,9 @@ function content({ error, items }: Props) {
 					const getLastPart = (value: string) =>
 						value.substring(value.lastIndexOf("/") + 1);
 					return html`
-                  <div class="card mt-2">
+                <div class="card mt-2">
                   <div class="card-body">
-                    <button class="btn btn-primary">
+                    <button class="btn btn-primary" disabled>
                       <i class="bi bi-list-stars"></i>
                     </button>
                     <form action="/feeds" method="post" class="">
@@ -42,14 +42,12 @@ function content({ error, items }: Props) {
                         ${getLastPart(item.value)}
                       </button>`
 													: getLastPart(item.value)
-											}
-                      
+											}                      
                     </form>    
-                    ${item.pinned ? html`<i class="bi bi-pin-angle-fill"></i>` : ""}
-                     
-                  </div>
-                  </div>
-                `;
+                    ${item.pinned ? html`<i class="bi bi-pin-angle-fill"></i>` : ""}                     
+                  </div>                  
+                </div>
+              `;
 				})}
       </div>
     </div>
