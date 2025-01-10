@@ -351,6 +351,25 @@ export const createRouter = (ctx: AppContext) => {
 		}),
 	);
 
+	router.post(
+		"/feeds",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}
+
+			console.log("req.body", req.body);
+
+		//	const preferences = await agent.app.bsky.actor.getPreferences();
+		//	const { items } = preferences.data.preferences[9] as SavedFeedsPrefV2;
+
+		//	return res.type("html").send(page(feeds({ items })));
+		}),
+	);
+
 	// Chat page
 	router.get(
 		"/chat",
