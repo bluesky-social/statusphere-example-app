@@ -47,7 +47,7 @@ function content({
 }: Props) {
 	const date = ts(createdAt ?? new Date().toISOString());
 	return html`
-    <div class="container px-0">
+    ${banner ? html`<div class="container px-0">
       <div class="row">
         <img src="${banner}" class="rounded-top px-0" alt="castle">
       </div>
@@ -93,7 +93,10 @@ function content({
           ${description}
         </div>
       </div>
-    </div>
+    </div>` : html`<div id="header" class="text-center border-bottom border-primary">      
+      <p class= "fs-2"><i class="bi bi-caret-left-fill text-primary" onclick="history.back()"></i>Feeds</p>    
+    </div>`}
+    
   
   ${postsArray?.map((post) => {
 		// console.log(post)
