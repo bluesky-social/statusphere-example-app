@@ -23,6 +23,7 @@ type Props = {
 	postsCount?: number;
 	createdAt?: string;
 	postsArray?: FeedViewPost[];
+  feedName?: string;
 };
 
 export function profile(props: Props) {
@@ -44,6 +45,7 @@ function content({
 	postsCount,
 	createdAt,
 	postsArray,
+  feedName,
 }: Props) {
 	const date = ts(createdAt ?? new Date().toISOString());
 	return html`
@@ -94,7 +96,7 @@ function content({
         </div>
       </div>
     </div>` : html`<div id="header" class="text-center border-bottom border-primary">      
-      <p class= "fs-2"><i class="bi bi-caret-left-fill text-primary" onclick="history.back()"></i>Feeds</p>    
+      <p class= "fs-2"><i class="bi bi-caret-left-fill text-primary" onclick="history.back()"></i>${feedName}</p>    
     </div>`}
     
   

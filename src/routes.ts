@@ -359,7 +359,11 @@ export const createRouter = (ctx: AppContext) => {
 			// If the user is not logged in send them to the login page.
 			if (!agent) {
 				return res.type("html").send(page(login({})));
-			}			
+			}
+			
+
+			const feedName = req.body.value.substring(req.body.value.lastIndexOf('/') + 1);
+			
 
 			const { data } = await agent.app.bsky.feed.getFeed(
 				{
@@ -373,7 +377,7 @@ export const createRouter = (ctx: AppContext) => {
 
 		
 
-			return res.type("html").send(page(profile({ postsArray })));
+			return res.type("html").send(page(profile({ postsArray, feedName })));
 		}),
 	);
 
