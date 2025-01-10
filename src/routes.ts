@@ -361,12 +361,23 @@ export const createRouter = (ctx: AppContext) => {
 				return res.type("html").send(page(login({})));
 			}
 
-			console.log("req.body", req.body);
+			
 
-		//	const preferences = await agent.app.bsky.actor.getPreferences();
-		//	const { items } = preferences.data.preferences[9] as SavedFeedsPrefV2;
+			const { data } = await agent.app.bsky.feed.getFeed(
+				{
+				  feed: req.body.value,
+				  limit: 30,
+				},
+				
+			  );
+			  
+			  const { feed: postsArray, cursor: nextPage } = data;
 
-		//	return res.type("html").send(page(feeds({ items })));
+			//console.log(postsArray);
+
+		
+
+			return res.type("html").send(page(profile({ postsArray })));
 		}),
 	);
 
