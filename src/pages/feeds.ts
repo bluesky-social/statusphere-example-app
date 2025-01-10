@@ -35,9 +35,10 @@ function content({ error, items }: Props) {
                       <input type="hidden" name="type" value="${item.type}">
                       <input type="hidden" name="pinned" value="${item.pinned}">
                       <input type="hidden" name="id" value="${item.id}">
-                      <button class="btn" type="submit">
+                      ${item.type === 'feed' ? html`<button class="btn" type="submit">
                         ${getLastPart(item.value)}
-                      </button>
+                      </button>` : getLastPart(item.value)}
+                      
                     </form>    
                     ${item.pinned ? html`<i class="bi bi-pin-angle-fill"></i>` : ''}
                      
