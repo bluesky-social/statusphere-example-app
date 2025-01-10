@@ -18,7 +18,7 @@ export function feeds(props: Props) {
 function content({ error, items }: Props) {
 	return html`
     <div id="header" class="text-center border-bottom border-primary">      
-      <p class= "fs-2"><i class="bi bi-caret-left-fill text-primary"></i>Feeds</p>    
+      <p class= "fs-2"><i class="bi bi-caret-left-fill text-primary" onclick="history.back()"></i>Feeds</p>    
     </div>
     <div class="container">
       <div>        
@@ -38,9 +38,7 @@ function content({ error, items }: Props) {
                       <button class="btn" type="submit">
                         ${getLastPart(item.value)}
                       </button>
-                    </form>
-                    
-                    
+                    </form>    
                     ${item.pinned ? html`<i class="bi bi-pin-angle-fill"></i>` : ''}
                      
                   </div>
