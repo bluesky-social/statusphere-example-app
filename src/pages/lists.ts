@@ -29,7 +29,8 @@ function content({ error, items }: Props) {
                   <i class="bi bi-list-stars"></i>
                 </button>
                 <form action="/lists" method="post" class="d-inline">
-                  <input type="hidden" name="uri" value="${item.uri}">                      
+                  <input type="hidden" name="uri" value="${item.uri}">
+                  <input type="hidden" name="name" value="${item.name}">                      
                   <button class="btn" type="submit">
                   ${item.name} - ${item.description}
                   </button>          
