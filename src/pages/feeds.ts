@@ -25,29 +25,29 @@ function content({ error, items }: Props) {
         ${items.map((item, i) => {
 					const getLastPart = (value: string) =>
 						value.substring(value.lastIndexOf("/") + 1);
-					return html`
-                <div class="card mt-2">
-                  <div class="card-body">
-                    <button class="btn btn-primary" disabled>
-                      <i class="bi bi-list-stars"></i>
-                    </button>
-                    <form action="/feeds" method="post" class="">
-                      <input type="hidden" name="value" value="${item.value}">
-                      <input type="hidden" name="type" value="${item.type}">
-                      <input type="hidden" name="pinned" value="${item.pinned}">
-                      <input type="hidden" name="id" value="${item.id}">
-                      ${
-												item.type === "feed"
-													? html`<button class="btn" type="submit">
-                        ${getLastPart(item.value)}
-                      </button>`
-													: getLastPart(item.value)
-											}                      
-                    </form>    
-                    ${item.pinned ? html`<i class="bi bi-pin-angle-fill"></i>` : ""}                     
-                  </div>                  
-                </div>
-              `;
+          return html`
+        <div class="card mt-2">
+          <div class="card-body d-flex align-items-center">
+          <button class="btn btn-primary me-2" disabled>
+            <i class="bi bi-list-stars"></i>
+          </button>
+          <form action="/feeds" method="post" class="d-inline-flex align-items-center">
+            <input type="hidden" name="value" value="${item.value}">
+            <input type="hidden" name="type" value="${item.type}">
+            <input type="hidden" name="pinned" value="${item.pinned}">
+            <input type="hidden" name="id" value="${item.id}">
+            ${
+                        item.type === "feed"
+                          ? html`<button class="btn" type="submit">
+            ${getLastPart(item.value)}
+            </button>`
+                          : getLastPart(item.value)
+                      }                      
+          </form>    
+          ${item.pinned ? html`<i class="bi bi-pin-angle-fill ms-2"></i>` : ""}                     
+          </div>                  
+        </div>
+        `;
 				})}
       </div>
     </div>
