@@ -329,7 +329,17 @@ export const createRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-			return res.type("html").send(page(lists({})));
+
+			// https://docs.bsky.app/docs/api/app-bsky-graph-get-lists
+			const myLists = await agent.app.bsky.graph.getLists({
+				actor: agent.assertDid,
+				limit: 50,
+			});
+			//console.log(myLists.data);
+			const items = myLists.data.lists;
+			console.log(items);
+
+			return res.type("html").send(page(lists({ items })));
 		}),
 	);
 
