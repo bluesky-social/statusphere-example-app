@@ -21,9 +21,7 @@ function content({ error, items }: Props) {
     </div>
     <div class="container">
       <div>        
-        ${items?.map((item, i) => {
-          const getLastPart = (value: string) =>
-            value.substring(value.lastIndexOf("/") + 1);
+        ${items?.map((item, i) => {          
           return html`
                 <div class="card mt-2">
                   <div class="card-body">
@@ -31,16 +29,14 @@ function content({ error, items }: Props) {
                       <i class="bi bi-list-stars"></i>
                     </button>
                     <form action="/lists" method="post" class="">
-                      <input type="hidden" name="uri" value="${item.uri}">
-                      <input type="hidden" name="type" value="${item.type}">                      
-                      <input type="hidden" name="id" value="${item.id}">
+                      <input type="hidden" name="uri" value="${item.uri}">                      
                       <button class="btn" type="submit">
                         ${item.name} - ${item.description}
                       </button>          
                     </form>                                        
                   </div>                  
                 </div>
-              `;
+            `;
         })}
       </div>
     </div>
