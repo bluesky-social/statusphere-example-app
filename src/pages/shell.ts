@@ -37,7 +37,7 @@ export function shell({ title, content }: { title: string; content: Hole }) {
                 </div>
               </form>
             </div>
-            <div class="col-6 border border-primary rounded ms-2"><!-- center content goes here -->
+            <div class="col-6 border border-primary rounded ms-2 pb-2"><!-- center content goes here -->
               ${content}
             </div>
             <div class="col border border-primary rounded mx-2 text-center"> <!-- right side content goes here -->
