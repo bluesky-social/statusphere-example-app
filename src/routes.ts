@@ -350,7 +350,7 @@ export const createRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}	
-			console.log(req.body);
+			
 			const feedName = req.body.name;
 			const { data } = await agent.app.bsky.feed.getListFeed(
 				{
@@ -359,10 +359,8 @@ export const createRouter = (ctx: AppContext) => {
 				},				
 			  );
 			  			  
-			  const { feed: postsArray, cursor: nextPage } = data;
-			  
-			//  console.log(data);
-
+			  const { feed: postsArray, cursor: nextPage } = data;			  
+			
 			return res.type("html").send(page(profile({ postsArray, feedName })));
 		}),
 	);
