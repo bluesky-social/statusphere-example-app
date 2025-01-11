@@ -35,7 +35,7 @@ function content({ error, items }: Props) {
                       <input type="hidden" name="type" value="${item.type}">                      
                       <input type="hidden" name="id" value="${item.id}">
                       <button class="btn" type="submit">
-                        ${item.name}
+                        ${item.name} - ${item.description}
                       </button>          
                     </form>                                        
                   </div>                  
