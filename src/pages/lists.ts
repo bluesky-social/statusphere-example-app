@@ -22,20 +22,20 @@ function content({ error, items }: Props) {
     <div class="container">
       <div>        
         ${items?.map((item, i) => {          
-          return html`
-                <div class="card mt-2">
-                  <div class="card-body">
-                    <button class="btn btn-primary" disabled>
-                      <i class="bi bi-list-stars"></i>
-                    </button>
-                    <form action="/lists" method="post" class="">
-                      <input type="hidden" name="uri" value="${item.uri}">                      
-                      <button class="btn" type="submit">
-                        ${item.name} - ${item.description}
-                      </button>          
-                    </form>                                        
-                  </div>                  
-                </div>
+            return html`
+              <div class="card mt-2">
+                <div class="card-body d-flex align-items-center">
+                <button class="btn btn-primary me-2" disabled>
+                  <i class="bi bi-list-stars"></i>
+                </button>
+                <form action="/lists" method="post" class="d-inline">
+                  <input type="hidden" name="uri" value="${item.uri}">                      
+                  <button class="btn" type="submit">
+                  ${item.name} - ${item.description}
+                  </button>          
+                </form>                                        
+                </div>                  
+              </div>
             `;
         })}
       </div>
