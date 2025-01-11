@@ -1,8 +1,5 @@
-import { AppBskyFeedPost } from "@atproto/api";
-import type AppBskyEmbedImages from "@atproto/api";
 import type { AppBskyEmbedExternal } from "@atproto/api";
 import type { FeedViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
-import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { html } from "../lib/view";
@@ -101,8 +98,7 @@ function content({
 				: html`<div id="header" class="text-center border-bottom border-primary">      
       <p class= "fs-2"><i class="bi bi-caret-left-fill text-primary" onclick="history.back()"></i>${feedName}</p>    
     </div>`
-		}
-    
+		}    
   
   ${postsArray?.map((post) => {
 		// console.log(post)
