@@ -30,20 +30,14 @@ function content({ error, items }: Props) {
                     <button class="btn btn-primary" disabled>
                       <i class="bi bi-list-stars"></i>
                     </button>
-                    <form action="/feeds" method="post" class="">
-                      <input type="hidden" name="value" value="${item.value}">
-                      <input type="hidden" name="type" value="${item.type}">
-                      <input type="hidden" name="pinned" value="${item.pinned}">
+                    <form action="/lists" method="post" class="">
+                      <input type="hidden" name="uri" value="${item.uri}">
+                      <input type="hidden" name="type" value="${item.type}">                      
                       <input type="hidden" name="id" value="${item.id}">
-                      ${
-                        item.type === "feed"
-                          ? html`<button class="btn" type="submit">
+                      <button class="btn" type="submit">
                         ${item.name}
-                      </button>`
-                          : item.name
-                      }                      
-                    </form>    
-                    ${item.pinned ? html`<i class="bi bi-pin-angle-fill"></i>` : ""}                     
+                      </button>          
+                    </form>                                        
                   </div>                  
                 </div>
               `;
