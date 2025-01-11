@@ -334,12 +334,36 @@ export const createRouter = (ctx: AppContext) => {
 			const myLists = await agent.app.bsky.graph.getLists({
 				actor: agent.assertDid,
 				limit: 50,
-			});
-			//console.log(myLists.data);
-			const items = myLists.data.lists;
-			console.log(items);
+			});			
+			const items = myLists.data.lists;			
 
 			return res.type("html").send(page(lists({ items })));
+		}),
+	);
+
+	router.post(
+		"/lists",
+		handler(async (req, res) => {
+			// If the user is signed in, get an agent which communicates with their server
+			const agent = await getSessionAgent(req, res, ctx);
+			// If the user is not logged in send them to the login page.
+			if (!agent) {
+				return res.type("html").send(page(login({})));
+			}	
+			console.log(req.body);
+			const feedName = req.body.name;
+			const { data } = await agent.app.bsky.feed.getListFeed(
+				{
+				  list: req.body.uri,
+				  limit: 30,
+				},				
+			  );
+			  			  
+			  const { feed: postsArray, cursor: nextPage } = data;
+			  
+			//  console.log(data);
+
+			return res.type("html").send(page(profile({ postsArray, feedName })));
 		}),
 	);
 
@@ -369,11 +393,9 @@ export const createRouter = (ctx: AppContext) => {
 			// If the user is not logged in send them to the login page.
 			if (!agent) {
 				return res.type("html").send(page(login({})));
-			}
-			
+			}			
 
-			const feedName = req.body.value.substring(req.body.value.lastIndexOf('/') + 1);
-			
+			const feedName = req.body.value.substring(req.body.value.lastIndexOf('/') + 1);			
 
 			const { data } = await agent.app.bsky.feed.getFeed(
 				{
@@ -383,8 +405,7 @@ export const createRouter = (ctx: AppContext) => {
 				
 			  );
 			  
-			  const { feed: postsArray, cursor: nextPage } = data;	
-
+			  const { feed: postsArray, cursor: nextPage } = data;
 		
 
 			return res.type("html").send(page(profile({ postsArray, feedName })));
