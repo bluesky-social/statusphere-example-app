@@ -22,9 +22,9 @@ import { feeds } from "./pages/feeds";
 import { lists } from "./pages/lists";
 import { notifications } from "./pages/notifications";
 import { search } from "./pages/search";
-import { settings } from "./pages/settings";
 import { createBlankRouter } from './routes/blank'
 import { createMarketplaceRouter } from './routes/marketplace'
+import { createSettingsRouter } from './routes/settings'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -87,6 +87,7 @@ export const createRouter = (ctx: AppContext) => {
 
 	router.use(createBlankRouter(ctx))
 	router.use(createMarketplaceRouter(ctx))
+	router.use(createSettingsRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -277,22 +278,8 @@ export const createRouter = (ctx: AppContext) => {
 			}
 			return res.redirect("/");
 		}),
-	);	
-
-	// Settings page
-	router.get(
-		"/settings",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			// If the user is not logged in send them to the login page.
-			if (!agent) {
-				return res.type("html").send(page(login({})));
-			}
-			return res.type("html").send(page(settings({})));
-		}),
 	);
-
+	
 	// Lists page
 	router.get(
 		"/lists",
