@@ -20,11 +20,11 @@ import { profile } from "#/pages/profile";
 import { chat } from "./pages/chat";
 import { feeds } from "./pages/feeds";
 import { lists } from "./pages/lists";
-import { marketplace } from "./pages/marketplace";
 import { notifications } from "./pages/notifications";
 import { search } from "./pages/search";
 import { settings } from "./pages/settings";
 import { createBlankRouter } from './routes/blank'
+import { createMarketplaceRouter } from './routes/marketplace'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -86,6 +86,7 @@ export const createRouter = (ctx: AppContext) => {
 	router.use("/css", express.static("./node_modules/bootswatch/dist/united"));
 
 	router.use(createBlankRouter(ctx))
+	router.use(createMarketplaceRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -277,20 +278,6 @@ export const createRouter = (ctx: AppContext) => {
 			return res.redirect("/");
 		}),
 	);	
-
-	// Marketplace page
-	router.get(
-		"/marketplace",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			// If the user is not logged in send them to the login page.
-			if (!agent) {
-				return res.type("html").send(page(login({})));
-			}
-			return res.type("html").send(page(marketplace({})));
-		}),
-	);
 
 	// Settings page
 	router.get(
