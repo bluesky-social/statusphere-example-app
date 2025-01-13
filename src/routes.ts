@@ -2,18 +2,11 @@ import assert from "node:assert";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import { Agent } from "@atproto/api";
-//import { TID } from "@atproto/common";
-//import { OAuthResolverError } from "@atproto/oauth-client-node";
-//import { isValidHandle } from "@atproto/syntax";
 import express from "express";
 import { rateLimit } from "express-rate-limit";
 import { getIronSession } from "iron-session";
 import type { AppContext } from "#/index";
-import * as Profile from "#/lexicon/types/app/bsky/actor/profile";
 import { env } from "#/lib/env";
-import { page } from "#/lib/view";
-import { home } from "#/pages/home";
-import { login } from "#/pages/login";
 import { createBlankRouter } from './routes/blank'
 import { createMarketplaceRouter } from './routes/marketplace'
 import { createSettingsRouter } from './routes/settings'

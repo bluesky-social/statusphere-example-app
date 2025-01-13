@@ -1,9 +1,6 @@
 import express from 'express'
 import { handler, getSessionAgent } from '#/lib/utils'
 import { AppContext } from '#/index'
-import { page } from "#/lib/view";
-import { blank } from "#/pages/blank";
-import { login } from '#/pages/login'
 import { getIronSession } from "iron-session";
 import { env } from "#/lib/env";
 
