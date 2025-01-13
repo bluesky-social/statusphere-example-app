@@ -1,5 +1,5 @@
 import express from 'express'
-import { handler, getSessionAgent } from './utils'
+import { handler, getSessionAgent } from '#/lib/utils'
 import { AppContext } from '#/index'
 
 export const createBlankRouter = (ctx: AppContext) => {
