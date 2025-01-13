@@ -2,7 +2,7 @@ import assert from "node:assert";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import { Agent } from "@atproto/api";
-import { TID } from "@atproto/common";
+//import { TID } from "@atproto/common";
 import { OAuthResolverError } from "@atproto/oauth-client-node";
 import { isValidHandle } from "@atproto/syntax";
 import express from "express";
@@ -10,7 +10,6 @@ import { rateLimit } from "express-rate-limit";
 import { getIronSession } from "iron-session";
 import type { AppContext } from "#/index";
 import * as Profile from "#/lexicon/types/app/bsky/actor/profile";
-import * as Status from "#/lexicon/types/xyz/statusphere/status";
 import { env } from "#/lib/env";
 import { page } from "#/lib/view";
 import { home } from "#/pages/home";
@@ -24,6 +23,7 @@ import { createFeedsRouter } from './routes/feeds'
 import { createChatRouter } from './routes/chat'
 import { createNotificationsRouter } from './routes/notifications'
 import { createSearchRouter } from './routes/search'
+import { createStatusRouter } from './routes/status'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -93,6 +93,7 @@ export const createRouter = (ctx: AppContext) => {
 	router.use(createChatRouter(ctx))
 	router.use(createNotificationsRouter(ctx))
 	router.use(createSearchRouter(ctx))
+	router.use(createStatusRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -233,55 +234,6 @@ export const createRouter = (ctx: AppContext) => {
 					}),
 				),
 			);
-		}),
-	);
-
-	// "Set status" handler
-	router.post(
-		"/status",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			if (!agent) {
-				return res
-					.status(401)
-					.type("html")
-					.send("<h1>Error: Session required</h1>");
-			}
-
-			// Construct & validate their status record
-			const rkey = TID.nextStr();
-			const record = {
-				$type: "xyz.statusphere.status",
-				status: req.body?.status,
-				createdAt: new Date().toISOString(),
-			};
-			if (!Status.validateRecord(record).success) {
-				return res
-					.status(400)
-					.type("html")
-					.send("<h1>Error: Invalid status</h1>");
-			}
-
-			try {
-				// Write the status record to the user's repository
-				// This is where the new record gets sent to the PDS and goes to the firehose
-				const res = await agent.com.atproto.repo.putRecord({
-					repo: agent.assertDid,
-					collection: "xyz.statusphere.status",
-					rkey,
-					record,
-					validate: false,
-				});
-				const uri = res.data.uri;
-			} catch (err) {
-				ctx.logger.warn({ err }, "failed to write record");
-				return res
-					.status(500)
-					.type("html")
-					.send("<h1>Error: Failed to write record</h1>");
-			}
-			return res.redirect("/");
 		}),
 	);	
 
