@@ -25,6 +25,7 @@ import { marketplace } from "./pages/marketplace";
 import { notifications } from "./pages/notifications";
 import { search } from "./pages/search";
 import { settings } from "./pages/settings";
+import { createBlankRouter } from './routes/blank'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -84,6 +85,8 @@ export const createRouter = (ctx: AppContext) => {
 	router.use("/vid", express.static("./node_modules/video.js/dist"));
 	router.use("/icons", express.static("./node_modules/bootstrap-icons/font"));
 	router.use("/css", express.static("./node_modules/bootswatch/dist/united"));
+
+	router.use(createBlankRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -277,6 +280,7 @@ export const createRouter = (ctx: AppContext) => {
 	);
 
 	// Blank page
+	/*
 	router.get(
 		"/blank",
 		handler(async (req, res) => {
@@ -289,6 +293,7 @@ export const createRouter = (ctx: AppContext) => {
 			return res.type("html").send(page(blank({})));
 		}),
 	);
+	*/
 
 	// Marketplace page
 	router.get(
