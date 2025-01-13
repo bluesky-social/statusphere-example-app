@@ -25,6 +25,7 @@ import { createNotificationsRouter } from './routes/notifications'
 import { createSearchRouter } from './routes/search'
 import { createStatusRouter } from './routes/status'
 import { createHomeRouter } from './routes/home'
+import { createLogoutRouter } from './routes/logout'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -96,6 +97,7 @@ export const createRouter = (ctx: AppContext) => {
 	router.use(createSearchRouter(ctx))
 	router.use(createStatusRouter(ctx))
 	router.use(createHomeRouter(ctx))
+	router.use(createLogoutRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -164,19 +166,6 @@ export const createRouter = (ctx: AppContext) => {
 					),
 				);
 			}
-		}),
-	);
-
-	// Logout handler
-	router.post(
-		"/logout",
-		handler(async (req, res) => {
-			const session = await getIronSession<Session>(req, res, {
-				cookieName: "sid",
-				password: env.COOKIE_SECRET,
-			});
-			await session.destroy();
-			return res.redirect("/");
 		}),
 	);	
 
