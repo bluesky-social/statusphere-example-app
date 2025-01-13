@@ -16,7 +16,6 @@ import { env } from "#/lib/env";
 import { page } from "#/lib/view";
 import { home } from "#/pages/home";
 import { login } from "#/pages/login";
-import { profile } from "#/pages/profile";
 import { chat } from "./pages/chat";
 import { feeds } from "./pages/feeds";
 import { lists } from "./pages/lists";
@@ -25,6 +24,7 @@ import { search } from "./pages/search";
 import { createBlankRouter } from './routes/blank'
 import { createMarketplaceRouter } from './routes/marketplace'
 import { createSettingsRouter } from './routes/settings'
+import { createProfileRouter } from './routes/profile'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -88,6 +88,7 @@ export const createRouter = (ctx: AppContext) => {
 	router.use(createBlankRouter(ctx))
 	router.use(createMarketplaceRouter(ctx))
 	router.use(createSettingsRouter(ctx))
+	router.use(createProfileRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -411,62 +412,7 @@ export const createRouter = (ctx: AppContext) => {
 			}
 			return res.type("html").send(page(search({})));
 		}),
-	);
-
-	router.get(
-		"/profile",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			// If the user is not logged in send them to the login page.
-			if (!agent) {
-				return res.type("html").send(page(login({})));
-			}
-			const id: string = agent.did ?? "";
-			const { data } = await agent.getProfile({ actor: id });
-			const {
-				did,
-				handle,
-				displayName,
-				avatar,
-				banner,
-				description,
-				followersCount,
-				followsCount,
-				postsCount,
-				createdAt,
-				...rest
-			} = data;
-
-			// let's try getting my feed
-
-			//https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
-			const feed = await agent.getAuthorFeed({
-				actor: id,
-				filter: "posts_no_replies",
-				limit: 50,
-			});
-
-			const { feed: postsArray, cursor: nextPage } = feed.data;
-
-			return res.type("html").send(
-				page(
-					profile({
-						handle,
-						displayName,
-						avatar,
-						banner,
-						description,
-						followersCount,
-						followsCount,
-						postsCount,
-						createdAt,
-						postsArray,
-					}),
-				),
-			);
-		}),
-	);
+	);	
 
 	return router;
 };
