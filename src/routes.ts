@@ -2,7 +2,6 @@ import assert from "node:assert";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import { Agent } from "@atproto/api";
-import type { SavedFeedsPrefV2 } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { TID } from "@atproto/common";
 import { OAuthResolverError } from "@atproto/oauth-client-node";
 import { isValidHandle } from "@atproto/syntax";
@@ -17,7 +16,6 @@ import { page } from "#/lib/view";
 import { home } from "#/pages/home";
 import { login } from "#/pages/login";
 import { chat } from "./pages/chat";
-import { feeds } from "./pages/feeds";
 import { notifications } from "./pages/notifications";
 import { search } from "./pages/search";
 import { createBlankRouter } from './routes/blank'
@@ -25,6 +23,7 @@ import { createMarketplaceRouter } from './routes/marketplace'
 import { createSettingsRouter } from './routes/settings'
 import { createProfileRouter } from './routes/profile'
 import { createListsRouter } from './routes/lists'
+import { createFeedsRouter } from './routes/feeds'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -90,6 +89,7 @@ export const createRouter = (ctx: AppContext) => {
 	router.use(createSettingsRouter(ctx))
 	router.use(createProfileRouter(ctx))
 	router.use(createListsRouter(ctx))
+	router.use(createFeedsRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -281,51 +281,6 @@ export const createRouter = (ctx: AppContext) => {
 			return res.redirect("/");
 		}),
 	);	
-
-	// Feeds page
-	router.get(
-		"/feeds",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			// If the user is not logged in send them to the login page.
-			if (!agent) {
-				return res.type("html").send(page(login({})));
-			}
-
-			const preferences = await agent.app.bsky.actor.getPreferences();
-			const { items } = preferences.data.preferences[9] as SavedFeedsPrefV2;
-
-			return res.type("html").send(page(feeds({ items })));
-		}),
-	);
-
-	router.post(
-		"/feeds",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			// If the user is not logged in send them to the login page.
-			if (!agent) {
-				return res.type("html").send(page(login({})));
-			}			
-
-			const feedName = req.body.value.substring(req.body.value.lastIndexOf('/') + 1);			
-
-			const { data } = await agent.app.bsky.feed.getFeed(
-				{
-				  feed: req.body.value,
-				  limit: 30,
-				},
-				
-			  );
-			  
-			  const { feed: postsArray, cursor: nextPage } = data;
-		
-
-			return res.type("html").send(page(profile({ postsArray, feedName })));
-		}),
-	);
 
 	// Chat page
 	router.get(
