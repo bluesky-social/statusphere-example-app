@@ -41,7 +41,6 @@ export class SessionStore implements NodeSavedSessionStore {
 
 	async get(key: string): Promise<NodeSavedSession | undefined> {
 		const result = await this.collection.findOne({ key });
-		//console.log('session-get-result:', result)
 		if (!result) return;
 		return JSON.parse(result.session) as NodeSavedSession;
 	}
@@ -53,7 +52,6 @@ export class SessionStore implements NodeSavedSessionStore {
 			{ $set: { session: session } },
 			{ upsert: true },
 		);
-		console.log("session-set-result:", result);
 	}
 
 	async del(key: string) {
