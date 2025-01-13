@@ -2,7 +2,6 @@ import assert from "node:assert";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import { Agent } from "@atproto/api";
-import { AppBskyActorDefs } from "@atproto/api";
 import type { SavedFeedsPrefV2 } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { TID } from "@atproto/common";
 import { OAuthResolverError } from "@atproto/oauth-client-node";
