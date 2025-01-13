@@ -1,3 +1,5 @@
+import express from "express";
+
 // Helper function for defining routes
 const handler =
 	(fn: express.Handler) =>
