@@ -15,7 +15,6 @@ import { env } from "#/lib/env";
 import { page } from "#/lib/view";
 import { home } from "#/pages/home";
 import { login } from "#/pages/login";
-import { notifications } from "./pages/notifications";
 import { search } from "./pages/search";
 import { createBlankRouter } from './routes/blank'
 import { createMarketplaceRouter } from './routes/marketplace'
@@ -24,6 +23,7 @@ import { createProfileRouter } from './routes/profile'
 import { createListsRouter } from './routes/lists'
 import { createFeedsRouter } from './routes/feeds'
 import { createChatRouter } from './routes/chat'
+import { createNotificationsRouter } from './routes/notifications'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -91,6 +91,7 @@ export const createRouter = (ctx: AppContext) => {
 	router.use(createListsRouter(ctx))
 	router.use(createFeedsRouter(ctx))
 	router.use(createChatRouter(ctx))
+	router.use(createNotificationsRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -282,20 +283,6 @@ export const createRouter = (ctx: AppContext) => {
 			return res.redirect("/");
 		}),
 	);	
-
-	// Notifications page
-	router.get(
-		"/notifications",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			// If the user is not logged in send them to the login page.
-			if (!agent) {
-				return res.type("html").send(page(login({})));
-			}
-			return res.type("html").send(page(notifications({})));
-		}),
-	);
 
 	// Search page
 	router.get(
