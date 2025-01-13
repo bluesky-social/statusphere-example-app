@@ -1,15 +1,15 @@
-import express from 'express'
-import { handler, getSessionAgent } from '#/lib/utils'
-import { AppContext } from '#/index'
+import express from "express";
 import { getIronSession } from "iron-session";
+import type { AppContext } from "#/index";
 import { env } from "#/lib/env";
+import { getSessionAgent, handler } from "#/lib/utils";
 
 type Session = { did: string };
 
 export const createLogoutRouter = (ctx: AppContext) => {
-  const router = express.Router()
-  
-  // Logout handler
+	const router = express.Router();
+
+	// Logout handler
 	router.post(
 		"/logout",
 		handler(async (req, res) => {
@@ -22,5 +22,5 @@ export const createLogoutRouter = (ctx: AppContext) => {
 		}),
 	);
 
-  return router
-}
+	return router;
+};
