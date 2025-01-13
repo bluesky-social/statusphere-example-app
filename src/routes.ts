@@ -15,7 +15,6 @@ import { env } from "#/lib/env";
 import { page } from "#/lib/view";
 import { home } from "#/pages/home";
 import { login } from "#/pages/login";
-import { search } from "./pages/search";
 import { createBlankRouter } from './routes/blank'
 import { createMarketplaceRouter } from './routes/marketplace'
 import { createSettingsRouter } from './routes/settings'
@@ -24,6 +23,7 @@ import { createListsRouter } from './routes/lists'
 import { createFeedsRouter } from './routes/feeds'
 import { createChatRouter } from './routes/chat'
 import { createNotificationsRouter } from './routes/notifications'
+import { createSearchRouter } from './routes/search'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -92,6 +92,7 @@ export const createRouter = (ctx: AppContext) => {
 	router.use(createFeedsRouter(ctx))
 	router.use(createChatRouter(ctx))
 	router.use(createNotificationsRouter(ctx))
+	router.use(createSearchRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -281,20 +282,6 @@ export const createRouter = (ctx: AppContext) => {
 					.send("<h1>Error: Failed to write record</h1>");
 			}
 			return res.redirect("/");
-		}),
-	);	
-
-	// Search page
-	router.get(
-		"/search",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			// If the user is not logged in send them to the login page.
-			if (!agent) {
-				return res.type("html").send(page(login({})));
-			}
-			return res.type("html").send(page(search({})));
 		}),
 	);	
 
