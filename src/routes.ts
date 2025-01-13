@@ -18,13 +18,13 @@ import { home } from "#/pages/home";
 import { login } from "#/pages/login";
 import { chat } from "./pages/chat";
 import { feeds } from "./pages/feeds";
-import { lists } from "./pages/lists";
 import { notifications } from "./pages/notifications";
 import { search } from "./pages/search";
 import { createBlankRouter } from './routes/blank'
 import { createMarketplaceRouter } from './routes/marketplace'
 import { createSettingsRouter } from './routes/settings'
 import { createProfileRouter } from './routes/profile'
+import { createListsRouter } from './routes/lists'
 
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -89,6 +89,7 @@ export const createRouter = (ctx: AppContext) => {
 	router.use(createMarketplaceRouter(ctx))
 	router.use(createSettingsRouter(ctx))
 	router.use(createProfileRouter(ctx))
+	router.use(createListsRouter(ctx))
 
 	// OAuth metadata
 	router.get(
@@ -279,53 +280,7 @@ export const createRouter = (ctx: AppContext) => {
 			}
 			return res.redirect("/");
 		}),
-	);
-	
-	// Lists page
-	router.get(
-		"/lists",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			// If the user is not logged in send them to the login page.
-			if (!agent) {
-				return res.type("html").send(page(login({})));
-			}
-
-			// https://docs.bsky.app/docs/api/app-bsky-graph-get-lists
-			const myLists = await agent.app.bsky.graph.getLists({
-				actor: agent.assertDid,
-				limit: 50,
-			});			
-			const items = myLists.data.lists;			
-
-			return res.type("html").send(page(lists({ items })));
-		}),
-	);
-
-	router.post(
-		"/lists",
-		handler(async (req, res) => {
-			// If the user is signed in, get an agent which communicates with their server
-			const agent = await getSessionAgent(req, res, ctx);
-			// If the user is not logged in send them to the login page.
-			if (!agent) {
-				return res.type("html").send(page(login({})));
-			}	
-			
-			const feedName = req.body.name;
-			const { data } = await agent.app.bsky.feed.getListFeed(
-				{
-				  list: req.body.uri,
-				  limit: 30,
-				},				
-			  );
-			  			  
-			  const { feed: postsArray, cursor: nextPage } = data;			  
-			
-			return res.type("html").send(page(profile({ postsArray, feedName })));
-		}),
-	);
+	);	
 
 	// Feeds page
 	router.get(
