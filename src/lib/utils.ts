@@ -1,4 +1,9 @@
 import express from "express";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import type { AppContext } from "#/index";
+import { getIronSession } from "iron-session";
+
+type Session = { did: string };
 
 // Helper function for defining routes
 const handler =
