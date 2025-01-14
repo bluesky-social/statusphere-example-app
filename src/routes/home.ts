@@ -1,71 +1,65 @@
 import express from "express";
 import type { AppContext } from "#/index";
-import * as Profile from "#/lexicon/types/app/bsky/actor/profile";
 import { getSessionAgent, handler } from "#/lib/utils";
 import { page } from "#/lib/view";
-import { home } from "#/pages/home";
 import { login } from "#/pages/login";
+import { home } from "#/pages/home";
 
 export const createHomeRouter = (ctx: AppContext) => {
 	const router = express.Router();
 
-	// Homepage
 	router.get(
 		"/",
 		handler(async (req, res) => {
 			// If the user is signed in, get an agent which communicates with their server
 			const agent = await getSessionAgent(req, res, ctx);
-
-			// Fetch data stored in mongodb
-			const db = ctx.dbm.db("statusphere");
-			const collection = db.collection("status");
-			const statuses = await collection
-				.find({})
-				.sort({ indexedAt: -1 })
-				.toArray()
-				.then((docs) =>
-					docs.map((doc) => ({
-						uri: doc.uri,
-						authorDid: doc.authorDid,
-						status: doc.status,
-						createdAt: doc.createdAt,
-						indexedAt: doc.indexedAt,
-					})),
-				);
-
-			// Map user DIDs to their domain-name handles
-			const didHandleMap = await ctx.resolver.resolveDidsToHandles(
-				statuses.map((s) => s.authorDid),
-			);
-
+			// If the user is not logged in send them to the login page.
 			if (!agent) {
-				// Serve the logged-out view
 				return res.type("html").send(page(login({})));
 			}
+			const { data } = await agent.getProfile({ actor: agent.assertDid });
+			const {
+				did,
+				handle,
+				displayName,
+				avatar,
+				banner,
+				description,
+				followersCount,
+				followsCount,
+				postsCount,
+				createdAt,
+				...rest
+			} = data;
 
-			// Fetch additional information about the logged-in user
-			const { data: profileRecord } = await agent.com.atproto.repo.getRecord({
-				repo: agent.assertDid,
-				collection: "app.bsky.actor.profile",
-				rkey: "self",
+			// profile page
+			//https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
+			const feed = await agent.getAuthorFeed({
+				actor: agent.assertDid,
+				filter: "posts_no_replies",
+				limit: 50,
 			});
-			const profile =
-				Profile.isRecord(profileRecord.value) &&
-				Profile.validateRecord(profileRecord.value).success
-					? profileRecord.value
-					: {};
 
-			// Serve the logged-in view
+			const { feed: postsArray, cursor: nextPage } = feed.data;
+
 			return res.type("html").send(
 				page(
 					home({
-						statuses,
-						didHandleMap,
-						profile,
+						handle,
+						displayName,
+						avatar,
+						banner,
+						description,
+						followersCount,
+						followsCount,
+						postsCount,
+						createdAt,
+						postsArray,
 					}),
 				),
 			);
 		}),
 	);
+
 	return router;
 };
