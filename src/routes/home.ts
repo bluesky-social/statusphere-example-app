@@ -17,44 +17,19 @@ export const createHomeRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-			const { data } = await agent.getProfile({ actor: agent.assertDid });
-			const {
-				did,
-				handle,
-				displayName,
-				avatar,
-				banner,
-				description,
-				followersCount,
-				followsCount,
-				postsCount,
-				createdAt,
-				...rest
-			} = data;
-
-			// profile page
-			//https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
-			const feed = await agent.getAuthorFeed({
-				actor: agent.assertDid,
-				filter: "posts_no_replies",
-				limit: 50,
-			});
-
-			const { feed: postsArray, cursor: nextPage } = feed.data;
+						
+			const feedName = "Following";
+			const feed = await agent.getTimeline({
+				
+			  });
+			  
+			  const { feed: postsArray, cursor: nextPage } = feed.data;
 
 			return res.type("html").send(
 				page(
-					home({
-						handle,
-						displayName,
-						avatar,
-						banner,
-						description,
-						followersCount,
-						followsCount,
-						postsCount,
-						createdAt,
+					home({						
 						postsArray,
+						feedName,
 					}),
 				),
 			);

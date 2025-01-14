@@ -54,7 +54,7 @@ function content({
       </div>
       <div class="row">
         <div class="col-3" style="margin-top: -12%; position: relative;">
-          <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="Kitten" />
+          <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="${displayName}" />
         </div>
         <div class="col-4">          
         </div>
