@@ -115,7 +115,7 @@ export const createStatusRouter = (ctx: AppContext) => {
 					.type("html")
 					.send("<h1>Error: Failed to write record</h1>");
 			}
-			return res.redirect("/");
+			return res.redirect("/status");
 		}),
 	);
 
