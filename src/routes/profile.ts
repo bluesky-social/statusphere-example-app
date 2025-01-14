@@ -17,8 +17,7 @@ export const createProfileRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-			const id: string = agent.did ?? "";
-			const { data } = await agent.getProfile({ actor: id });
+			const { data } = await agent.getProfile({ actor: agent.assertDid });
 			const {
 				did,
 				handle,
@@ -36,7 +35,7 @@ export const createProfileRouter = (ctx: AppContext) => {
 			// profile page
 			//https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
 			const feed = await agent.getAuthorFeed({
-				actor: id,
+				actor: agent.assertDid,
 				filter: "posts_no_replies",
 				limit: 50,
 			});
