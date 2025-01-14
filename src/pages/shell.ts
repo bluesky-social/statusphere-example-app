@@ -26,6 +26,7 @@ export function shell({ title, content }: { title: string; content: Hole }) {
                 <a href="/chat" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-chat-dots"></i> Chat</a>
                 <a href="/feeds" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-hash"></i> Feeds</a>
                 <a href="/lists" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-list-ul"></i> Lists</a>
+                <a href="/status" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-clipboard2-check"></i> Status</a>
                 <a href="/profile" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-person"></i> Profile</a>
                 <a href="/settings" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-gear"></i> Settings</a>
                 <a href="/marketplace" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-shop-window"></i> Marketplace</a>
