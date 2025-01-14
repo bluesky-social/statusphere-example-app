@@ -48,6 +48,8 @@ export const createFeedsRouter = (ctx: AppContext) => {
 			});
 
 			const { feed: postsArray, cursor: nextPage } = data;
+			// sort decending by createdAt
+			postsArray.sort((a, b) => ((a.post.record as {createdAt: string}).createdAt > ( b.post.record as {createdAt: string}).createdAt ? -1 : 1));
 
 			return res.type("html").send(page(home({ postsArray, feedName })));
 		}),

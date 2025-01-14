@@ -41,6 +41,8 @@ export const createProfileRouter = (ctx: AppContext) => {
 			});
 
 			const { feed: postsArray, cursor: nextPage } = feed.data;
+			// sort decending by createdAt
+			postsArray.sort((a, b) => ((a.post.record as {createdAt: string}).createdAt > ( b.post.record as {createdAt: string}).createdAt ? -1 : 1));
 
 			return res.type("html").send(
 				page(
