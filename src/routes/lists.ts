@@ -4,7 +4,7 @@ import { getSessionAgent, handler } from "#/lib/utils";
 import { page } from "#/lib/view";
 import { lists } from "#/pages/lists";
 import { login } from "#/pages/login";
-import { profile } from "#/pages/profile";
+import { home } from "#/pages/home";
 
 export const createListsRouter = (ctx: AppContext) => {
 	const router = express.Router();
@@ -49,7 +49,7 @@ export const createListsRouter = (ctx: AppContext) => {
 
 			const { feed: postsArray, cursor: nextPage } = data;
 
-			return res.type("html").send(page(profile({ postsArray, feedName })));
+			return res.type("html").send(page(home({ postsArray, feedName })));
 		}),
 	);
 
