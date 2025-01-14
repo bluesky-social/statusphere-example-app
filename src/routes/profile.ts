@@ -3,7 +3,7 @@ import type { AppContext } from "#/index";
 import { getSessionAgent, handler } from "#/lib/utils";
 import { page } from "#/lib/view";
 import { login } from "#/pages/login";
-import { profile } from "#/pages/profile";
+import { home } from "#/pages/home"
 
 export const createProfileRouter = (ctx: AppContext) => {
 	const router = express.Router();
@@ -44,7 +44,7 @@ export const createProfileRouter = (ctx: AppContext) => {
 
 			return res.type("html").send(
 				page(
-					profile({
+					home({
 						handle,
 						displayName,
 						avatar,
