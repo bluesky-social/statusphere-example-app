@@ -42,7 +42,7 @@ type Props = {
 
 export function status(props: Props) {
 	return shell({
-		title: "Home",
+		title: "Status",
 		content: content(props),
 	});
 }
