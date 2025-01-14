@@ -1,9 +1,9 @@
-import express from "express";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { AppContext } from "#/index";
-import { getIronSession } from "iron-session";
-import { env } from "#/lib/env";
 import { Agent } from "@atproto/api";
+import type express from "express";
+import { getIronSession } from "iron-session";
+import type { AppContext } from "#/index";
+import { env } from "#/lib/env";
 
 type Session = { did: string };
 
@@ -43,4 +43,4 @@ async function getSessionAgent(
 	}
 }
 
-export { handler, getSessionAgent }
+export { handler, getSessionAgent };

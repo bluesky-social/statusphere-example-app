@@ -2,8 +2,8 @@ import express from "express";
 import type { AppContext } from "#/index";
 import { getSessionAgent, handler } from "#/lib/utils";
 import { page } from "#/lib/view";
+import { home } from "#/pages/home";
 import { login } from "#/pages/login";
-import { home } from "#/pages/home"
 
 export const createProfileRouter = (ctx: AppContext) => {
 	const router = express.Router();
@@ -42,7 +42,12 @@ export const createProfileRouter = (ctx: AppContext) => {
 
 			const { feed: postsArray, cursor: nextPage } = feed.data;
 			// sort decending by createdAt
-			postsArray.sort((a, b) => ((a.post.record as {createdAt: string}).createdAt > ( b.post.record as {createdAt: string}).createdAt ? -1 : 1));
+			postsArray.sort((a, b) =>
+				(a.post.record as { createdAt: string }).createdAt >
+				(b.post.record as { createdAt: string }).createdAt
+					? -1
+					: 1,
+			);
 
 			return res.type("html").send(
 				page(

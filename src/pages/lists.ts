@@ -1,10 +1,10 @@
-import { ListView } from "@atproto/api/dist/client/types/app/bsky/graph/defs";
+import type { ListView } from "@atproto/api/dist/client/types/app/bsky/graph/defs";
 import { html } from "../lib/view";
 import { shell } from "./shell";
 
-type Props = { 
-  error?: string;
-  items?: ListView[];
+type Props = {
+	error?: string;
+	items?: ListView[];
 };
 
 export function lists(props: Props) {
@@ -15,14 +15,14 @@ export function lists(props: Props) {
 }
 
 function content({ error, items }: Props) {
-  return html`
+	return html`
     <div id="header" class="text-center border-bottom border-primary">      
       <p class= "fs-2"><i class="bi bi-caret-left-fill text-primary" onclick="history.back()"></i>Lists</p>    
     </div>
     <div class="container">
       <div>        
-        ${items?.map((item, i) => {          
-            return html`
+        ${items?.map((item, i) => {
+					return html`
               <div class="card mt-2">
                 <div class="card-body d-flex align-items-center">
                 <button class="btn btn-primary me-2" disabled>
@@ -38,7 +38,7 @@ function content({ error, items }: Props) {
                 </div>                  
               </div>
             `;
-        })}
+				})}
       </div>
     </div>
   `;

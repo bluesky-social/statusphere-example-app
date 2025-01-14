@@ -2,8 +2,8 @@ import express from "express";
 import type { AppContext } from "#/index";
 import { getSessionAgent, handler } from "#/lib/utils";
 import { page } from "#/lib/view";
-import { login } from "#/pages/login";
 import { home } from "#/pages/home";
+import { login } from "#/pages/login";
 
 export const createHomeRouter = (ctx: AppContext) => {
 	const router = express.Router();
@@ -17,19 +17,22 @@ export const createHomeRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-						
+
 			const feedName = "Following";
-			const feed = await agent.getTimeline({
-				
-			  });
-			  
+			const feed = await agent.getTimeline({});
+
 			const { feed: postsArray, cursor: nextPage } = feed.data;
 			// sort decending by createdAt
-			postsArray.sort((a, b) => ((a.post.record as {createdAt: string}).createdAt > ( b.post.record as {createdAt: string}).createdAt ? -1 : 1));
+			postsArray.sort((a, b) =>
+				(a.post.record as { createdAt: string }).createdAt >
+				(b.post.record as { createdAt: string }).createdAt
+					? -1
+					: 1,
+			);
 
 			return res.type("html").send(
 				page(
-					home({						
+					home({
 						postsArray,
 						feedName,
 					}),
