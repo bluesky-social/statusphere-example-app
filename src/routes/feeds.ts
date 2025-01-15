@@ -42,10 +42,17 @@ export const createFeedsRouter = (ctx: AppContext) => {
 				req.body.value.lastIndexOf("/") + 1,
 			);
 
-			const { data } = await agent.app.bsky.feed.getFeed({
-				feed: req.body.value,
-				limit: 30,
-			});
+			const { data } = await agent.app.bsky.feed.getFeed(
+				{
+					feed: req.body.value,
+					limit: 30,
+				},
+				{
+					headers: {
+						"Accept-Language": "en",
+					},
+				},
+			);
 
 			const { feed: postsArray, cursor: nextPage } = data;
 			// sort decending by createdAt
