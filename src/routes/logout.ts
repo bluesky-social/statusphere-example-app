@@ -2,7 +2,7 @@ import express from "express";
 import { getIronSession } from "iron-session";
 import type { AppContext } from "#/index";
 import { env } from "#/lib/env";
-import { getSessionAgent, handler } from "#/lib/utils";
+import { handler } from "#/lib/utils";
 
 type Session = { did: string };
 

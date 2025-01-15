@@ -2,7 +2,7 @@ import { OAuthResolverError } from "@atproto/oauth-client-node";
 import { isValidHandle } from "@atproto/syntax";
 import express from "express";
 import type { AppContext } from "#/index";
-import { getSessionAgent, handler } from "#/lib/utils";
+import { handler } from "#/lib/utils";
 import { page } from "#/lib/view";
 import { login } from "#/pages/login";
 
