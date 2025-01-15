@@ -4,21 +4,14 @@ import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { html } from "../lib/view";
 import { shell } from "./shell";
+import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
 type Props = {
-	error?: string;
-	displayName?: string;
-	handle?: string;
-	avatar?: string;
-	banner?: string;
-	description?: string;
-	followersCount?: number;
-	followsCount?: number;
-	postsCount?: number;
-	createdAt?: string;
+	error?: string;	
+  profile?: ProfileViewDetailed;
 	postsArray?: FeedViewPost[];
 	feedName?: string;
 };
@@ -31,30 +24,22 @@ export function home(props: Props) {
 }
 
 function content({
-	error,
-	banner,
-	avatar,
-	displayName,
-	handle,
-	description,
-	followersCount,
-	followsCount,
-	postsCount,
-	createdAt,
+	error,	
+  profile,
 	postsArray,
 	feedName,
 }: Props) {
-	const date = ts(createdAt ?? new Date().toISOString());
+	const date = ts(profile?.createdAt ?? new Date().toISOString());
 	return html`
     ${
-			banner
+			profile?.banner
 				? html`<div class="container px-0">
       <div class="row">
-        <img src="${banner}" class="rounded-top px-0" alt="castle">
+        <img src="${profile.banner}" class="rounded-top px-0" alt="castle">
       </div>
       <div class="row">
         <div class="col-3" style="margin-top: -12%; position: relative;">
-          <img src="${avatar}" class="img-fluid rounded-circle img-thumbnail" alt="${displayName}" />
+          <img src="${profile.avatar}" class="img-fluid rounded-circle img-thumbnail" alt="${profile.displayName}" />
         </div>
         <div class="col-4">          
         </div>
@@ -67,7 +52,7 @@ function content({
       </div>
       <div class="row">
         <div class="col">
-          ${displayName}
+          ${profile.displayName}
         </div>
         <div class="col">
           Joined: ${date}
@@ -75,23 +60,23 @@ function content({
       </div>
       <div class="row">
         <div class="col">
-          @${handle}
+          @${profile.handle}
         </div>
       </div>
       <div class="row">
         <div class="col">
-          <a href= "/">${followersCount} followers</a>
+          <a href= "/">${profile.followersCount} followers</a>
         </div>
         <div class="col">
-          <a href= "/">${followsCount} following</a>
+          <a href= "/">${profile.followsCount} following</a>
         </div>
         <div class="col text-primary">
-          ${postsCount} posts
+          ${profile.postsCount} posts
         </div>
       </div>
       <div class="row py-2">
         <div class="col">
-          ${description}
+          ${profile.description}
         </div>
       </div>
     </div>`

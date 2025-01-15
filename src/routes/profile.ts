@@ -18,19 +18,7 @@ export const createProfileRouter = (ctx: AppContext) => {
 				return res.type("html").send(page(login({})));
 			}
 			const { data } = await agent.getProfile({ actor: agent.assertDid });
-			const {
-				did,
-				handle,
-				displayName,
-				avatar,
-				banner,
-				description,
-				followersCount,
-				followsCount,
-				postsCount,
-				createdAt,
-				...rest
-			} = data;
+			const profile = data;
 
 			// profile page
 			//https://docs.bsky.app/docs/tutorials/viewing-feeds#author-feeds
@@ -51,16 +39,8 @@ export const createProfileRouter = (ctx: AppContext) => {
 
 			return res.type("html").send(
 				page(
-					home({
-						handle,
-						displayName,
-						avatar,
-						banner,
-						description,
-						followersCount,
-						followsCount,
-						postsCount,
-						createdAt,
+					home({						
+						profile,
 						postsArray,
 					}),
 				),
