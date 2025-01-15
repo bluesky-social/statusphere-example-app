@@ -17,7 +17,7 @@ function content({ error }: Props) {
     </div>
     <div class="container">
       <div>
-        You can add your content here.
+        Not yet but we're working on it.
       </div>
     </div>
   `;
