@@ -1,4 +1,3 @@
-import { AppBskyActorDefs } from "@atproto/api";
 import type { SavedFeed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { html } from "../lib/view";
 import { shell } from "./shell";
