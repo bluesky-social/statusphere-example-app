@@ -26,7 +26,7 @@ export const createMarketplaceRouter = (ctx: AppContext) => {
 			const db = ctx.dbm.db("statusphere");
 			const collection = db.collection("profile");
 
-			// insert the profile into the database or update it if it's already there
+			// insert the profile into the database or update if it's already there
 			const result = await collection.updateOne(
 				{ did: profile.did },
 				{
