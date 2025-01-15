@@ -1,6 +1,5 @@
 import events from "node:events";
 import type http from "node:http";
-import { IdResolver, MemoryCache } from "@atproto/identity";
 import type { OAuthClient } from "@atproto/oauth-client-node";
 import type { Firehose } from "@atproto/sync";
 import express, { type Express } from "express";
