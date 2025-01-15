@@ -18,7 +18,33 @@ export const createMarketplaceRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-			return res.type("html").send(page(marketplace({})));
+
+			// let's add them to the database
+			const { data } = await agent.getProfile({ actor: agent.assertDid });
+			const profile = data;
+			
+			const db = ctx.dbm.db("statusphere");
+			const collection = db.collection("profile");
+
+			// insert the profile into the database or update it if it's already there
+			const result = await collection.updateOne(
+				{ did: profile.did },
+				{
+					$set: {
+						handle: profile.handle,
+						displayName: profile.displayName,
+						avatar: profile.avatar,
+						createdAt: profile.createdAt,
+						indexedAt: profile.indexedAt,
+					}
+				},
+				{ upsert: true }
+			);
+
+			console.log(`New listing created with the following id: ${result.upsertedId}`);
+			console.log(`was listing updated: ${result.acknowledged}`);
+
+			return res.type("html").send(page(marketplace({profile})));
 		}),
 	);
 
