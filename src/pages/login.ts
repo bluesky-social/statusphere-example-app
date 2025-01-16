@@ -15,8 +15,8 @@ function content({ error }: Props) {
     <div class="container border border-primary rounded mt-3 p-3">
       <div id="header" class="row">
         <div class="col text-center">
-          <h1>Statusphere</h1>
-          <p>Set your status on the Atmosphere.</p>
+          <h1 class= "text-primary"><i class="bi bi-shop"></i> SocialAtm</h1>
+          <p>Authenticated Transfer Marketplace.</p>
         </div>
       </div>
 
