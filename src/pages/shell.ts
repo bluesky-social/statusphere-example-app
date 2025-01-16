@@ -29,7 +29,7 @@ export function shell({ title, content }: { title: string; content: Hole }) {
                 <a href="/status" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-clipboard2-check"></i> Status</a>
                 <a href="/profile" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-person"></i> Profile</a>
                 <a href="/settings" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-gear"></i> Settings</a>
-                <a href="/marketplace" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-shop-window"></i> Marketplace</a>
+                <a href="/marketplace" class="list-group-item list-group-item-action list-group-item-light"><i class="bi bi-shop"></i> Marketplace</a>
               </div>
               <form action="/logout" method="post" class="session-form">
                 <div class="m-2">
