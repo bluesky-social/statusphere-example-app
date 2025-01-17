@@ -5,7 +5,8 @@ export function shell({ title, content }: { title: string; content: Hole }) {
     <head>
       <script src="/js/bootstrap.bundle.min.js"></script>
       <script src="/public/js/color-modes.js"></script>
-      <script src="/vid/video.min.js"></script>
+      <script src="/public/js/up-button.js"></script>
+      <script src="/vid/video.min.js" defer></script>
       
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -14,8 +15,9 @@ export function shell({ title, content }: { title: string; content: Hole }) {
       <link rel="stylesheet" href="/icons/bootstrap-icons.min.css">
       <link rel="stylesheet" href="/vid/video-js.min.css">
     </head>
-    <body>
+    <body>      
       <div id="root">
+        <button id="upBtn" type= "button" class= "btn btn-primary m-3 position-fixed bottom-0 end-0"><i class="bi bi-caret-up-fill"></i></button>
         <div class="container-fluid">
           <div class="row my-2 fw-bold">
             <div class="col border border-primary rounded ms-2"> <!-- left content goes here -->
