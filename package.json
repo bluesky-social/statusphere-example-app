@@ -14,11 +14,11 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
-    "@atproto/api": "^0.13.27",
+    "@atproto/api": "^0.13.28",
     "@atproto/common": "^0.4.6",
     "@atproto/identity": "^0.4.5",
     "@atproto/lexicon": "^0.4.5",
-    "@atproto/oauth-client-node": "^0.2.7",
+    "@atproto/oauth-client-node": "^0.2.8",
     "@atproto/sync": "^0.1.10",
     "@atproto/syntax": "^0.3.1",
     "@atproto/xrpc-server": "^0.7.7",
