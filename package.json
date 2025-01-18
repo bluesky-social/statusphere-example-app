@@ -11,7 +11,9 @@
     "build": "tsup",
     "start": "node dist/index.js",
     "lexgen": "lex gen-server ./src/lexicon ./lexicons/*",
-    "clean": "rimraf dist coverage"
+    "clean": "rimraf dist coverage",
+    "test": "jest --testMatch='**/*.test.ts'",
+    "jest": "jest"
   },
   "dependencies": {
     "@atproto/api": "^0.13.4",
@@ -36,12 +38,21 @@
     "@atproto/lex-cli": "^0.4.1",
     "@types/better-sqlite3": "^7.6.11",
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/supertest": "^6.0.2",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "jest": "^29.7.0",
     "pino-pretty": "^11.0.0",
     "rimraf": "^5.0.0",
+    "superagent": "^10.1.1",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "tsup": "^8.0.2",
     "tsx": "^4.7.2",
-    "typescript": "^5.4.4"
+    "typescript": "^5.7.2"
   },
   "tsup": {
     "entry": [
@@ -52,5 +63,30 @@
     "splitting": false,
     "sourcemap": true,
     "clean": true
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "collectCoverage": true,
+    "maxWorkers": 1,
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
+    "coverageReporters": [
+      "text",
+      "cobertura"
+    ],
+    "moduleDirectories": [
+      "node_modules"
+    ],
+    "moduleNameMapper": {
+      "^#/(.*)$": "<rootDir>/src/$1"
+    },
+    "setupFiles": [
+      "./tests/jest.env.ts",
+      "./tests/jest.global.ts"
+    ],
+    "setupFilesAfterEnv": [
+      "./tests/jest.setup.ts"
+    ]
   }
 }
