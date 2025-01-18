@@ -20,3 +20,6 @@ jobs:
       - name: Tests
         run: |
           npm run test
+
+      - name: Upload Test Coverage
+        uses: codecov/codecov-action@v3

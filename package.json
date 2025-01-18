@@ -59,6 +59,14 @@
   },
   "jest": {
     "preset": "ts-jest",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
+    "coverageReporters": [
+      "text",
+      "cobertura"
+    ],
     "moduleDirectories": [
       "node_modules"
     ],

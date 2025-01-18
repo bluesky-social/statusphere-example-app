@@ -1,6 +1,7 @@
 # AT Protocol "Statusphere" Example App
 
 [![Test](https://github.com/bluesky-social/statusphere-example-app/actions/workflows/test.yml/badge.svg)](https://github.com/bluesky-social/statusphere-example-app/actions/workflows/test.yml)
+[![Coverage](https://codecov.io/gh/bluesky-social/statusphere-example-app/graph/badge.svg)](https://codecov.io/gh/bluesky-social/statusphere-example-app)
 
 An example application covering:
 
