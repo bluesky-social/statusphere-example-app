@@ -61,8 +61,10 @@ function content({ statuses, didHandleMap, profile }: Props) {
 				</div>
 			</div>
 			<form id="status-form">
-			<div class="input-group">
-			    <select class="form-select" id="status" name="status" form="status-form">			    
+			<input type="hidden" id="handle" name="handle" value="${profile.displayName}" />
+			<div class="input-group">			    
+			    <select class="form-select" id="status" name="status" form="status-form">
+				<option>Choose a Status here...</option>			    
 				${STATUS_OPTIONS.map(
 					(status: string, index: number) =>
 						html`
@@ -74,11 +76,12 @@ function content({ statuses, didHandleMap, profile }: Props) {
 				<button type="submit" class="btn btn-outline-primary">submit</button>
 				</div>
 			</form>
+			<div id="status-feed">
 			${statuses.map((status: Status, i: number) => {
 				const handle = didHandleMap[status.authorDid] || status.authorDid;
 				const date = ts(status);
 				return html`
-					<div id="status-feed" class="card mt-2">
+					<div class="card mt-2">
 						<div class="card-body">
 							${status.status}
 							<a class="author" href=${toBskyLink(handle)}>${handle}</a>
@@ -91,6 +94,7 @@ function content({ statuses, didHandleMap, profile }: Props) {
 					</div>
 				`;
 			})}
+			</div>
 		</div>
 	</div>`;
 }

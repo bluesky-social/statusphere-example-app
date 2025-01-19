@@ -12,20 +12,20 @@ async function handleSubmit(event) {
   const form = event.target;
   const formData = new FormData(form);
 
-  /* Log the FormData entries
+  // Log the FormData entries
   for (const [key, value] of formData.entries()) {
     console.log(`${key}: ${value}`);
   }
-  */
+  
 
   //console.log('form:', form);
-  //console.log('Status:', formData.get('status'));
+  console.log('Status:', formData.get('handle'));
 
   try {
     const response = await axios.post('/status', {
       status: formData.get('status'),      
     });
-    console.log('Form submitted successfully:', response.data);
+    console.log('Form submitted successfully:');
 
     // Create a new status element
     const newStatus = document.createElement('div');
@@ -33,7 +33,7 @@ async function handleSubmit(event) {
     newStatus.innerHTML = `
       <div class="card-body">
         ${formData.get('status')}
-        <a class="author" href="#">You</a>
+        <a class="author" href="#">${formData.get('handle')}</a>
         is feeling ${formData.get('status')} today
       </div>
     `;
