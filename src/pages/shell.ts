@@ -7,6 +7,9 @@ export function shell({ title, content }: { title: string; content: Hole }) {
       <script src="/public/js/color-modes.js"></script>
       <script src="/public/js/up-button.js"></script>
       <script src="/vid/video.min.js" defer></script>
+      <script src="/axios/axios.min.js"></script>
+      <script src="/public/js/status.js"></script>
+      <script initializeStatusForm().catch(console.error);></script>
       
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />

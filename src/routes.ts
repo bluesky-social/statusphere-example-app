@@ -76,6 +76,7 @@ export const createRouter = (ctx: AppContext) => {
 		express.static(path.join(__dirname, "pages", "public")),
 	);
 	router.use("/js", express.static("./node_modules/bootstrap/dist/js"));
+	router.use("/axios", express.static("./node_modules/axios/dist"));
 	router.use("/vid", express.static("./node_modules/video.js/dist"));
 	router.use("/icons", express.static("./node_modules/bootstrap-icons/font"));
 	router.use("/css", express.static("./node_modules/bootswatch/dist/united"));
