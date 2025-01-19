@@ -68,7 +68,7 @@ function content({ statuses, didHandleMap, profile }: Props) {
 				${STATUS_OPTIONS.map(
 					(status: string, index: number) =>
 						html`
-						<option value="${status}">${status}</option>
+						<option value="${status}" class="fs-1">${status}</option>
 										
 						`
 				)}
