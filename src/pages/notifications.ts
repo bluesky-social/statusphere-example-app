@@ -26,9 +26,7 @@ function content({ error, notifications }: Props) {
       <div class="col-2">
         <img src="${notification.author.avatar}" class="img-fluid rounded-circle img-thumbnail" alt="${notification.author.displayName}" />
       </div>
-      <div class="col-7">${notification.author.displayName}</div>
-      <div class="col-3">${notification.reason}</div>
-      
+      <div class="col-10">${notification.author.displayName} - ${notification.reason}</div>      
     </div>`;
   })}
   </div>
