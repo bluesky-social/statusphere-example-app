@@ -4,6 +4,7 @@ import { getSessionAgent, handler } from "#/lib/utils";
 import { page } from "#/lib/view";
 import { login } from "#/pages/login";
 import { notifications } from "#/pages/notifications";
+import type { Notification as NotificationView } from "@atproto/api/src/client/types/app/bsky/notification/listNotifications";
 
 export const createNotificationsRouter = (ctx: AppContext) => {
 	const router = express.Router();
@@ -18,7 +19,24 @@ export const createNotificationsRouter = (ctx: AppContext) => {
 			if (!agent) {
 				return res.type("html").send(page(login({})));
 			}
-			return res.type("html").send(page(notifications({})));
+
+			const notify = await agent.app.bsky.notification.listNotifications();
+			//console.log(JSON.stringify(notify.data));
+
+			const { notifications: NotificationView , cursor: nextPage } = notify.data;
+
+			/*
+			const { feed: postsArray, cursor: nextPage } = notify.data;
+	 		// sort decending by createdAt
+			postsArray.sort((a, b) =>
+				(a.post.record as { createdAt: string }).createdAt >
+				(b.post.record as { createdAt: string }).createdAt
+					? -1
+					: 1,
+			);
+			*/
+
+			return res.type("html").send(page(notifications({ notifications: NotificationView })));
 		}),
 	);
 
