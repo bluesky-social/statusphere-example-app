@@ -4,7 +4,7 @@ import type { MongoClient } from "mongodb";
 import pino from "pino";
 import * as Status from "#/lexicon/types/xyz/statusphere/status";
 
-export function createIngester(idResolver: IdResolver, dbm: MongoClient) {
+export function createFirehose(idResolver: IdResolver, dbm: MongoClient) {
 	const logger = pino({ name: "firehose ingestion" });
 	return new Firehose({
 		idResolver,

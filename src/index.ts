@@ -12,13 +12,13 @@ import {
 	createBidirectionalResolver,
 	createIdResolver,
 } from "#/id-resolver";
-import { createIngester } from "#/ingester";
+import { createFirehose } from "#/firehose";
 import { env } from "#/lib/env";
 import { createRouter } from "#/routes";
 
 // Application state passed to the router and elsewhere
 export type AppContext = {
-	ingester: Firehose;
+	firehose: Firehose;
 	logger: pino.Logger;
 	oauthClient: OAuthClient;
 	resolver: BidirectionalResolver;
@@ -44,10 +44,10 @@ export class Server {
 		// Create the atproto utilities
 		const oauthClient = await createClient(dbm);
 		const baseIdResolver = createIdResolver();
-		const ingester = createIngester(baseIdResolver, dbm);
+		const firehose = createFirehose(baseIdResolver, dbm);
 		const resolver = createBidirectionalResolver(baseIdResolver);
 		const ctx = {
-			ingester,
+			firehose,
 			logger,
 			oauthClient,
 			resolver,
@@ -55,7 +55,7 @@ export class Server {
 		};
 
 		// Subscribe to events on the firehose
-		ingester.start();
+		firehose.start();
 
 		// Create our server
 		const app: Express = express();
@@ -78,7 +78,7 @@ export class Server {
 
 	async close() {
 		this.ctx.logger.info("sigint received, shutting down");
-		await this.ctx.ingester.destroy();
+		await this.ctx.firehose.destroy();
 		return new Promise<void>((resolve) => {
 			this.server.close(() => {
 				this.ctx.logger.info("server closed");
