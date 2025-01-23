@@ -14,14 +14,14 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
-    "@atproto/api": "^0.13.28",
+    "@atproto/api": "^0.13.31",
     "@atproto/common": "^0.4.6",
     "@atproto/identity": "^0.4.5",
     "@atproto/lexicon": "^0.4.5",
     "@atproto/oauth-client-node": "^0.2.8",
-    "@atproto/sync": "^0.1.10",
+    "@atproto/sync": "^0.1.11",
     "@atproto/syntax": "^0.3.1",
-    "@atproto/xrpc-server": "^0.7.7",
+    "@atproto/xrpc-server": "^0.7.8",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
@@ -38,11 +38,11 @@
     "uhtml": "^4.7.0"
   },
   "devDependencies": {
-    "@atproto/lex-cli": "^0.5.5",
+    "@atproto/lex-cli": "^0.5.6",
     "@biomejs/biome": "1.9.4",
     "@types/better-sqlite3": "^7.6.12",
     "@types/express": "^4.17.21",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.10.10",
     "pino-pretty": "^13.0.0",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
