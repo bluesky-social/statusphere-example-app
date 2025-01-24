@@ -43,8 +43,8 @@ export class Server {
     const baseIdResolver = createIdResolver()
 
     // Uncomment whichever ingester you want to use
-    // const ingester = createFirehoseIngester(db, baseIdResolver)
-    const ingester = createJetstreamIngester(db)
+    const ingester = createFirehoseIngester(db, baseIdResolver)
+    // const ingester = createJetstreamIngester(db)
 
     const resolver = createBidirectionalResolver(baseIdResolver)
     const ctx = {
