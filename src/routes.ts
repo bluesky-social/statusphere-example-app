@@ -176,12 +176,15 @@ export const createRouter = (ctx: AppContext) => {
       }
 
       // Fetch additional information about the logged-in user
-      const { data: profileRecord } = await agent.com.atproto.repo.getRecord({
+      const profileResponse = await agent.com.atproto.repo.getRecord({
         repo: agent.assertDid,
         collection: 'app.bsky.actor.profile',
         rkey: 'self',
-      })
-      const profile =
+      }).catch(() => undefined);
+
+      const profileRecord = profileResponse?.data;
+
+      const profile = profileRecord &&
         Profile.isRecord(profileRecord.value) &&
         Profile.validateRecord(profileRecord.value).success
           ? profileRecord.value
