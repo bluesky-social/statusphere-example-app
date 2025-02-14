@@ -21,7 +21,7 @@
     "@atproto/oauth-client-node": "^0.2.2",
     "@atproto/sync": "^0.1.4",
     "@atproto/syntax": "^0.3.0",
-    "@atproto/xrpc-server": "^0.6.3",
+    "@atproto/xrpc-server": "^0.7.9",
     "better-sqlite3": "^11.1.2",
     "dotenv": "^16.4.5",
     "envalid": "^8.0.0",
