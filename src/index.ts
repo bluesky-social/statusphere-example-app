@@ -7,17 +7,17 @@ import { Firehose } from '@atproto/sync'
 
 import { createDb, migrateToLatest } from '#/db'
 import { env } from '#/lib/env'
-import { createIngester } from '#/ingester'
+import { createJetstreamIngester, Jetstream } from '#/jetstream-ingester'
+import { createFirehoseIngester } from '#/firehose-ingester'
 import { createRouter } from '#/routes'
 import { createClient } from '#/auth/client'
 import { createBidirectionalResolver, createIdResolver, BidirectionalResolver } from '#/id-resolver'
 import type { Database } from '#/db'
-import { IdResolver, MemoryCache } from '@atproto/identity'
 
 // Application state passed to the router and elsewhere
 export type AppContext = {
   db: Database
-  ingester: Firehose
+  ingester: Jetstream | Firehose
   logger: pino.Logger
   oauthClient: OAuthClient
   resolver: BidirectionalResolver
@@ -41,7 +41,11 @@ export class Server {
     // Create the atproto utilities
     const oauthClient = await createClient(db)
     const baseIdResolver = createIdResolver()
-    const ingester = createIngester(db, baseIdResolver)
+
+    // Uncomment whichever ingester you want to use
+    const ingester = createFirehoseIngester(db, baseIdResolver)
+    // const ingester = createJetstreamIngester(db)
+
     const resolver = createBidirectionalResolver(baseIdResolver)
     const ctx = {
       db,

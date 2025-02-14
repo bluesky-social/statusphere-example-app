@@ -4,7 +4,7 @@ import { Firehose } from '@atproto/sync'
 import type { Database } from '#/db'
 import * as Status from '#/lexicon/types/xyz/statusphere/status'
 
-export function createIngester(db: Database, idResolver: IdResolver) {
+export function createFirehoseIngester(db: Database, idResolver: IdResolver) {
   const logger = pino({ name: 'firehose ingestion' })
   return new Firehose({
     idResolver,
