@@ -85,7 +85,7 @@ export const createRouter = (ctx: AppContext) => {
         ctx.logger.error({ err }, 'oauth callback failed')
         return res.redirect('/?error')
       }
-      return res.redirect('/')
+      return res.redirect('/statuses')
     })
   )
 
@@ -148,32 +148,26 @@ export const createRouter = (ctx: AppContext) => {
     handler(async (req, res) => {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
+      if (!agent) {
+        // Serve the logged-out view
+        return res.type('html').send(page(home({})))
+      }
 
       // Fetch data stored in our SQLite
       const statuses = await ctx.db
         .selectFrom('status')
         .selectAll()
+        .where('authorDid', '=', agent.assertDid)
         .orderBy('indexedAt', 'desc')
         .limit(10)
         .execute()
-      const myStatus = agent
-        ? await ctx.db
-            .selectFrom('status')
-            .selectAll()
-            .where('authorDid', '=', agent.assertDid)
-            .orderBy('indexedAt', 'desc')
-            .executeTakeFirst()
-        : undefined
+
+      const myStatus = statuses[0]
 
       // Map user DIDs to their domain-name handles
       const didHandleMap = await ctx.resolver.resolveDidsToHandles(
         statuses.map((s) => s.authorDid)
       )
-
-      if (!agent) {
-        // Serve the logged-out view
-        return res.type('html').send(page(home({ statuses, didHandleMap })))
-      }
 
       // Fetch additional information about the logged-in user
       const profileResponse = await agent.com.atproto.repo.getRecord({
@@ -201,6 +195,71 @@ export const createRouter = (ctx: AppContext) => {
           })
         )
       )
+    })
+  )
+
+  // "Fetch statuses" handler
+  router.get(
+    '/statuses',
+    handler(async (req, res) => {
+      // If the user is signed in, get an agent which communicates with their server
+      const agent = await getSessionAgent(req, res, ctx)
+      if (!agent) {
+        return res
+          .status(401)
+          .type('html')
+          .send('<h1>Error: Session required</h1>')
+      }
+
+      // Fetch data stored in the repo
+      const { data: repoStatusesData } = await agent.com.atproto.repo.listRecords({
+        repo: agent.assertDid,
+        collection: 'xyz.statusphere.status',
+        limit: 10,
+      })
+
+      // Map the records to our SQLite schema
+      const repoStatuses = repoStatusesData.records
+        .map((record) => {
+          const value = record.value as { status: string; createdAt: string }
+          return {
+            uri: record.uri,
+            authorDid: agent.assertDid,
+            status: value.status,
+            createdAt: value.createdAt,
+            indexedAt: value.createdAt,
+          }
+        })
+        .filter((record) => Status.validateRecord(record).success)
+
+      if (repoStatuses.length !== 0) {
+        // Fetch existing statuses from SQLite
+        const dbStatuses = await ctx.db
+          .selectFrom('status')
+          .selectAll()
+          .where('uri', 'in', repoStatuses.map((s) => s.uri))
+          .limit(10)
+          .execute()
+
+        // Persist to SQLite only if there are not existing in SQLite
+        const statuses = dbStatuses.length === 0
+          ? repoStatuses
+          : repoStatuses.filter((s) => !dbStatuses.some((dbS) => dbS.uri === s.uri))
+
+        if (statuses.length !== 0) {
+          try {
+            // Optimistically update our SQLite
+            await ctx.db
+              .insertInto('status')
+              .values(statuses)
+              .execute()
+          } catch (err) {
+            ctx.logger.warn({err}, 'failed to update computed view; ignoring as it should be caught by the firehose')
+          }
+        }
+      }
+
+      return res.redirect('/')
     })
   )
 
