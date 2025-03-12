@@ -17,19 +17,24 @@ function content({ error }: Props) {
       <p>Set your status on the Atmosphere.</p>
     </div>
     <div class="container">
-      <form action="/login" method="post" class="login-form">
-        <input
-          type="text"
-          name="handle"
-          placeholder="Enter your handle (eg alice.bsky.social)"
-          required
-        />
-        <button type="submit">Log in</button>
+      <form action="/login" method="post" class="login-form" id="login-form">
+        <div class="login-input">
+          <input
+            type="text"
+            name="handle"
+            placeholder="Enter your handle (eg alice.bsky.social)" />
+          <button type="submit">Log in</button>
+        </div>
         ${error ? html`<p>Error: <i>${error}</i></p>` : undefined}
       </form>
       <div class="signup-cta">
         Don't have an account on the Atmosphere?
-        <a href="https://bsky.app">Sign up for Bluesky</a> to create one now!
+        <input
+          form="login-form"
+          type="submit"
+          name="signup"
+          value="Sign up for Bluesky" />
+        to create one now!
       </div>
     </div>
   </div>`

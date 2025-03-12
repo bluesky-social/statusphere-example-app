@@ -102,8 +102,7 @@ export const createRouter = (ctx: AppContext) => {
     '/login',
     handler(async (req, res) => {
       // Validate
-      const handle = req.body?.handle
-      if (typeof handle !== 'string' || !isValidHandle(handle)) {
+      const handle = req.body?.signup ? 'https://bsky.social' : req.body?.handle
       if (typeof handle !== 'string' || !handle.trim()) {
         return res
           .type('html')

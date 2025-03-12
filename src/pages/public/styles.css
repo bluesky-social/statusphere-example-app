@@ -122,7 +122,14 @@ button:hover, .button:hover {
   background-color: #fff;
 }
 
-.login-form input {
+.login-input {
+  gap: 6px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.login-input input {
   flex: 1;
   border: 0;
 }
@@ -209,4 +216,17 @@ button:hover, .button:hover {
   text-align: center;
   text-wrap: balance;
   margin-top: 1rem;
+}
+
+.signup-cta input[type='submit'] {
+  appearance: none;
+  border: none;
+  background: none;
+  margin: 0;
+  padding: 0;
+  display: inline;
+  color: var(--primary-500);
+  text-decoration: underline;
+  font-size: inherit;
+  cursor: pointer;
 }
