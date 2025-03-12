@@ -104,6 +104,12 @@ export const createRouter = (ctx: AppContext) => {
       // Validate
       const handle = req.body?.handle
       if (typeof handle !== 'string' || !isValidHandle(handle)) {
+      if (typeof handle !== 'string' || !handle.trim()) {
+        return res
+          .type('html')
+          .send(page(login({ error: 'handle is required' })))
+      }
+      if (!(isValidHandle(handle) || isValidUrl(handle))) {
         return res.type('html').send(page(login({ error: 'invalid handle' })))
       }
 
@@ -176,15 +182,18 @@ export const createRouter = (ctx: AppContext) => {
       }
 
       // Fetch additional information about the logged-in user
-      const profileResponse = await agent.com.atproto.repo.getRecord({
-        repo: agent.assertDid,
-        collection: 'app.bsky.actor.profile',
-        rkey: 'self',
-      }).catch(() => undefined);
+      const profileResponse = await agent.com.atproto.repo
+        .getRecord({
+          repo: agent.assertDid,
+          collection: 'app.bsky.actor.profile',
+          rkey: 'self',
+        })
+        .catch(() => undefined)
 
-      const profileRecord = profileResponse?.data;
+      const profileRecord = profileResponse?.data
 
-      const profile = profileRecord &&
+      const profile =
+        profileRecord &&
         Profile.isRecord(profileRecord.value) &&
         Profile.validateRecord(profileRecord.value).success
           ? profileRecord.value
@@ -277,4 +286,14 @@ export const createRouter = (ctx: AppContext) => {
   )
 
   return router
+}
+
+function isValidUrl(url: string): boolean {
+  try {
+    const urlp = new URL(url)
+    // http or https
+    return urlp.protocol === 'http:' || urlp.protocol === 'https:'
+  } catch (error) {
+    return false
+  }
 }
