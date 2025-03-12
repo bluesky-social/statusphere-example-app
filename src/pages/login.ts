@@ -33,7 +33,7 @@ function content({ error }: Props) {
           form="login-form"
           type="submit"
           name="signup"
-          value="Sign up for Bluesky" />
+          value="Sign up via Bluesky" />
         to create one now!
       </div>
     </div>
