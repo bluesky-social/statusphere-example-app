@@ -1,13 +1,11 @@
-import assert from 'node:assert'
 import { Keyset } from '@atproto/jwk'
 import { JoseKey } from '@atproto/jwk-jose'
 import {
-  AppViewHandleResolver,
   atprotoLoopbackClientMetadata,
-  DidResolverCommon,
   NodeOAuthClient,
   OAuthClientMetadataInput,
 } from '@atproto/oauth-client-node'
+import assert from 'node:assert'
 
 import type { Database } from '#/db'
 import { env } from '#/env'
@@ -47,7 +45,7 @@ export async function createOAuthClient(db: Database) {
         response_types: ['code'],
         application_type: 'web',
         token_endpoint_auth_method: pk ? 'private_key_jwt' : 'none',
-        token_endpoint_auth_signing_alg: pk ? pk[1] : undefined,
+        token_endpoint_auth_signing_alg: pk ? pk.alg : undefined,
         dpop_bound_access_tokens: true,
       }
     : atprotoLoopbackClientMetadata(
