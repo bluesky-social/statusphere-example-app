@@ -5,7 +5,11 @@ import { isValidHandle } from '@atproto/syntax'
 import express, { Request, Response } from 'express'
 import { getIronSession } from 'iron-session'
 import assert from 'node:assert'
-import type { IncomingMessage, ServerResponse } from 'node:http'
+import type {
+  IncomingMessage,
+  RequestListener,
+  ServerResponse,
+} from 'node:http'
 import path from 'node:path'
 
 import type { AppContext } from '#/context'
@@ -40,7 +44,7 @@ async function getSessionAgent(
   }
 }
 
-export const createRouter = (ctx: AppContext) => {
+export function createRouter(ctx: AppContext): RequestListener {
   const app = express()
 
   // Static assets
