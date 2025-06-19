@@ -10,7 +10,6 @@ const STATUS_OPTIONS = [
   '💙',
   '🥹',
   '😧',
-  '😤',
   '🙃',
   '😉',
   '😎',
@@ -36,7 +35,7 @@ const STATUS_OPTIONS = [
 
 type Props = {
   statuses: Status[]
-  didHandleMap: Record<string, string>
+  didHandleMap: Record<string, string | undefined>
   profile?: { displayName?: string }
   myStatus?: Status
 }
@@ -85,7 +84,7 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
               value="${status}"
             >
               ${status}
-            </button>`
+            </button>`,
         )}
       </form>
       ${statuses.map((status, i) => {

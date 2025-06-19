@@ -1,6 +1,6 @@
 import pino from 'pino'
 import { IdResolver } from '@atproto/identity'
-import { Firehose } from '@atproto/sync'
+import { Event, Firehose } from '@atproto/sync'
 import type { Database } from '#/db'
 import * as Status from '#/lexicon/types/xyz/statusphere/status'
 
@@ -8,7 +8,7 @@ export function createIngester(db: Database, idResolver: IdResolver) {
   const logger = pino({ name: 'firehose ingestion' })
   return new Firehose({
     idResolver,
-    handleEvent: async (evt) => {
+    handleEvent: async (evt: Event) => {
       // Watch for write events
       if (evt.event === 'create' || evt.event === 'update') {
         const now = new Date()
@@ -43,10 +43,13 @@ export function createIngester(db: Database, idResolver: IdResolver) {
         evt.collection === 'xyz.statusphere.status'
       ) {
         // Remove the status from our SQLite
-        await db.deleteFrom('status').where('uri', '=', evt.uri.toString()).execute()
+        await db
+          .deleteFrom('status')
+          .where('uri', '=', evt.uri.toString())
+          .execute()
       }
     },
-    onError: (err) => {
+    onError: (err: unknown) => {
       logger.error({ err }, 'error on firehose ingestion')
     },
     filterCollections: ['xyz.statusphere.status'],

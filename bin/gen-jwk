@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+
+'use strict'
+
+const { JoseKey } = require('@atproto/jwk-jose')
+
+async function main() {
+  const kid = Date.now().toString()
+  const key = await JoseKey.generate(['ES256'], kid)
+  const jwk = key.privateJwk
+
+  console.log(JSON.stringify(jwk))
+}
+
+main()

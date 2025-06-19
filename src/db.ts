@@ -1,11 +1,13 @@
 import SqliteDb from 'better-sqlite3'
 import {
   Kysely,
-  Migrator,
-  SqliteDialect,
   Migration,
   MigrationProvider,
+  Migrator,
+  SqliteDialect,
 } from 'kysely'
+
+import { env } from '#/env'
 
 // Types
 
@@ -77,18 +79,23 @@ migrations['001'] = {
 
 // APIs
 
-export const createDb = (location: string): Database => {
-  return new Kysely<DatabaseSchema>({
+export async function createDb(options?: {
+  /** @default true */
+  migrate?: boolean
+}): Promise<Database> {
+  const db = new Kysely<DatabaseSchema>({
     dialect: new SqliteDialect({
-      database: new SqliteDb(location),
+      database: new SqliteDb(env.DB_PATH),
     }),
   })
-}
 
-export const migrateToLatest = async (db: Database) => {
-  const migrator = new Migrator({ db, provider: migrationProvider })
-  const { error } = await migrator.migrateToLatest()
-  if (error) throw error
+  if (options?.migrate !== false) {
+    const migrator = new Migrator({ db, provider: migrationProvider })
+    const { error } = await migrator.migrateToLatest()
+    if (error) throw error
+  }
+
+  return db
 }
 
 export type Database = Kysely<DatabaseSchema>
