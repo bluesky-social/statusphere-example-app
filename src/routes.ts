@@ -16,7 +16,7 @@ import type { AppContext } from '#/context'
 import * as Profile from '#/lexicon/types/app/bsky/actor/profile'
 import * as Status from '#/lexicon/types/xyz/statusphere/status'
 import { env } from '#/env'
-import { formHandler, handler } from '#/lib/http'
+import { handler } from '#/lib/http'
 import { page } from '#/lib/view'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
@@ -53,7 +53,7 @@ export function createRouter(ctx: AppContext): RequestListener {
   // OAuth metadata
   app.get(
     '/oauth-client-metadata.json',
-    handler(async (req: Request, res: Response) => {
+    handler((req: Request, res: Response) => {
       res.json(ctx.oauthClient.clientMetadata)
     }),
   )
@@ -61,7 +61,7 @@ export function createRouter(ctx: AppContext): RequestListener {
   // Public keys
   app.get(
     '/.well-known/jwks.json',
-    handler(async (req: Request, res: Response) => {
+    handler((req: Request, res: Response) => {
       res.json(ctx.oauthClient.jwks)
     }),
   )
@@ -91,7 +91,7 @@ export function createRouter(ctx: AppContext): RequestListener {
   // Login page
   app.get(
     '/login',
-    handler(async (req: Request, res: Response) => {
+    handler((req: Request, res: Response) => {
       res.type('html').send(page(login({})))
     }),
   )
@@ -99,7 +99,8 @@ export function createRouter(ctx: AppContext): RequestListener {
   // Login handler
   app.post(
     '/login',
-    formHandler(async (req: Request, res: Response) => {
+    express.urlencoded({ extended: true }),
+    handler(async (req: Request, res: Response) => {
       // Validate
       const handle = req.body?.handle
       if (typeof handle !== 'string' || !isValidHandle(handle)) {
@@ -133,7 +134,7 @@ export function createRouter(ctx: AppContext): RequestListener {
   // Logout handler
   app.post(
     '/logout',
-    formHandler(async (req: Request, res: Response) => {
+    handler(async (req: Request, res: Response) => {
       const session = await getIronSession<Session>(req, res, {
         cookieName: 'sid',
         password: env.COOKIE_SECRET,
@@ -223,7 +224,8 @@ export function createRouter(ctx: AppContext): RequestListener {
   // "Set status" handler
   app.post(
     '/status',
-    formHandler(async (req: Request, res: Response) => {
+    express.urlencoded({ extended: true }),
+    handler(async (req: Request, res: Response) => {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
       if (!agent) {
