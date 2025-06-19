@@ -1,13 +1,18 @@
-import pino from 'pino'
-import { IdResolver } from '@atproto/identity'
-import { Event, Firehose } from '@atproto/sync'
 import type { Database } from '#/db'
 import * as Status from '#/lexicon/types/xyz/statusphere/status'
+import { IdResolver, MemoryCache } from '@atproto/identity'
+import { Event, Firehose } from '@atproto/sync'
+import pino from 'pino'
 
-export function createIngester(db: Database, idResolver: IdResolver) {
+const HOUR = 60e3 * 60
+const DAY = HOUR * 24
+
+export function createIngester(db: Database) {
   const logger = pino({ name: 'firehose ingestion' })
   return new Firehose({
-    idResolver,
+    idResolver: new IdResolver({
+      didCache: new MemoryCache(HOUR, DAY),
+    }),
     handleEvent: async (evt: Event) => {
       // Watch for write events
       if (evt.event === 'create' || evt.event === 'update') {
@@ -34,7 +39,7 @@ export function createIngester(db: Database, idResolver: IdResolver) {
               oc.column('uri').doUpdateSet({
                 status: record.status,
                 indexedAt: now.toISOString(),
-              })
+              }),
             )
             .execute()
         }

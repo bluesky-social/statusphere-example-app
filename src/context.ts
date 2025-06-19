@@ -3,13 +3,7 @@ import { Firehose } from '@atproto/sync'
 import { pino } from 'pino'
 
 import { createOAuthClient } from '#/auth/client'
-import { Database } from '#/db'
-import { createDb } from '#/db'
-import {
-  BidirectionalResolver,
-  createBidirectionalResolver,
-  createIdResolver,
-} from '#/id-resolver'
+import { createDb, Database } from '#/db'
 import { createIngester } from '#/ingester'
 
 /**
@@ -20,23 +14,20 @@ export type AppContext = {
   ingester: Firehose
   logger: pino.Logger
   oauthClient: NodeOAuthClient
-  resolver: BidirectionalResolver
+  identityResolver: NodeOAuthClient['identityResolver']
 }
 
 export async function createAppContext(): Promise<AppContext> {
-  const logger = pino({ name: 'server start' })
-
   const db = await createDb()
   const oauthClient = await createOAuthClient(db)
-  const baseIdResolver = createIdResolver()
-  const ingester = createIngester(db, baseIdResolver)
-  const resolver = createBidirectionalResolver(baseIdResolver)
+  const ingester = createIngester(db)
+  const logger = pino({ name: 'server' })
 
   return {
     db,
     ingester,
     logger,
     oauthClient,
-    resolver,
+    identityResolver: oauthClient.identityResolver,
   }
 }

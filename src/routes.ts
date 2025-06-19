@@ -162,10 +162,20 @@ export const createRouter = (ctx: AppContext) => {
             .executeTakeFirst()
         : undefined
 
-      // Map user DIDs to their domain-name handles
-      const didHandleMap = await ctx.resolver.resolveDidsToHandles(
-        statuses.map((s) => s.authorDid),
-      )
+      // Map (unique) user DIDs to their domain-name handles
+      const uniqueDids = [...new Set(statuses.map((s) => s.authorDid))]
+
+      const didHandleMap: Record<string, string | undefined> =
+        Object.fromEntries(
+          await Promise.all(
+            uniqueDids.map((did) =>
+              ctx.identityResolver.resolve(did).then(
+                (r) => [did, r.handle],
+                () => [did, undefined],
+              ),
+            ),
+          ),
+        )
 
       if (!agent) {
         // Serve the logged-out view
