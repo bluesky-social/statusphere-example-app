@@ -19,7 +19,7 @@ import { handler } from '#/lib/http'
 import { page } from '#/lib/view'
 import { home, STATUS_OPTIONS } from '#/pages/home'
 import { login } from '#/pages/login'
-import { ifString } from './lib/util'
+import { ifString } from '#/lib/util'
 
 type Session = { did?: string }
 
