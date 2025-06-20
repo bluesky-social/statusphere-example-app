@@ -67,12 +67,7 @@ button:hover, .button:hover {
   color: var(--error-500);
   text-align: center;
   padding: 1rem;
-  display: none;
 }
-.error.visible {
-  display: block;
-}
-
 #header {
   background-color: #fff;
   text-align: center;
