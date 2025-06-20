@@ -10,7 +10,7 @@ export const env = cleanEnv(process.env, {
     choices: ['development', 'production', 'test'],
   }),
   PORT: port({ devDefault: testOnly(3000) }),
-  PUBLIC_URL: str({}),
+  PUBLIC_URL: str({ default: undefined }),
   DB_PATH: str({ devDefault: ':memory:' }),
   COOKIE_SECRET: str({ devDefault: '00000000000000000000000000000000' }),
   PRIVATE_KEYS: envalidJsonWebKeys({ default: undefined }),

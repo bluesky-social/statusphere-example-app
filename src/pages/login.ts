@@ -15,7 +15,7 @@ function content({ error, state }: Props) {
   const signupService =
     !env.PDS_URL || env.PDS_URL === 'https://bsky.social'
       ? 'Bluesky'
-      : env.PDS_URL
+      : new URL(env.PDS_URL).hostname
 
   const signupUrl = state
     ? `/signup?state=${encodeURIComponent(state)}`
