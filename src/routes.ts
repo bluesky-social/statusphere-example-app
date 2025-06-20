@@ -1,7 +1,6 @@
 import { Agent } from '@atproto/api'
 import { TID } from '@atproto/common'
 import { OAuthResolverError } from '@atproto/oauth-client-node'
-import { isValidHandle } from '@atproto/syntax'
 import express, { Request, Response } from 'express'
 import { getIronSession } from 'iron-session'
 import assert from 'node:assert'
@@ -105,16 +104,41 @@ export function createRouter(ctx: AppContext): RequestListener {
     express.urlencoded({ extended: true }),
     handler(async (req: Request, res: Response) => {
       // Validate
-      const handle = req.body?.handle
-      if (typeof handle !== 'string' || !isValidHandle(handle)) {
+      const input = req.body?.input
+      if (typeof input !== 'string') {
         return void res
           .type('html')
-          .send(page(login({ error: 'invalid handle' })))
+          .send(page(login({ error: 'invalid input' })))
       }
 
       // Initiate the OAuth flow
       try {
-        const url = await ctx.oauthClient.authorize(handle, {
+        const url = await ctx.oauthClient.authorize(input, {
+          scope: 'atproto transition:generic',
+        })
+        res.redirect(url.toString())
+      } catch (err) {
+        ctx.logger.error({ err }, 'oauth authorize failed')
+        res.type('html').send(
+          page(
+            login({
+              error:
+                err instanceof OAuthResolverError
+                  ? err.message
+                  : "couldn't initiate login",
+            }),
+          ),
+        )
+      }
+    }),
+  )
+
+  // Signup
+  app.get(
+    '/signup',
+    handler(async (req: Request, res: Response) => {
+      try {
+        const url = await ctx.oauthClient.authorize(env.PDS_URL, {
           scope: 'atproto transition:generic',
         })
         res.redirect(url.toString())

@@ -207,6 +207,7 @@ button:hover, .button:hover {
 
 .signup-cta {
   text-align: center;
-  text-wrap: balance;
+  width: 100%;
+  display: block;
   margin-top: 1rem;
 }

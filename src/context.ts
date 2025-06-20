@@ -5,6 +5,7 @@ import { pino } from 'pino'
 import { createOAuthClient } from '#/auth/client'
 import { createDb, Database } from '#/db'
 import { createIngester } from '#/ingester'
+import { env } from '#/env'
 
 /**
  * Application state passed to the router and elsewhere
@@ -21,7 +22,7 @@ export async function createAppContext(): Promise<AppContext> {
   const db = await createDb()
   const oauthClient = await createOAuthClient(db)
   const ingester = createIngester(db)
-  const logger = pino({ name: 'server' })
+  const logger = pino({ name: 'server', level: env.LOG_LEVEL })
 
   return {
     db,

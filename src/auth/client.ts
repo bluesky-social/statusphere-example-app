@@ -60,5 +60,7 @@ export async function createOAuthClient(db: Database) {
     clientMetadata,
     stateStore: new StateStore(db),
     sessionStore: new SessionStore(db),
+    plcDirectoryUrl: env.PLC_URL,
+    handleResolver: env.PDS_URL,
   })
 }

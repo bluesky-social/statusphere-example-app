@@ -20,7 +20,6 @@
     "@atproto/lexicon": "^0.4.11",
     "@atproto/oauth-client-node": "^0.3.1",
     "@atproto/sync": "^0.1.26",
-    "@atproto/syntax": "^0.4.0",
     "@atproto/xrpc-server": "^0.8.0",
     "better-sqlite3": "^11.1.2",
     "dotenv": "^16.4.5",
