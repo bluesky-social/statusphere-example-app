@@ -2,7 +2,7 @@ import { env } from '#/env'
 import { html } from '../lib/view'
 import { shell } from './shell'
 
-type Props = { error?: string; state?: string }
+type Props = { error?: string }
 
 export function login(props: Props) {
   return shell({
@@ -11,15 +11,11 @@ export function login(props: Props) {
   })
 }
 
-function content({ error, state }: Props) {
+function content({ error }: Props) {
   const signupService =
     !env.PDS_URL || env.PDS_URL === 'https://bsky.social'
       ? 'Bluesky'
       : new URL(env.PDS_URL).hostname
-
-  const signupUrl = state
-    ? `/signup?state=${encodeURIComponent(state)}`
-    : '/signup'
 
   return html`<div id="root">
     <div id="header">
@@ -35,14 +31,10 @@ function content({ error, state }: Props) {
           required
         />
 
-        ${state != null
-          ? html`<input type="hidden" name="state" value="${state}" />`
-          : undefined}
-
         <button type="submit">Log in</button>
       </form>
 
-      <a href="${signupUrl}" class="button signup-cta">
+      <a href="/signup" class="button signup-cta">
         Login or Sign up with a ${signupService} account
       </a>
 
