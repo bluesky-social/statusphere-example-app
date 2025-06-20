@@ -15,6 +15,7 @@ export const env = cleanEnv(process.env, {
   COOKIE_SECRET: str({ devDefault: '00000000000000000000000000000000' }),
   PRIVATE_KEYS: keys({ default: undefined }),
   LOG_LEVEL: str({
+    devDefault: 'debug',
     default: 'info',
     choices: ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'],
   }),
