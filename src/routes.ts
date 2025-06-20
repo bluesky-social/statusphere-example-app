@@ -97,20 +97,18 @@ export function createRouter(ctx: AppContext): RequestListener {
         // Update the session cookie
         session.did = oauth.session.did
         await session.save()
-
-        // Redirect to the homepage
-        return res.redirect('/')
       } catch (err) {
         ctx.logger.error({ err }, 'oauth callback failed')
         return res.redirect('/?error')
       }
+      return res.redirect('/')
     }),
   )
 
   // Login page
   router.get(
     '/login',
-    handler((req: Request, res: Response) => {
+    handler(async (req: Request, res: Response) => {
       res.type('html').send(page(login({})))
     }),
   )
@@ -127,6 +125,8 @@ export function createRouter(ctx: AppContext): RequestListener {
         res.type('html').send(page(login({ error: 'invalid input' })))
         return
       }
+
+      // @NOTE input can be a handle, a DID or a service URL (PDS).
 
       // Initiate the OAuth flow
       try {
@@ -202,8 +202,6 @@ export function createRouter(ctx: AppContext): RequestListener {
   router.get(
     '/',
     handler(async (req: Request, res: Response) => {
-      const error = ifString(req.query.error)
-
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
 
@@ -240,7 +238,7 @@ export function createRouter(ctx: AppContext): RequestListener {
 
       if (!agent) {
         // Serve the logged-out view
-        res.type('html').send(page(home({ error, statuses, didHandleMap })))
+        res.type('html').send(page(home({ statuses, didHandleMap })))
         return
       }
 
@@ -263,9 +261,16 @@ export function createRouter(ctx: AppContext): RequestListener {
           : {}
 
       // Serve the logged-in view
-      res
-        .type('html')
-        .send(page(home({ error, statuses, didHandleMap, profile, myStatus })))
+      res.type('html').send(
+        page(
+          home({
+            statuses,
+            didHandleMap,
+            profile,
+            myStatus,
+          }),
+        ),
+      )
     }),
   )
 
@@ -277,76 +282,71 @@ export function createRouter(ctx: AppContext): RequestListener {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
       if (!agent) {
-        res.redirect(`/login}`)
+        res.redirect(`/login`)
+        return
+      }
+
+      const status = ifString(req.body?.status)
+      if (!status || !STATUS_OPTIONS.includes(status)) {
+        throw new Error('Invalid status')
+      }
+
+      // Construct & validate their status record
+      const rkey = TID.nextStr()
+      const record = {
+        $type: 'xyz.statusphere.status',
+        status,
+        createdAt: new Date().toISOString(),
+      }
+
+      if (!Status.validateRecord(record).success) {
+        res.status(400).type('html').send('<h1>Error: Invalid status</h1>')
+        return
+      }
+
+      // Write the status record to the user's repository
+      let uri
+      try {
+        const res = await agent.com.atproto.repo.putRecord({
+          repo: agent.assertDid,
+          collection: 'xyz.statusphere.status',
+          rkey,
+          record,
+          validate: false,
+        })
+        uri = res.data.uri
+      } catch (err) {
+        ctx.logger.warn({ err }, 'failed to write record')
+        res
+          .status(500)
+          .type('html')
+          .send('<h1>Error: Failed to write record</h1>')
         return
       }
 
       try {
-        const status = req.body?.status
-        if (typeof status !== 'string' || !STATUS_OPTIONS.includes(status)) {
-          throw new Error('Invalid status')
-        }
-
-        // Construct & validate their status record
-        const rkey = TID.nextStr()
-        const record = {
-          $type: 'xyz.statusphere.status',
-          status,
-          createdAt: new Date().toISOString(),
-        }
-
-        if (!Status.validateRecord(record).success) {
-          res.status(400).type('html').send('<h1>Error: Invalid status</h1>')
-          return
-        }
-
-        // Write the status record to the user's repository
-        let uri
-        try {
-          const res = await agent.com.atproto.repo.putRecord({
-            repo: agent.assertDid,
-            collection: 'xyz.statusphere.status',
-            rkey,
-            record,
-            validate: false,
+        // Optimistically update our SQLite
+        // This isn't strictly necessary because the write event will be
+        // handled in #/firehose/ingestor.ts, but it ensures that future reads
+        // will be up-to-date after this method finishes.
+        await ctx.db
+          .insertInto('status')
+          .values({
+            uri,
+            authorDid: agent.assertDid,
+            status: record.status,
+            createdAt: record.createdAt,
+            indexedAt: new Date().toISOString(),
           })
-          uri = res.data.uri
-        } catch (err) {
-          ctx.logger.error({ err }, 'failed to write record')
-          res
-            .status(500)
-            .type('html')
-            .send('<h1>Error: Failed to write record</h1>')
-          return
-        }
-
-        try {
-          // Optimistically update our SQLite
-          // This isn't strictly necessary because the write event will be
-          // handled in #/firehose/ingestor.ts, but it ensures that future reads
-          // will be up-to-date after this method finishes.
-          await ctx.db
-            .insertInto('status')
-            .values({
-              uri,
-              authorDid: agent.assertDid,
-              status: record.status,
-              createdAt: record.createdAt,
-              indexedAt: new Date().toISOString(),
-            })
-            .execute()
-        } catch (err) {
-          ctx.logger.warn(
-            { err },
-            'failed to update computed view; ignoring as it should be caught by the firehose',
-          )
-        }
-
-        res.redirect('/')
+          .execute()
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Unknown error'
-        res.redirect(`/?error=${encodeURIComponent(message)}`)
+        ctx.logger.warn(
+          { err },
+          'failed to update computed view; ignoring as it should be caught by the firehose',
+        )
       }
+
+      res.redirect('/')
     }),
   )
 

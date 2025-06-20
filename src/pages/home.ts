@@ -36,7 +36,6 @@ export const STATUS_OPTIONS = [
 type Props = {
   statuses: Status[]
   didHandleMap: Record<string, string | undefined>
-  error?: string
   profile?: { displayName?: string }
   myStatus?: Status
 }
@@ -48,8 +47,9 @@ export function home(props: Props) {
   })
 }
 
-function content({ error, statuses, didHandleMap, profile, myStatus }: Props) {
+function content({ statuses, didHandleMap, profile, myStatus }: Props) {
   return html`<div id="root">
+    <div class="error"></div>
     <div id="header">
       <h1>Statusphere</h1>
       <p>Set your status on the Atmosphere.</p>
@@ -87,7 +87,6 @@ function content({ error, statuses, didHandleMap, profile, myStatus }: Props) {
             </button>`,
         )}
       </form>
-      ${error ? html`<div class="error">${error}</div>` : undefined}
       ${statuses.map((status, i) => {
         const handle = didHandleMap[status.authorDid] || status.authorDid
         const date = ts(status)
