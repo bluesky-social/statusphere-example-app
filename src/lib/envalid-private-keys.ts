@@ -1,4 +1,4 @@
-import { Jwk, jwkValidator } from '@atproto/jwk'
+import { Jwk, jwkValidator } from '@atproto/oauth-client-node'
 import { makeValidator } from 'envalid'
 import { z } from 'zod'
 
@@ -6,7 +6,7 @@ export type PrivateKey = Jwk & { kid: string }
 
 const privateKeySchema = z.intersection(
   jwkValidator,
-  z.object({ kid: z.string().nonempty() })
+  z.object({ kid: z.string().nonempty() }),
 ) satisfies z.ZodType<PrivateKey>
 
 const privateKeysSchema = z.array(privateKeySchema).nonempty()

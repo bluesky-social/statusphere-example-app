@@ -1,6 +1,6 @@
-import { Keyset } from '@atproto/jwk'
-import { JoseKey } from '@atproto/jwk-jose'
 import {
+  Keyset,
+  JoseKey,
   atprotoLoopbackClientMetadata,
   NodeOAuthClient,
   OAuthClientMetadataInput,
@@ -60,5 +60,9 @@ export async function createOAuthClient(db: Database) {
     clientMetadata,
     stateStore: new StateStore(db),
     sessionStore: new SessionStore(db),
+
+    // XXX Staging
+    plcDirectoryUrl: 'https://plc.staging.bsky.dev',
+    handleResolver: 'https://staging.bsky.dev',
   })
 }

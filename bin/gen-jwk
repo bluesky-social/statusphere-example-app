@@ -2,7 +2,7 @@
 
 'use strict'
 
-const { JoseKey } = require('@atproto/jwk-jose')
+const { JoseKey } = require('@atproto/oauth-client-node')
 
 async function main() {
   const kid = Date.now().toString()
