@@ -15,8 +15,7 @@ export const env = cleanEnv(process.env, {
   COOKIE_SECRET: str({ devDefault: '00000000000000000000000000000000' }),
   PRIVATE_KEYS: envalidJsonWebKeys({ default: undefined }),
   LOG_LEVEL: str({ default: 'info' }),
-  PDS_OWNER: str({ default: 'Bluesky' }),
-  PDS_URL: str({ default: 'https://bsky.social' }),
-  PLC_URL: str({ default: 'https://plc.directory' }),
-  FIREHOSE_URL: str({ default: 'wss://bsky.network' }),
+  PDS_URL: str({ default: undefined }),
+  PLC_URL: str({ default: undefined }),
+  FIREHOSE_URL: str({ default: undefined }),
 })

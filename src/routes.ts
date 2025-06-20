@@ -138,7 +138,8 @@ export function createRouter(ctx: AppContext): RequestListener {
     '/signup',
     handler(async (req: Request, res: Response) => {
       try {
-        const url = await ctx.oauthClient.authorize(env.PDS_URL, {
+        const service = env.PDS_URL ?? 'https://bsky.social'
+        const url = await ctx.oauthClient.authorize(service, {
           scope: 'atproto transition:generic',
         })
         res.redirect(url.toString())

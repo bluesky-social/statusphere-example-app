@@ -12,6 +12,11 @@ export function login(props: Props) {
 }
 
 function content({ error }: Props) {
+  const serviceName =
+    !env.PDS_URL || env.PDS_URL === 'https://bsky.social'
+      ? 'Bluesky'
+      : env.PDS_URL
+
   return html`<div id="root">
     <div id="header">
       <h1>Statusphere</h1>
@@ -29,7 +34,7 @@ function content({ error }: Props) {
       </form>
 
       <a href="/signup" class="button signup-cta">
-        Login or Sign up with a ${env.PDS_OWNER} account
+        Login or Sign up with a ${serviceName} account
       </a>
 
       ${error ? html`<p>Error: <i>${error}</i></p>` : undefined}
