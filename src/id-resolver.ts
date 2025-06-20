@@ -1,7 +1,7 @@
 import { OAuthClient } from '@atproto/oauth-client-node'
 
 export interface BidirectionalResolver {
-  resolveDidToHandle(did: string): Promise<string>
+  resolveDidToHandle(did: string): Promise<string | undefined>
   resolveDidsToHandles(
     dids: string[],
   ): Promise<Record<string, string | undefined>>
@@ -11,14 +11,13 @@ export function createBidirectionalResolver({
   identityResolver,
 }: OAuthClient): BidirectionalResolver {
   return {
-    async resolveDidToHandle(did: string): Promise<string> {
+    async resolveDidToHandle(did: string): Promise<string | undefined> {
       try {
         const { handle } = await identityResolver.resolve(did)
         if (handle) return handle
       } catch {
         // Ignore
       }
-      return did
     },
 
     async resolveDidsToHandles(
