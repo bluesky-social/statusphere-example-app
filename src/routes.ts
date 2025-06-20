@@ -21,7 +21,7 @@ import { page } from '#/lib/view'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
 
-type Session = { did: string }
+type Session = { did?: string }
 
 // Helper function to get the Atproto Agent for the active session
 async function getSessionAgent(
@@ -35,7 +35,10 @@ async function getSessionAgent(
   })
   if (!session.did) return null
   try {
-    const oauthSession = await ctx.oauthClient.restore(session.did)
+    // force rotating the credentials if the request has a no-cache header
+    const refresh = req.headers['cache-control']?.includes('no-cache') || 'auto'
+
+    const oauthSession = await ctx.oauthClient.restore(session.did, refresh)
     return oauthSession ? new Agent(oauthSession) : null
   } catch (err) {
     ctx.logger.warn({ err }, 'oauth restore failed')
@@ -139,7 +142,19 @@ export function createRouter(ctx: AppContext): RequestListener {
         cookieName: 'sid',
         password: env.COOKIE_SECRET,
       })
-      await session.destroy()
+
+      // Revoke credentials on the server
+      if (session.did) {
+        try {
+          const oauthSession = await ctx.oauthClient.restore(session.did)
+          if (oauthSession) await oauthSession.signOut()
+        } catch (err) {
+          ctx.logger.warn({ err }, 'Failed to revoke credentials')
+        }
+      }
+
+      session.destroy()
+
       return res.redirect('/')
     }),
   )

@@ -12,22 +12,22 @@ import { env } from '#/env'
 import { SessionStore, StateStore } from './storage'
 
 export async function createOAuthClient(db: Database) {
-  assert(
-    !env.PUBLIC_URL || env.PRIVATE_JWKS,
-    'ATProto requires backend clients to be confidential',
-  )
-
   // Confidential client require a keyset accessible on the internet. Non
   // internet clients (e.g. development) cannot expose a keyset on the internet
   // so they can't be private..
   const keyset =
-    env.PUBLIC_URL && env.PRIVATE_JWKS
+    env.PUBLIC_URL && env.PRIVATE_KEYS
       ? new Keyset(
           await Promise.all(
-            env.PRIVATE_JWKS.map((jwk) => JoseKey.fromJWK(jwk)),
+            env.PRIVATE_KEYS.map((jwk) => JoseKey.fromJWK(jwk)),
           ),
         )
       : undefined
+
+  assert(
+    !env.PUBLIC_URL || keyset?.size,
+    'ATProto requires backend clients to be confidential. Make sure to set the PRIVATE_KEYS environment variable.',
+  )
 
   // If a keyset is defined (meaning the client is confidential). Let's make
   // sure it has a private key for signing. Note: findPrivateKey will throw if
@@ -60,9 +60,5 @@ export async function createOAuthClient(db: Database) {
     clientMetadata,
     stateStore: new StateStore(db),
     sessionStore: new SessionStore(db),
-
-    // XXX Staging
-    plcDirectoryUrl: 'https://plc.staging.bsky.dev',
-    handleResolver: 'https://staging.bsky.dev',
   })
 }
