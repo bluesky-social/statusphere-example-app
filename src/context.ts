@@ -3,7 +3,7 @@ import { Firehose } from '@atproto/sync'
 import { pino } from 'pino'
 
 import { createOAuthClient } from '#/auth/client'
-import { createDb, Database } from '#/db'
+import { createDb, Database, migrateToLatest } from '#/db'
 import { createIngester } from '#/ingester'
 import { env } from '#/env'
 
@@ -19,7 +19,8 @@ export type AppContext = {
 }
 
 export async function createAppContext(): Promise<AppContext> {
-  const db = await createDb()
+  const db = createDb(env.DB_PATH)
+  await migrateToLatest(db)
   const oauthClient = await createOAuthClient(db)
   const ingester = createIngester(db)
   const logger = pino({ name: 'server', level: env.LOG_LEVEL })
