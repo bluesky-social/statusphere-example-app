@@ -1,7 +1,11 @@
 const SIGNALS = ['SIGINT', 'SIGTERM'] as const
 
+/**
+ * Runs a function with an abort signal that will be triggered when the process
+ * receives a termination signal.
+ */
 export async function run<F extends (signal: AbortSignal) => unknown>(
-  fn: F
+  fn: F,
 ): Promise<Awaited<ReturnType<F>>> {
   const killController = new AbortController()
 

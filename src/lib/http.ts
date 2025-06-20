@@ -19,13 +19,16 @@ export type AsyncHandler<
   Res extends ServerResponse<Req> = ServerResponse<Req>,
 > = (req: Req, res: Res, next: NextFunction) => Promise<void>
 
-// Helper function for defining routes
+/**
+ * Wraps a request handler middleware to ensure that `next` is called if it
+ * throws or returns a promise that rejects.
+ */
 export function handler<
   Req extends IncomingMessage = IncomingMessage,
   Res extends ServerResponse<Req> = ServerResponse<Req>,
 >(fn: Handler<Req, Res> | AsyncHandler<Req, Res>): Handler<Req, Res> {
   return (req, res, next) => {
-    // NodeJS prefers objects over functions for garbage collection,
+    // Optimization: NodeJS prefers objects over functions for garbage collection
     const nextSafe = nextOnce.bind({ next })
     try {
       const result = fn(req, res, nextSafe)
@@ -42,6 +45,11 @@ export function handler<
   }
 }
 
+/**
+ * Create an HTTP server with the provided request listener, ensuring that it
+ * can bind the listening port, and returns a termination function that allows
+ * graceful termination of HTTP connections.
+ */
 export async function startServer(
   requestListener: RequestListener,
   {

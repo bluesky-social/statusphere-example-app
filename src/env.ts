@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import { cleanEnv, port, str, testOnly } from 'envalid'
-import { privateKeys } from '#/lib/envalid-private-keys'
+import { envalidJsonWebKeys } from '#/lib/jwk'
 
 dotenv.config()
 
@@ -13,5 +13,5 @@ export const env = cleanEnv(process.env, {
   PUBLIC_URL: str({}),
   DB_PATH: str({ devDefault: ':memory:' }),
   COOKIE_SECRET: str({ devDefault: '00000000000000000000000000000000' }),
-  PRIVATE_JWKS: privateKeys({ default: undefined }),
+  PRIVATE_JWKS: envalidJsonWebKeys({ default: undefined }),
 })
