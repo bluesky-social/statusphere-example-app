@@ -37,6 +37,7 @@ export async function createAppContext(): Promise<AppContext> {
     logger,
     oauthClient,
     resolver,
+
     async destroy() {
       await ingester.destroy()
       await db.destroy()

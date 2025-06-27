@@ -29,6 +29,6 @@ run(async (killSignal) => {
   // Gracefully shutdown the http server
   await terminate()
 
-  // Close the firehose connection
+  // Gracefully shutdown the application context
   await ctx.destroy()
 })

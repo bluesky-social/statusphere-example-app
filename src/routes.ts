@@ -17,8 +17,10 @@ import * as Status from '#/lexicon/types/xyz/statusphere/status'
 import { handler } from '#/lib/http'
 import { ifString } from '#/lib/util'
 import { page } from '#/lib/view'
-import { home, STATUS_OPTIONS } from '#/pages/home'
+import { home } from '#/pages/home'
 import { login } from '#/pages/login'
+
+const MAX_AGE = env.NODE_ENV === 'production' ? 60 : 0
 
 type Session = { did?: string }
 
@@ -43,16 +45,22 @@ async function getSessionAgent(
   }
 }
 
-export function createRouter(ctx: AppContext): RequestListener {
+export const createRouter = (ctx: AppContext): RequestListener => {
   const router = express()
 
   // Static assets
-  router.use('/public', express.static(path.join(__dirname, 'pages', 'public')))
+  router.use(
+    '/public',
+    express.static(path.join(__dirname, 'pages', 'public'), {
+      maxAge: MAX_AGE * 1000,
+    }),
+  )
 
   // OAuth metadata
   router.get(
     '/oauth-client-metadata.json',
     handler((req: Request, res: Response) => {
+      res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
       res.json(ctx.oauthClient.clientMetadata)
     }),
   )
@@ -61,6 +69,7 @@ export function createRouter(ctx: AppContext): RequestListener {
   router.get(
     '/.well-known/jwks.json',
     handler((req: Request, res: Response) => {
+      res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
       res.json(ctx.oauthClient.jwks)
     }),
   )
@@ -69,6 +78,8 @@ export function createRouter(ctx: AppContext): RequestListener {
   router.get(
     '/oauth/callback',
     handler(async (req: Request, res: Response) => {
+      res.setHeader('cache-control', 'no-store')
+
       const params = new URLSearchParams(req.originalUrl.split('?')[1])
       try {
         // Load the session cookie
@@ -105,6 +116,8 @@ export function createRouter(ctx: AppContext): RequestListener {
   router.get(
     '/login',
     handler(async (req: Request, res: Response) => {
+      res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
+
       return res.type('html').send(page(login({})))
     }),
   )
@@ -114,11 +127,32 @@ export function createRouter(ctx: AppContext): RequestListener {
     '/login',
     express.urlencoded(),
     handler(async (req: Request, res: Response) => {
+      res.setHeader('cache-control', 'no-store')
+
       const input = ifString(req.body.input)
 
       // Validate
       if (!input) {
         return res.type('html').send(page(login({ error: 'invalid input' })))
+      }
+
+      // @NOTE "input" can be a handle, a DID or a service URL (PDS).
+
+      // Initiate the OAuth flow
+      try {
+        const url = await ctx.oauthClient.authorize(input, {
+          scope: 'atproto transition:generic',
+        })
+        res.redirect(url.toString())
+      } catch (err) {
+        ctx.logger.error({ err }, 'oauth authorize failed')
+
+        const error =
+          err instanceof OAuthResolverError
+            ? err.message
+            : "couldn't initiate login"
+
+        return res.type('html').send(page(login({ error })))
       }
     }),
   )
@@ -127,6 +161,8 @@ export function createRouter(ctx: AppContext): RequestListener {
   router.get(
     '/signup',
     handler(async (req: Request, res: Response) => {
+      res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
+
       try {
         const service = env.PDS_URL ?? 'https://bsky.social'
         const url = await ctx.oauthClient.authorize(service, {
@@ -153,6 +189,9 @@ export function createRouter(ctx: AppContext): RequestListener {
   router.post(
     '/logout',
     handler(async (req: Request, res: Response) => {
+      // Never store this route
+      res.setHeader('cache-control', 'no-store')
+
       const session = await getIronSession<Session>(req, res, {
         cookieName: 'sid',
         password: env.COOKIE_SECRET,
@@ -178,6 +217,9 @@ export function createRouter(ctx: AppContext): RequestListener {
   router.get(
     '/',
     handler(async (req: Request, res: Response) => {
+      // Prevent caching of this page when the credentials change
+      res.setHeader('Vary', 'Cookie')
+
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
 
@@ -207,6 +249,9 @@ export function createRouter(ctx: AppContext): RequestListener {
         return res.type('html').send(page(home({ statuses, didHandleMap })))
       }
 
+      // Make sure this page does not get cached in public caches (proxies)
+      res.setHeader('cache-control', 'private')
+
       // Fetch additional information about the logged-in user
       const profileResponse = await agent.com.atproto.repo
         .getRecord({
@@ -226,16 +271,9 @@ export function createRouter(ctx: AppContext): RequestListener {
           : {}
 
       // Serve the logged-in view
-      res.type('html').send(
-        page(
-          home({
-            statuses,
-            didHandleMap,
-            profile,
-            myStatus,
-          }),
-        ),
-      )
+      res
+        .type('html')
+        .send(page(home({ statuses, didHandleMap, profile, myStatus })))
     }),
   )
 
@@ -244,25 +282,27 @@ export function createRouter(ctx: AppContext): RequestListener {
     '/status',
     express.urlencoded(),
     handler(async (req: Request, res: Response) => {
+      // Never store this route
+      res.setHeader('cache-control', 'no-store')
+
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
       if (!agent) {
-        return res.redirect(`/login`)
-      }
-
-      const status = ifString(req.body?.status)
-      if (!status || !STATUS_OPTIONS.includes(status)) {
-        throw new Error('Invalid status')
+        return res
+          .status(401)
+          .type('html')
+          .send('<h1>Error: Session required</h1>')
       }
 
       // Construct & validate their status record
       const rkey = TID.nextStr()
       const record = {
         $type: 'xyz.statusphere.status',
-        status,
+        status: req.body?.status,
         createdAt: new Date().toISOString(),
       }
 
+      // Make sure the record generated from the input is valid
       if (!Status.validateRecord(record).success) {
         return res
           .status(400)
@@ -270,9 +310,9 @@ export function createRouter(ctx: AppContext): RequestListener {
           .send('<h1>Error: Invalid status</h1>')
       }
 
-      // Write the status record to the user's repository
       let uri
       try {
+        // Write the status record to the user's repository
         const res = await agent.com.atproto.repo.putRecord({
           repo: agent.assertDid,
           collection: 'xyz.statusphere.status',
@@ -311,7 +351,7 @@ export function createRouter(ctx: AppContext): RequestListener {
         )
       }
 
-      res.redirect('/')
+      return res.redirect('/')
     }),
   )
 
