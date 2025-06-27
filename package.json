@@ -14,23 +14,24 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
-    "@atproto/api": "^0.13.4",
-    "@atproto/common": "^0.4.1",
-    "@atproto/identity": "^0.4.0",
-    "@atproto/lexicon": "^0.4.2",
-    "@atproto/oauth-client-node": "^0.2.2",
-    "@atproto/sync": "^0.1.4",
-    "@atproto/syntax": "^0.3.0",
-    "@atproto/xrpc-server": "^0.7.9",
+    "@atproto/api": "^0.15.6",
+    "@atproto/common": "^0.4.11",
+    "@atproto/identity": "^0.4.8",
+    "@atproto/lexicon": "^0.4.11",
+    "@atproto/oauth-client-node": "^0.3.1",
+    "@atproto/sync": "^0.1.26",
+    "@atproto/xrpc-server": "^0.8.0",
     "better-sqlite3": "^11.1.2",
     "dotenv": "^16.4.5",
     "envalid": "^8.0.0",
     "express": "^4.19.2",
+    "http-terminator": "^3.2.0",
     "iron-session": "^8.0.2",
     "kysely": "^0.27.4",
     "multiformats": "^9.9.0",
     "pino": "^9.3.2",
-    "uhtml": "^4.5.9"
+    "uhtml": "^4.5.9",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@atproto/lex-cli": "^0.4.1",

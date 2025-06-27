@@ -1,42 +1,37 @@
-import { IdResolver, MemoryCache } from '@atproto/identity'
-
-const HOUR = 60e3 * 60
-const DAY = HOUR * 24
-
-
-export function createIdResolver() {
-  return new IdResolver({
-    didCache: new MemoryCache(HOUR, DAY),
-  })
-}
+import { OAuthClient } from '@atproto/oauth-client-node'
 
 export interface BidirectionalResolver {
-  resolveDidToHandle(did: string): Promise<string>
-  resolveDidsToHandles(dids: string[]): Promise<Record<string, string>>
+  resolveDidToHandle(did: string): Promise<string | undefined>
+  resolveDidsToHandles(
+    dids: string[],
+  ): Promise<Record<string, string | undefined>>
 }
 
-export function createBidirectionalResolver(resolver: IdResolver) {
+export function createBidirectionalResolver({
+  identityResolver,
+}: OAuthClient): BidirectionalResolver {
   return {
-    async resolveDidToHandle(did: string): Promise<string> {
-      const didDoc = await resolver.did.resolveAtprotoData(did)
-      const resolvedHandle = await resolver.handle.resolve(didDoc.handle)
-      if (resolvedHandle === did) {
-        return didDoc.handle
+    async resolveDidToHandle(did: string): Promise<string | undefined> {
+      try {
+        const { handle } = await identityResolver.resolve(did)
+        if (handle) return handle
+      } catch {
+        // Ignore
       }
-      return did
     },
 
     async resolveDidsToHandles(
-      dids: string[]
-    ): Promise<Record<string, string>> {
-      const didHandleMap: Record<string, string> = {}
-      const resolves = await Promise.all(
-        dids.map((did) => this.resolveDidToHandle(did).catch((_) => did))
+      dids: string[],
+    ): Promise<Record<string, string | undefined>> {
+      const uniqueDids = [...new Set(dids)]
+
+      return Object.fromEntries(
+        await Promise.all(
+          uniqueDids.map((did) =>
+            this.resolveDidToHandle(did).then((handle) => [did, handle]),
+          ),
+        ),
       )
-      for (let i = 0; i < dids.length; i++) {
-        didHandleMap[dids[i]] = resolves[i]
-      }
-      return didHandleMap
     },
   }
 }

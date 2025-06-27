@@ -1,48 +1,47 @@
-import assert from 'node:assert'
-import path from 'node:path'
-import type { IncomingMessage, ServerResponse } from 'node:http'
-import { OAuthResolverError } from '@atproto/oauth-client-node'
-import { isValidHandle } from '@atproto/syntax'
-import { TID } from '@atproto/common'
 import { Agent } from '@atproto/api'
-import express from 'express'
+import { TID } from '@atproto/common'
+import { OAuthResolverError } from '@atproto/oauth-client-node'
+import express, { Request, Response } from 'express'
 import { getIronSession } from 'iron-session'
-import type { AppContext } from '#/index'
+import type {
+  IncomingMessage,
+  RequestListener,
+  ServerResponse,
+} from 'node:http'
+import path from 'node:path'
+
+import type { AppContext } from '#/context'
+import { env } from '#/env'
+import * as Profile from '#/lexicon/types/app/bsky/actor/profile'
+import * as Status from '#/lexicon/types/xyz/statusphere/status'
+import { handler } from '#/lib/http'
+import { ifString } from '#/lib/util'
+import { page } from '#/lib/view'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
-import { env } from '#/lib/env'
-import { page } from '#/lib/view'
-import * as Status from '#/lexicon/types/xyz/statusphere/status'
-import * as Profile from '#/lexicon/types/app/bsky/actor/profile'
 
-type Session = { did: string }
+// Max age, in seconds, for static routes and assets
+const MAX_AGE = env.NODE_ENV === 'production' ? 60 : 0
 
-// Helper function for defining routes
-const handler =
-  (fn: express.Handler) =>
-  async (
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    try {
-      await fn(req, res, next)
-    } catch (err) {
-      next(err)
-    }
-  }
+type Session = { did?: string }
 
 // Helper function to get the Atproto Agent for the active session
 async function getSessionAgent(
   req: IncomingMessage,
-  res: ServerResponse<IncomingMessage>,
-  ctx: AppContext
+  res: ServerResponse,
+  ctx: AppContext,
 ) {
+  res.setHeader('Vary', 'Cookie')
+
   const session = await getIronSession<Session>(req, res, {
     cookieName: 'sid',
     password: env.COOKIE_SECRET,
   })
   if (!session.did) return null
+
+  // This page is dynamic and should not be cached publicly
+  res.setHeader('cache-control', `max-age=${MAX_AGE}, private`)
+
   try {
     const oauthSession = await ctx.oauthClient.restore(session.did)
     return oauthSession ? new Agent(oauthSession) : null
@@ -53,93 +52,169 @@ async function getSessionAgent(
   }
 }
 
-export const createRouter = (ctx: AppContext) => {
-  const router = express.Router()
+export const createRouter = (ctx: AppContext): RequestListener => {
+  const router = express()
 
   // Static assets
-  router.use('/public', express.static(path.join(__dirname, 'pages', 'public')))
+  router.use(
+    '/public',
+    express.static(path.join(__dirname, 'pages', 'public'), {
+      maxAge: MAX_AGE * 1000,
+    }),
+  )
 
   // OAuth metadata
   router.get(
-    '/client-metadata.json',
-    handler((_req, res) => {
-      return res.json(ctx.oauthClient.clientMetadata)
-    })
+    '/oauth-client-metadata.json',
+    handler((req, res) => {
+      res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
+      res.json(ctx.oauthClient.clientMetadata)
+    }),
+  )
+
+  // Public keys
+  router.get(
+    '/.well-known/jwks.json',
+    handler((req, res) => {
+      res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
+      res.json(ctx.oauthClient.jwks)
+    }),
   )
 
   // OAuth callback to complete session creation
   router.get(
     '/oauth/callback',
     handler(async (req, res) => {
+      res.setHeader('cache-control', 'no-store')
+
       const params = new URLSearchParams(req.originalUrl.split('?')[1])
       try {
-        const { session } = await ctx.oauthClient.callback(params)
-        const clientSession = await getIronSession<Session>(req, res, {
+        // Load the session cookie
+        const session = await getIronSession<Session>(req, res, {
           cookieName: 'sid',
           password: env.COOKIE_SECRET,
         })
-        assert(!clientSession.did, 'session already exists')
-        clientSession.did = session.did
-        await clientSession.save()
+
+        // If the user is already signed in, destroy the old credentials
+        if (session.did) {
+          try {
+            const oauthSession = await ctx.oauthClient.restore(session.did)
+            if (oauthSession) oauthSession.signOut()
+          } catch (err) {
+            ctx.logger.warn({ err }, 'oauth restore failed')
+          }
+        }
+
+        // Complete the OAuth flow
+        const oauth = await ctx.oauthClient.callback(params)
+
+        // Update the session cookie
+        session.did = oauth.session.did
+
+        await session.save()
       } catch (err) {
         ctx.logger.error({ err }, 'oauth callback failed')
-        return res.redirect('/?error')
       }
+
       return res.redirect('/')
-    })
+    }),
   )
 
   // Login page
   router.get(
     '/login',
-    handler(async (_req, res) => {
-      return res.type('html').send(page(login({})))
-    })
+    handler(async (req, res) => {
+      res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
+      res.type('html').send(page(login({})))
+    }),
   )
 
   // Login handler
   router.post(
     '/login',
+    express.urlencoded(),
     handler(async (req, res) => {
-      // Validate
-      const handle = req.body?.handle
-      if (typeof handle !== 'string' || !isValidHandle(handle)) {
-        return res.type('html').send(page(login({ error: 'invalid handle' })))
-      }
+      // Never store this route
+      res.setHeader('cache-control', 'no-store')
 
       // Initiate the OAuth flow
       try {
-        const url = await ctx.oauthClient.authorize(handle, {
+        // Validate input: can be a handle, a DID or a service URL (PDS).
+        const input = ifString(req.body.input)
+        if (!input) {
+          throw new Error('Invalid input')
+        }
+
+        // Initiate the OAuth flow
+        const url = await ctx.oauthClient.authorize(input, {
           scope: 'atproto transition:generic',
         })
-        return res.redirect(url.toString())
+
+        res.redirect(url.toString())
       } catch (err) {
         ctx.logger.error({ err }, 'oauth authorize failed')
-        return res.type('html').send(
+
+        const error = err instanceof Error ? err.message : 'unexpected error'
+
+        return res.type('html').send(page(login({ error })))
+      }
+    }),
+  )
+
+  // Signup
+  router.get(
+    '/signup',
+    handler(async (req, res) => {
+      res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
+
+      try {
+        const service = env.PDS_URL ?? 'https://bsky.social'
+        const url = await ctx.oauthClient.authorize(service, {
+          scope: 'atproto transition:generic',
+        })
+        res.redirect(url.toString())
+      } catch (err) {
+        ctx.logger.error({ err }, 'oauth authorize failed')
+        res.type('html').send(
           page(
             login({
               error:
                 err instanceof OAuthResolverError
                   ? err.message
                   : "couldn't initiate login",
-            })
-          )
+            }),
+          ),
         )
       }
-    })
+    }),
   )
 
   // Logout handler
   router.post(
     '/logout',
     handler(async (req, res) => {
+      // Never store this route
+      res.setHeader('cache-control', 'no-store')
+
       const session = await getIronSession<Session>(req, res, {
         cookieName: 'sid',
         password: env.COOKIE_SECRET,
       })
-      await session.destroy()
+
+      // Revoke credentials on the server
+      if (session.did) {
+        try {
+          const oauthSession = await ctx.oauthClient.restore(session.did)
+          if (oauthSession) await oauthSession.signOut()
+        } catch (err) {
+          ctx.logger.warn({ err }, 'Failed to revoke credentials')
+        }
+      }
+
+      session.destroy()
+
       return res.redirect('/')
-    })
+    }),
   )
 
   // Homepage
@@ -167,7 +242,7 @@ export const createRouter = (ctx: AppContext) => {
 
       // Map user DIDs to their domain-name handles
       const didHandleMap = await ctx.resolver.resolveDidsToHandles(
-        statuses.map((s) => s.authorDid)
+        statuses.map((s) => s.authorDid),
       )
 
       if (!agent) {
@@ -176,37 +251,34 @@ export const createRouter = (ctx: AppContext) => {
       }
 
       // Fetch additional information about the logged-in user
-      const profileResponse = await agent.com.atproto.repo.getRecord({
-        repo: agent.assertDid,
-        collection: 'app.bsky.actor.profile',
-        rkey: 'self',
-      }).catch(() => undefined);
+      const profileResponse = await agent.com.atproto.repo
+        .getRecord({
+          repo: agent.assertDid,
+          collection: 'app.bsky.actor.profile',
+          rkey: 'self',
+        })
+        .catch(() => undefined)
 
-      const profileRecord = profileResponse?.data;
+      const profileRecord = profileResponse?.data
 
-      const profile = profileRecord &&
+      const profile =
+        profileRecord &&
         Profile.isRecord(profileRecord.value) &&
         Profile.validateRecord(profileRecord.value).success
           ? profileRecord.value
           : {}
 
       // Serve the logged-in view
-      return res.type('html').send(
-        page(
-          home({
-            statuses,
-            didHandleMap,
-            profile,
-            myStatus,
-          })
-        )
-      )
-    })
+      res
+        .type('html')
+        .send(page(home({ statuses, didHandleMap, profile, myStatus })))
+    }),
   )
 
   // "Set status" handler
   router.post(
     '/status',
+    express.urlencoded(),
     handler(async (req, res) => {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
@@ -217,13 +289,14 @@ export const createRouter = (ctx: AppContext) => {
           .send('<h1>Error: Session required</h1>')
       }
 
-      // Construct & validate their status record
-      const rkey = TID.nextStr()
+      // Construct their status record
       const record = {
         $type: 'xyz.statusphere.status',
         status: req.body?.status,
         createdAt: new Date().toISOString(),
       }
+
+      // Make sure the record generated from the input is valid
       if (!Status.validateRecord(record).success) {
         return res
           .status(400)
@@ -237,7 +310,7 @@ export const createRouter = (ctx: AppContext) => {
         const res = await agent.com.atproto.repo.putRecord({
           repo: agent.assertDid,
           collection: 'xyz.statusphere.status',
-          rkey,
+          rkey: TID.nextStr(),
           record,
           validate: false,
         })
@@ -268,12 +341,12 @@ export const createRouter = (ctx: AppContext) => {
       } catch (err) {
         ctx.logger.warn(
           { err },
-          'failed to update computed view; ignoring as it should be caught by the firehose'
+          'failed to update computed view; ignoring as it should be caught by the firehose',
         )
       }
 
       return res.redirect('/')
-    })
+    }),
   )
 
   return router

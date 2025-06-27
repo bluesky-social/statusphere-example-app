@@ -1,3 +1,4 @@
+import { env } from '#/env'
 import { html } from '../lib/view'
 import { shell } from './shell'
 
@@ -11,6 +12,11 @@ export function login(props: Props) {
 }
 
 function content({ error }: Props) {
+  const signupService =
+    !env.PDS_URL || env.PDS_URL === 'https://bsky.social'
+      ? 'Bluesky'
+      : new URL(env.PDS_URL).hostname
+
   return html`<div id="root">
     <div id="header">
       <h1>Statusphere</h1>
@@ -20,17 +26,19 @@ function content({ error }: Props) {
       <form action="/login" method="post" class="login-form">
         <input
           type="text"
-          name="handle"
+          name="input"
           placeholder="Enter your handle (eg alice.bsky.social)"
           required
         />
+
         <button type="submit">Log in</button>
-        ${error ? html`<p>Error: <i>${error}</i></p>` : undefined}
       </form>
-      <div class="signup-cta">
-        Don't have an account on the Atmosphere?
-        <a href="https://bsky.app">Sign up for Bluesky</a> to create one now!
-      </div>
+
+      <a href="/signup" class="button signup-cta">
+        Login or Sign up with a ${signupService} account
+      </a>
+
+      ${error ? html`<p>Error: <i>${error}</i></p>` : undefined}
     </div>
   </div>`
 }
