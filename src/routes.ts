@@ -110,11 +110,12 @@ export const createRouter = (ctx: AppContext): RequestListener => {
 
         // Update the session cookie
         session.did = oauth.session.did
+
         await session.save()
       } catch (err) {
         ctx.logger.error({ err }, 'oauth callback failed')
-        return res.redirect('/?error')
       }
+
       return res.redirect('/')
     }),
   )
