@@ -20,6 +20,7 @@ import { page } from '#/lib/view'
 import { home } from '#/pages/home'
 import { login } from '#/pages/login'
 
+// Max age, in seconds, for static routes and assets
 const MAX_AGE = env.NODE_ENV === 'production' ? 60 : 0
 
 type Session = { did?: string }
