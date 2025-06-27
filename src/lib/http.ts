@@ -1,3 +1,4 @@
+import { Request, Response } from 'express'
 import { createHttpTerminator } from 'http-terminator'
 import { once } from 'node:events'
 import type {
@@ -11,20 +12,20 @@ export type NextFunction = (err?: unknown) => void
 
 export type Middleware<
   Req extends IncomingMessage = IncomingMessage,
-  Res extends ServerResponse<Req> = ServerResponse<Req>,
+  Res extends ServerResponse = ServerResponse,
 > = (req: Req, res: Res, next: NextFunction) => void
 
 export type Handler<
   Req extends IncomingMessage = IncomingMessage,
-  Res extends ServerResponse<Req> = ServerResponse<Req>,
+  Res extends ServerResponse = ServerResponse,
 > = (req: Req, res: Res) => unknown | Promise<unknown>
 /**
  * Wraps a request handler middleware to ensure that `next` is called if it
  * throws or returns a promise that rejects.
  */
 export function handler<
-  Req extends IncomingMessage = IncomingMessage,
-  Res extends ServerResponse<Req> = ServerResponse<Req>,
+  Req extends IncomingMessage = Request,
+  Res extends ServerResponse = Response,
 >(fn: Handler<Req, Res>): Middleware<Req, Res> {
   return async (req, res, next) => {
     try {

@@ -31,11 +31,17 @@ async function getSessionAgent(
   res: ServerResponse,
   ctx: AppContext,
 ) {
+  res.setHeader('Vary', 'Cookie')
+
   const session = await getIronSession<Session>(req, res, {
     cookieName: 'sid',
     password: env.COOKIE_SECRET,
   })
   if (!session.did) return null
+
+  // This page is dynamic and should not be cached publicly
+  res.setHeader('cache-control', `max-age=${MAX_AGE}, private`)
+
   try {
     const oauthSession = await ctx.oauthClient.restore(session.did)
     return oauthSession ? new Agent(oauthSession) : null
@@ -60,7 +66,7 @@ export const createRouter = (ctx: AppContext): RequestListener => {
   // OAuth metadata
   router.get(
     '/oauth-client-metadata.json',
-    handler((req: Request, res: Response) => {
+    handler((req, res) => {
       res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
       res.json(ctx.oauthClient.clientMetadata)
     }),
@@ -69,7 +75,7 @@ export const createRouter = (ctx: AppContext): RequestListener => {
   // Public keys
   router.get(
     '/.well-known/jwks.json',
-    handler((req: Request, res: Response) => {
+    handler((req, res) => {
       res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
       res.json(ctx.oauthClient.jwks)
     }),
@@ -78,7 +84,7 @@ export const createRouter = (ctx: AppContext): RequestListener => {
   // OAuth callback to complete session creation
   router.get(
     '/oauth/callback',
-    handler(async (req: Request, res: Response) => {
+    handler(async (req, res) => {
       res.setHeader('cache-control', 'no-store')
 
       const params = new URLSearchParams(req.originalUrl.split('?')[1])
@@ -116,10 +122,9 @@ export const createRouter = (ctx: AppContext): RequestListener => {
   // Login page
   router.get(
     '/login',
-    handler(async (req: Request, res: Response) => {
+    handler(async (req, res) => {
       res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
-
-      return res.type('html').send(page(login({})))
+      res.type('html').send(page(login({})))
     }),
   )
 
@@ -127,31 +132,28 @@ export const createRouter = (ctx: AppContext): RequestListener => {
   router.post(
     '/login',
     express.urlencoded(),
-    handler(async (req: Request, res: Response) => {
+    handler(async (req, res) => {
+      // Never store this route
       res.setHeader('cache-control', 'no-store')
-
-      const input = ifString(req.body.input)
-
-      // Validate
-      if (!input) {
-        return res.type('html').send(page(login({ error: 'invalid input' })))
-      }
-
-      // @NOTE "input" can be a handle, a DID or a service URL (PDS).
 
       // Initiate the OAuth flow
       try {
+        // Validate input: can be a handle, a DID or a service URL (PDS).
+        const input = ifString(req.body.input)
+        if (!input) {
+          throw new Error('Invalid input')
+        }
+
+        // Initiate the OAuth flow
         const url = await ctx.oauthClient.authorize(input, {
           scope: 'atproto transition:generic',
         })
+
         res.redirect(url.toString())
       } catch (err) {
         ctx.logger.error({ err }, 'oauth authorize failed')
 
-        const error =
-          err instanceof OAuthResolverError
-            ? err.message
-            : "couldn't initiate login"
+        const error = err instanceof Error ? err.message : 'unexpected error'
 
         return res.type('html').send(page(login({ error })))
       }
@@ -161,7 +163,7 @@ export const createRouter = (ctx: AppContext): RequestListener => {
   // Signup
   router.get(
     '/signup',
-    handler(async (req: Request, res: Response) => {
+    handler(async (req, res) => {
       res.setHeader('cache-control', `max-age=${MAX_AGE}, public`)
 
       try {
@@ -189,7 +191,7 @@ export const createRouter = (ctx: AppContext): RequestListener => {
   // Logout handler
   router.post(
     '/logout',
-    handler(async (req: Request, res: Response) => {
+    handler(async (req, res) => {
       // Never store this route
       res.setHeader('cache-control', 'no-store')
 
@@ -217,10 +219,7 @@ export const createRouter = (ctx: AppContext): RequestListener => {
   // Homepage
   router.get(
     '/',
-    handler(async (req: Request, res: Response) => {
-      // Prevent caching of this page when the credentials change
-      res.setHeader('Vary', 'Cookie')
-
+    handler(async (req, res) => {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
 
@@ -249,9 +248,6 @@ export const createRouter = (ctx: AppContext): RequestListener => {
         // Serve the logged-out view
         return res.type('html').send(page(home({ statuses, didHandleMap })))
       }
-
-      // Make sure this page does not get cached in public caches (proxies)
-      res.setHeader('cache-control', 'private')
 
       // Fetch additional information about the logged-in user
       const profileResponse = await agent.com.atproto.repo
@@ -282,10 +278,7 @@ export const createRouter = (ctx: AppContext): RequestListener => {
   router.post(
     '/status',
     express.urlencoded(),
-    handler(async (req: Request, res: Response) => {
-      // Never store this route
-      res.setHeader('cache-control', 'no-store')
-
+    handler(async (req, res) => {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
       if (!agent) {
@@ -295,8 +288,7 @@ export const createRouter = (ctx: AppContext): RequestListener => {
           .send('<h1>Error: Session required</h1>')
       }
 
-      // Construct & validate their status record
-      const rkey = TID.nextStr()
+      // Construct their status record
       const record = {
         $type: 'xyz.statusphere.status',
         status: req.body?.status,
@@ -317,7 +309,7 @@ export const createRouter = (ctx: AppContext): RequestListener => {
         const res = await agent.com.atproto.repo.putRecord({
           repo: agent.assertDid,
           collection: 'xyz.statusphere.status',
-          rkey,
+          rkey: TID.nextStr(),
           record,
           validate: false,
         })

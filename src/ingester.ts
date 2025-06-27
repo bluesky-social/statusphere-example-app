@@ -11,11 +11,7 @@ const DAY = HOUR * 24
 export function createIngester(db: Database) {
   const logger = pino({ name: 'firehose', level: env.LOG_LEVEL })
   return new Firehose({
-    service: env.FIREHOSE_URL,
-    idResolver: new IdResolver({
-      plcUrl: env.PLC_URL,
-      didCache: new MemoryCache(HOUR, DAY),
-    }),
+    filterCollections: ['xyz.statusphere.status'],
     handleEvent: async (evt: Event) => {
       // Watch for write events
       if (evt.event === 'create' || evt.event === 'update') {
@@ -70,8 +66,12 @@ export function createIngester(db: Database) {
     onError: (err: unknown) => {
       logger.error({ err }, 'error on firehose ingestion')
     },
-    filterCollections: ['xyz.statusphere.status'],
     excludeIdentity: true,
     excludeAccount: true,
+    service: env.FIREHOSE_URL,
+    idResolver: new IdResolver({
+      plcUrl: env.PLC_URL,
+      didCache: new MemoryCache(HOUR, DAY),
+    }),
   })
 }
