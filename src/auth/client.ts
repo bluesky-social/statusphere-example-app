@@ -31,7 +31,7 @@ export async function createOAuthClient(db: Database) {
 
   // If a keyset is defined (meaning the client is confidential). Let's make
   // sure it has a private key for signing. Note: findPrivateKey will throw if
-  // the keyset does no contain a suitable private key.
+  // the keyset does not contain a suitable private key.
   const pk = keyset?.findPrivateKey({ use: 'sig' })
 
   const clientMetadata: OAuthClientMetadataInput = env.PUBLIC_URL
