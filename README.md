@@ -35,7 +35,9 @@ The generated key must be added to the environment variables (`.env` file) in `P
 PRIVATE_KEYS='[{"kty":"EC","kid":"12",...}]'
 ```
 
-> [!NOTE] The `PRIVATE_KEYS` is an array of keys. Make sure to use single
+> [!NOTE]
+>
+> The `PRIVATE_KEYS` is an array of keys. Make sure to use single
 > quotes, and square brackets around the keys `PRIVATE_KEYS='[<key here>]'`. If
 > you generate multiple keys, add new keys at the beginning of the array, so
 > that the first key is always the most recent one. When a key is removed, all
@@ -57,4 +59,7 @@ PUBLIC_URL="https://your-app-url.com"
 ```
 
 > [!NOTE]
-> You can use services like [ngrok](https://ngrok.com/) to expose your local server to the internet for testing purposes. Just set the `PUBLIC_URL` to the ngrok URL.
+>
+> You can use services like [ngrok](https://ngrok.com/) to expose your local
+> server to the internet for testing purposes. Just set the `PUBLIC_URL` to the
+> ngrok URL.
