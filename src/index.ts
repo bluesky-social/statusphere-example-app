@@ -1,11 +1,10 @@
-import { createHttpTerminator } from 'http-terminator'
 import { once } from 'node:events'
 
 import { createAppContext } from '#/context'
 import { env } from '#/env'
+import { startServer } from '#/lib/http'
 import { run } from '#/lib/process'
 import { createRouter } from '#/routes'
-import { startServer } from '#/lib/http'
 
 run(async (killSignal) => {
   // Create the application context
@@ -31,5 +30,5 @@ run(async (killSignal) => {
   await terminate()
 
   // Close the firehose connection
-  await ctx.ingester.destroy()
+  await ctx.destroy()
 })

@@ -3,7 +3,6 @@ import { TID } from '@atproto/common'
 import { OAuthResolverError } from '@atproto/oauth-client-node'
 import express, { Request, Response } from 'express'
 import { getIronSession } from 'iron-session'
-import assert from 'node:assert'
 import type {
   IncomingMessage,
   RequestListener,
@@ -12,14 +11,14 @@ import type {
 import path from 'node:path'
 
 import type { AppContext } from '#/context'
+import { env } from '#/env'
 import * as Profile from '#/lexicon/types/app/bsky/actor/profile'
 import * as Status from '#/lexicon/types/xyz/statusphere/status'
-import { env } from '#/env'
 import { handler } from '#/lib/http'
+import { ifString } from '#/lib/util'
 import { page } from '#/lib/view'
 import { home, STATUS_OPTIONS } from '#/pages/home'
 import { login } from '#/pages/login'
-import { ifString } from '#/lib/util'
 
 type Session = { did?: string }
 
@@ -35,10 +34,7 @@ async function getSessionAgent(
   })
   if (!session.did) return null
   try {
-    // force rotating the credentials if the request has a no-cache header
-    const refresh = req.headers['cache-control']?.includes('no-cache') || 'auto'
-
-    const oauthSession = await ctx.oauthClient.restore(session.did, refresh)
+    const oauthSession = await ctx.oauthClient.restore(session.did)
     return oauthSession ? new Agent(oauthSession) : null
   } catch (err) {
     ctx.logger.warn({ err }, 'oauth restore failed')
@@ -109,40 +105,20 @@ export function createRouter(ctx: AppContext): RequestListener {
   router.get(
     '/login',
     handler(async (req: Request, res: Response) => {
-      res.type('html').send(page(login({})))
+      return res.type('html').send(page(login({})))
     }),
   )
 
   // Login handler
   router.post(
     '/login',
-    express.urlencoded({ extended: true }),
+    express.urlencoded(),
     handler(async (req: Request, res: Response) => {
       const input = ifString(req.body.input)
 
       // Validate
       if (!input) {
-        res.type('html').send(page(login({ error: 'invalid input' })))
-        return
-      }
-
-      // @NOTE input can be a handle, a DID or a service URL (PDS).
-
-      // Initiate the OAuth flow
-      try {
-        const url = await ctx.oauthClient.authorize(input, {
-          scope: 'atproto transition:generic',
-        })
-        res.redirect(url.toString())
-      } catch (err) {
-        ctx.logger.error({ err }, 'oauth authorize failed')
-
-        const error =
-          err instanceof OAuthResolverError
-            ? err.message
-            : "couldn't initiate login"
-
-        res.type('html').send(page(login({ error })))
+        return res.type('html').send(page(login({ error: 'invalid input' })))
       }
     }),
   )
@@ -228,8 +204,7 @@ export function createRouter(ctx: AppContext): RequestListener {
 
       if (!agent) {
         // Serve the logged-out view
-        res.type('html').send(page(home({ statuses, didHandleMap })))
-        return
+        return res.type('html').send(page(home({ statuses, didHandleMap })))
       }
 
       // Fetch additional information about the logged-in user
@@ -267,13 +242,12 @@ export function createRouter(ctx: AppContext): RequestListener {
   // "Set status" handler
   router.post(
     '/status',
-    express.urlencoded({ extended: true }),
+    express.urlencoded(),
     handler(async (req: Request, res: Response) => {
       // If the user is signed in, get an agent which communicates with their server
       const agent = await getSessionAgent(req, res, ctx)
       if (!agent) {
-        res.redirect(`/login`)
-        return
+        return res.redirect(`/login`)
       }
 
       const status = ifString(req.body?.status)
@@ -290,8 +264,10 @@ export function createRouter(ctx: AppContext): RequestListener {
       }
 
       if (!Status.validateRecord(record).success) {
-        res.status(400).type('html').send('<h1>Error: Invalid status</h1>')
-        return
+        return res
+          .status(400)
+          .type('html')
+          .send('<h1>Error: Invalid status</h1>')
       }
 
       // Write the status record to the user's repository
@@ -307,11 +283,10 @@ export function createRouter(ctx: AppContext): RequestListener {
         uri = res.data.uri
       } catch (err) {
         ctx.logger.warn({ err }, 'failed to write record')
-        res
+        return res
           .status(500)
           .type('html')
           .send('<h1>Error: Failed to write record</h1>')
-        return
       }
 
       try {

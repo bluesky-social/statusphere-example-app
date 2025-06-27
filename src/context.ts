@@ -20,6 +20,7 @@ export type AppContext = {
   logger: pino.Logger
   oauthClient: NodeOAuthClient
   resolver: BidirectionalResolver
+  destroy: () => Promise<void>
 }
 
 export async function createAppContext(): Promise<AppContext> {
@@ -36,5 +37,9 @@ export async function createAppContext(): Promise<AppContext> {
     logger,
     oauthClient,
     resolver,
+    async destroy() {
+      await ingester.destroy()
+      await db.destroy()
+    },
   }
 }

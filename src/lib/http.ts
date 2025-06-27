@@ -9,16 +9,15 @@ import { createServer } from 'node:http'
 
 export type NextFunction = (err?: unknown) => void
 
-export type Handler<
+export type Middleware<
   Req extends IncomingMessage = IncomingMessage,
   Res extends ServerResponse<Req> = ServerResponse<Req>,
 > = (req: Req, res: Res, next: NextFunction) => void
 
-export type AsyncHandler<
+export type Handler<
   Req extends IncomingMessage = IncomingMessage,
   Res extends ServerResponse<Req> = ServerResponse<Req>,
-> = (req: Req, res: Res, next: NextFunction) => Promise<void>
-
+> = (req: Req, res: Res) => unknown | Promise<unknown>
 /**
  * Wraps a request handler middleware to ensure that `next` is called if it
  * throws or returns a promise that rejects.
@@ -26,22 +25,13 @@ export type AsyncHandler<
 export function handler<
   Req extends IncomingMessage = IncomingMessage,
   Res extends ServerResponse<Req> = ServerResponse<Req>,
->(fn: Handler<Req, Res> | AsyncHandler<Req, Res>): Handler<Req, Res> {
-  return (req, res, next) => {
-    // Optimization: NodeJS prefers objects over functions for garbage collection
-    const nextSafe = nextOnce.bind({ next })
+>(fn: Handler<Req, Res>): Middleware<Req, Res> {
+  return async (req, res, next) => {
     try {
-      const result = fn(req, res, nextSafe)
-      if (result instanceof Promise) result.catch(nextSafe)
+      await fn(req, res)
     } catch (err) {
-      nextSafe(err)
+      next(err)
     }
-  }
-
-  function nextOnce(this: { next: NextFunction | null }, err?: unknown) {
-    const { next } = this
-    this.next = null
-    next?.(err)
   }
 }
 
