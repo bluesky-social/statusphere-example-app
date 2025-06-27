@@ -37,14 +37,12 @@ PRIVATE_KEYS='[{"kty":"EC","kid":"12",...}]'
 
 > [!NOTE]
 >
-> The `PRIVATE_KEYS` is an array of keys. Make sure to use single
-> quotes, and square brackets around the keys `PRIVATE_KEYS='[<key here>]'`. If
-> you generate multiple keys, add new keys at the beginning of the array, so
-> that the first key is always the most recent one. When a key is removed, all
-> associated sessions will be invalidated.
+> The `PRIVATE_KEYS` can contain multiple keys. The first key in the array is
+> the most recent one, and it will be used to sign new tokens. When a key is
+> removed, all associated sessions will be invalidated.
 
 Make sure to also set the `COOKIE_SECRET`, which is used to sign session
-cookies, in your environment variables (`.env` file). You can generate a random
+cookies, in your environment variables (`.env` file). You should use a random
 string for this:
 
 ```sh
