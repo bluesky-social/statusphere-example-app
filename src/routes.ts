@@ -253,7 +253,7 @@ export const createRouter = (ctx: AppContext) => {
       try {
         // Optimistically update our SQLite
         // This isn't strictly necessary because the write event will be
-        // handled in #/firehose/ingestor.ts, but it ensures that future reads
+        // handled in #/ingestor.ts, but it ensures that future reads
         // will be up-to-date after this method finishes.
         await ctx.db
           .insertInto('status')
