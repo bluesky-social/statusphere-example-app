@@ -38,10 +38,7 @@ async function getSessionAgent(
   res: ServerResponse<IncomingMessage>,
   ctx: AppContext
 ) {
-  const session = await getIronSession<Session>(req, res, {
-    cookieName: 'sid',
-    password: env.COOKIE_SECRET,
-  })
+  const session = await getSession(req, res)
   if (!session.did) return null
   try {
     const oauthSession = await ctx.oauthClient.restore(session.did)
@@ -74,10 +71,7 @@ export const createRouter = (ctx: AppContext) => {
       const params = new URLSearchParams(req.originalUrl.split('?')[1])
       try {
         const { session } = await ctx.oauthClient.callback(params)
-        const clientSession = await getIronSession<Session>(req, res, {
-          cookieName: 'sid',
-          password: env.COOKIE_SECRET,
-        })
+        const clientSession = await getSession(req, res)
         assert(!clientSession.did, 'session already exists')
         clientSession.did = session.did
         await clientSession.save()
@@ -133,10 +127,7 @@ export const createRouter = (ctx: AppContext) => {
   router.post(
     '/logout',
     handler(async (req, res) => {
-      const session = await getIronSession<Session>(req, res, {
-        cookieName: 'sid',
-        password: env.COOKIE_SECRET,
-      })
+      const session = await getSession(req, res)
       await session.destroy()
       return res.redirect('/')
     })
@@ -277,4 +268,14 @@ export const createRouter = (ctx: AppContext) => {
   )
 
   return router
+}
+
+async function getSession(req: IncomingMessage, res: ServerResponse<IncomingMessage>) {
+  return await getIronSession<Session>(req, res, {
+    cookieName: 'sid',
+    password: env.COOKIE_SECRET,
+    cookieOptions: {
+      secure: env.NODE_ENV === 'production',
+    },
+  })
 }
