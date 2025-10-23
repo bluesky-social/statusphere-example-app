@@ -181,6 +181,7 @@ export const createRouter = (ctx: AppContext) => {
         collection: 'app.bsky.actor.profile',
         rkey: 'self',
       }).catch(() => undefined);
+      const loggedInUserHandle = await ctx.resolver.resolveDidToHandle(agent.assertDid)
 
       const profileRecord = profileResponse?.data;
 
@@ -197,6 +198,7 @@ export const createRouter = (ctx: AppContext) => {
             statuses,
             didHandleMap,
             profile,
+            loggedInUserHandle,
             myStatus,
           })
         )
