@@ -37,7 +37,8 @@ const STATUS_OPTIONS = [
 type Props = {
   statuses: Status[]
   didHandleMap: Record<string, string>
-  profile?: { displayName?: string }
+  profile?: { displayName?: string },
+  loggedInUserHandle?: string,
   myStatus?: Status
 }
 
@@ -48,7 +49,7 @@ export function home(props: Props) {
   })
 }
 
-function content({ statuses, didHandleMap, profile, myStatus }: Props) {
+function content({ statuses, didHandleMap, profile, loggedInUserHandle, myStatus }: Props) {
   return html`<div id="root">
     <div class="error"></div>
     <div id="header">
@@ -60,7 +61,7 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
         ${profile
           ? html`<form action="/logout" method="post" class="session-form">
               <div>
-                Hi, <strong>${profile.displayName || 'friend'}</strong>. What's
+                Hi, <strong>${profile.displayName || (loggedInUserHandle && `@${loggedInUserHandle}`) || 'friend'}</strong>. What's
                 your status today?
               </div>
               <div>
