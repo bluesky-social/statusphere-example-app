@@ -1,28 +1,66 @@
-import { NodeOAuthClient } from '@atproto/oauth-client-node'
+import {
+  Keyset,
+  JoseKey,
+  atprotoLoopbackClientMetadata,
+  NodeOAuthClient,
+  OAuthClientMetadataInput,
+} from '@atproto/oauth-client-node'
+import assert from 'node:assert'
+
 import type { Database } from '#/db'
-import { env } from '#/lib/env'
+import { env } from '#/env'
 import { SessionStore, StateStore } from './storage'
 
-export const createClient = async (db: Database) => {
-  const publicUrl = env.PUBLIC_URL
-  const url = publicUrl || `http://127.0.0.1:${env.PORT}`
-  const enc = encodeURIComponent
+export async function createOAuthClient(db: Database) {
+  // Confidential client require a keyset accessible on the internet. Non
+  // internet clients (e.g. development) cannot expose a keyset on the internet
+  // so they can't be private..
+  const keyset =
+    env.PUBLIC_URL && env.PRIVATE_KEYS
+      ? new Keyset(
+          await Promise.all(
+            env.PRIVATE_KEYS.map((jwk) => JoseKey.fromJWK(jwk)),
+          ),
+        )
+      : undefined
+
+  assert(
+    !env.PUBLIC_URL || keyset?.size,
+    'ATProto requires backend clients to be confidential. Make sure to set the PRIVATE_KEYS environment variable.',
+  )
+
+  // If a keyset is defined (meaning the client is confidential). Let's make
+  // sure it has a private key for signing. Note: findPrivateKey will throw if
+  // the keyset does not contain a suitable private key.
+  const pk = keyset?.findPrivateKey({ use: 'sig' })
+
+  const clientMetadata: OAuthClientMetadataInput = env.PUBLIC_URL
+    ? {
+        client_name: 'Statusphere Example App',
+        client_id: `${env.PUBLIC_URL}/oauth-client-metadata.json`,
+        jwks_uri: `${env.PUBLIC_URL}/.well-known/jwks.json`,
+        redirect_uris: [`${env.PUBLIC_URL}/oauth/callback`],
+        scope: 'atproto transition:generic',
+        grant_types: ['authorization_code', 'refresh_token'],
+        response_types: ['code'],
+        application_type: 'web',
+        token_endpoint_auth_method: pk ? 'private_key_jwt' : 'none',
+        token_endpoint_auth_signing_alg: pk ? pk.alg : undefined,
+        dpop_bound_access_tokens: true,
+      }
+    : atprotoLoopbackClientMetadata(
+        `http://localhost?${new URLSearchParams([
+          ['redirect_uri', `http://127.0.0.1:${env.PORT}/oauth/callback`],
+          ['scope', `atproto transition:generic`],
+        ])}`,
+      )
+
   return new NodeOAuthClient({
-    clientMetadata: {
-      client_name: 'AT Protocol Express App',
-      client_id: publicUrl
-        ? `${url}/client-metadata.json`
-        : `http://localhost?redirect_uri=${enc(`${url}/oauth/callback`)}&scope=${enc('atproto transition:generic')}`,
-      client_uri: url,
-      redirect_uris: [`${url}/oauth/callback`],
-      scope: 'atproto transition:generic',
-      grant_types: ['authorization_code', 'refresh_token'],
-      response_types: ['code'],
-      application_type: 'web',
-      token_endpoint_auth_method: 'none',
-      dpop_bound_access_tokens: true,
-    },
+    keyset,
+    clientMetadata,
     stateStore: new StateStore(db),
     sessionStore: new SessionStore(db),
+    plcDirectoryUrl: env.PLC_URL,
+    handleResolver: env.PDS_URL,
   })
 }
