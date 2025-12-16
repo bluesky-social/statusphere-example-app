@@ -69,6 +69,7 @@ function content({ statuses, didHandleMap, profile, myStatus }: Props) {
           : html`<div class="session-form">
               <div><a href="/login">Log in</a> to set your status!</div>
               <div>
+                <a href="/signup" class="button">Sign up</a>
                 <a href="/login" class="button">Log in</a>
               </div>
             </div>`}
