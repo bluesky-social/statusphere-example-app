@@ -93,6 +93,9 @@ export const createRouter = (ctx: AppContext): RequestListener => {
         const session = await getIronSession<Session>(req, res, {
           cookieName: 'sid',
           password: env.COOKIE_SECRET,
+          cookieOptions: {
+            secure: env.isDev ? false : true
+          },
         })
 
         // If the user is already signed in, destroy the old credentials
