@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { cleanEnv, port, str, testOnly, url } from 'envalid'
+import { bool, cleanEnv, port, str, testOnly, url } from 'envalid'
 import { envalidJsonWebKeys as keys } from '#/lib/jwk'
 
 dotenv.config()
@@ -22,4 +22,5 @@ export const env = cleanEnv(process.env, {
   PDS_URL: url({ default: undefined }),
   PLC_URL: url({ default: undefined }),
   FIREHOSE_URL: url({ default: undefined }),
+  ALLOW_HTTP: bool({ default: false }),
 })
