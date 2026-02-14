@@ -73,7 +73,7 @@ export async function insertStatus(data: StatusTable) {
           }),
         )
         .execute();
-      setCurrStatus(tx, data.authorDid);
+      await setCurrStatus(tx, data.authorDid);
     });
 }
 
