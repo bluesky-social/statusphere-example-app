@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@atproto/tap", "thread-stream", "pino"],
   turbopack: {
     root: __dirname,
   },

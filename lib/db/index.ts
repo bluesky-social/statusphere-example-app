@@ -22,6 +22,7 @@ export interface DatabaseSchema {
   auth_session: AuthSessionTable;
   account: AccountTable;
   status: StatusTable;
+  ingest_cursor: IngestCursorTable;
 }
 
 interface AuthStateTable {
@@ -47,4 +48,9 @@ export interface StatusTable {
   createdAt: string;
   indexedAt: string;
   current: 0 | 1;
+}
+
+export interface IngestCursorTable {
+  key: string;
+  seq: number;
 }
