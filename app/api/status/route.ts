@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Client } from "@atproto/lex";
+import { Client, l } from "@atproto/lex";
 import { getSession } from "@/lib/auth/session";
 import { insertStatus } from "@/lib/db/queries";
 import * as xyz from "@/lib/lexicons/xyz";
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
   const lexClient = new Client(session);
 
-  const createdAt = new Date().toISOString();
+  const createdAt = l.currentDatetimeString();
   const res = await lexClient.create(xyz.statusphere.status, {
     status,
     createdAt,
