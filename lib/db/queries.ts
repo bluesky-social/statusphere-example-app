@@ -16,7 +16,11 @@ export async function getAccountHandle(did: string): Promise<string | null> {
     .executeTakeFirst();
   if (account) return account.handle;
   // otherwise resolve the DID directly, e.g. for a freshly logged-in account we
-  // haven't seen an identity/account event for yet
+  // haven't seen a status/identity event for yet
+  return resolveHandle(did);
+}
+
+async function resolveHandle(did: string): Promise<string | null> {
   try {
     const didDoc = await idResolver.did.resolve(did);
     if (!didDoc) return null;
@@ -70,18 +74,32 @@ export async function getTopStatuses(limit = 10) {
 }
 
 export async function insertStatus(data: StatusTable) {
+  // Seed an account row for this DID if we haven't seen it before, resolving
+  // its real handle first so the UI doesn't show a raw DID while waiting on
+  // an identity event. This is the only place accounts get created: identity/
+  // account events cover the whole network, not just Statusphere users, so
+  // those handlers only ever update rows discovered here (see
+  // updateAccountActive/updateHandle). Resolved outside the transaction so a
+  // slow network lookup doesn't hold the sqlite write lock.
+  const existingAccount = await getDb()
+    .selectFrom("account")
+    .select("did")
+    .where("did", "=", data.authorDid)
+    .executeTakeFirst();
+  const handle = existingAccount
+    ? null
+    : ((await resolveHandle(data.authorDid)) ?? data.authorDid);
+
   await getDb()
     .transaction()
     .execute(async (tx) => {
-      // Seed an account row for this DID if we haven't seen it before. This is
-      // the only place accounts get created: identity/account events cover the
-      // whole network, not just Statusphere users, so those handlers only ever
-      // update rows that were discovered here (see updateAccountActive/updateHandle).
-      await tx
-        .insertInto("account")
-        .values({ did: data.authorDid, handle: data.authorDid, active: 1 })
-        .onConflict((oc) => oc.doNothing())
-        .execute();
+      if (handle) {
+        await tx
+          .insertInto("account")
+          .values({ did: data.authorDid, handle, active: 1 })
+          .onConflict((oc) => oc.doNothing())
+          .execute();
+      }
       await tx
         .insertInto("status")
         .values(data)
