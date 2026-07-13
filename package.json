@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm migrate && next dev",
+    "dev": "pnpm migrate && pnpm build:lex && next dev",
     "build:lex": "ts-lex build --importExt=\"\" --out=./lib/lexicons --override",
     "build": "pnpm build:lex && next build",
     "start": "pnpm migrate && next start --port ${PORT-3000}",
@@ -12,28 +12,28 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@atproto/common-web": "^0.4.11",
+    "@atproto/common-web": "^0.4.21",
     "@atproto/lex": "^0.0.10",
-    "@atproto/oauth-client-node": "^0.3.15",
-    "@atproto/syntax": "^0.4.2",
-    "@atproto/tap": "^0.1.2",
-    "better-sqlite3": "^12.5.0",
-    "kysely": "^0.28.9",
-    "next": "16.1.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "@atproto/oauth-client-node": "^0.3.17",
+    "@atproto/syntax": "^0.4.3",
+    "@atproto/tap": "^0.1.3",
+    "better-sqlite3": "^12.11.1",
+    "kysely": "^0.29.3",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.3.2",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.0.10",
-    "tailwindcss": "^4",
-    "tsx": "^4.21.0",
-    "typescript": "^5"
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.2.10",
+    "tailwindcss": "^4.3.2",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@8.15.9+sha512.499434c9d8fdd1a2794ebf4552b3b25c0a633abcee5bb15e7b5de90f32f47b513aca98cd5cfd001c31f0db454bc3804edccd578501e4ca293a6816166bbd9f81"
 }
