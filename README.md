@@ -24,4 +24,12 @@ pnpm dev
 # Navigate to http://127.0.0.1:3000
 ```
 
-To read data from the network, you'll need an instance of Tap running. Find instructions for getting set up by checking out the [Statusphere tutorial](https://atproto.com/guides/applications) or the [Tap repository](https://github.com/bluesky-social/indigo/blob/main/cmd/tap/README.md).
+To read data from the network, you'll need an instance of Tap running. The easiest way locally is via Docker Compose:
+
+```sh
+docker compose up -d
+```
+
+This runs Tap with `TAP_SIGNAL_COLLECTION` set to `xyz.statusphere.status`, so it automatically discovers and syncs any account that has posted a status through this app (or a fork of it) — no manual repo registration needed. Tap's webhook is pointed at the Next.js dev server on the host (`host.docker.internal:3000`), and its data is persisted to `.tap-data/` between restarts.
+
+See `docker-compose.yml` for the full config, or the [Tap repository](https://github.com/bluesky-social/indigo/blob/main/cmd/tap/README.md) for other setup options (e.g. running from source, `TAP_ADMIN_PASSWORD` for securing the webhook in shared environments).
