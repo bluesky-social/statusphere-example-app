@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm migrate && next dev",
+    "dev": "pnpm migrate && pnpm build:lex && next dev",
     "build:lex": "ts-lex build --importExt=\"\" --out=./lib/lexicons --override",
     "build": "pnpm build:lex && next build",
     "start": "pnpm migrate && next start --port ${PORT-3000}",
