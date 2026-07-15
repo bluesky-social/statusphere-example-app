@@ -1,6 +1,7 @@
-import { Kysely, Migration } from "kysely";
+import { Kysely } from "kysely";
+import { Migrator } from "kysely/migration";
+import type { Migration } from "kysely/migration";
 import { getDb } from ".";
-import { Migrator } from "kysely";
 
 const migrations: Record<string, Migration> = {
   "001": {
