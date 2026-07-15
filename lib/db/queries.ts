@@ -59,7 +59,7 @@ export async function getTopStatuses(limit = 10) {
 }
 
 export async function insertStatus(data: StatusTable) {
-  getDb()
+  await getDb()
     .transaction()
     .execute(async (tx) => {
       await tx
@@ -73,7 +73,7 @@ export async function insertStatus(data: StatusTable) {
           }),
         )
         .execute();
-      setCurrStatus(tx, data.authorDid);
+      await setCurrStatus(tx, data.authorDid);
     });
 }
 
