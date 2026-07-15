@@ -7,7 +7,7 @@ An example application covering:
 - Listen to the network firehose for new data
 - Publish data on the user's account using a custom schema
 
-See https://atproto.com/guides/applications for a guide through the codebase.
+See https://atproto.com/guides/statusphere-tutorial for a guide through the codebase.
 
 This project uses [Next.js](https://nextjs.org) as a server framework and [Tap](https://github.com/bluesky-social/indigo/blob/main/cmd/tap/README.md) for syncing data from the Atmosphere.
 
@@ -24,7 +24,7 @@ pnpm dev
 # Navigate to http://127.0.0.1:3000
 ```
 
-To read data from the network, you'll need an instance of Tap running. Quickest way locally:
+To read data from the network, you'll need an instance of Tap running. Find full setup instructions in the [Statusphere tutorial](https://atproto.com/guides/statusphere-tutorial). Quickest way locally:
 
 ```sh
 docker compose up -d
