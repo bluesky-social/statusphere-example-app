@@ -45,3 +45,6 @@ next-env.d.ts
 *.db-wal
 *.db-shm
 /lib/lexicons
+
+# tap
+/.tap-data
