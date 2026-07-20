@@ -48,6 +48,18 @@ const migrations: Record<string, Migration> = {
       await db.schema.dropTable("auth_state").execute();
     },
   },
+  "002": {
+    async up(db: Kysely<unknown>) {
+      await db.schema
+        .createTable("ingest_cursor")
+        .addColumn("key", "text", (col) => col.primaryKey())
+        .addColumn("seq", "integer", (col) => col.notNull())
+        .execute();
+    },
+    async down(db: Kysely<unknown>) {
+      await db.schema.dropTable("ingest_cursor").execute();
+    },
+  },
 };
 
 export function getMigrator() {

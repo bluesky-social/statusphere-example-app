@@ -4,8 +4,14 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@atproto/lex-schema': 0.2.2
+
 dependencies:
   '@atproto/common-web':
+    specifier: ^0.5.6
+    version: 0.5.6
+  '@atproto/identity':
     specifier: ^0.5.6
     version: 0.5.6
   '@atproto/lex':
@@ -17,12 +23,12 @@ dependencies:
   '@atproto/syntax':
     specifier: ^0.7.2
     version: 0.7.2
-  '@atproto/tap':
-    specifier: ^0.3.8
-    version: 0.3.8
   better-sqlite3:
     specifier: ^12.11.1
     version: 12.11.1
+  bsky-jetstream-preview:
+    specifier: 0.0.1-preview.1
+    version: 0.0.1-preview.1
   kysely:
     specifier: ^0.29.3
     version: 0.29.3
@@ -186,6 +192,14 @@ packages:
     engines: {node: '>=22'}
     dependencies:
       zod: 3.25.76
+    dev: false
+
+  /@atproto/identity@0.5.6:
+    resolution: {integrity: sha512-xGmg8HnYhTsqsVwpFIPKjQzwnHRddXnuD8N+f/tWlblX0119L7b8GyXFKY84TRbumKx7xvy/IanAncyDxBx+/A==}
+    engines: {node: '>=22'}
+    dependencies:
+      '@atproto/common-web': 0.5.6
+      '@atproto/crypto': 0.5.4
     dev: false
 
   /@atproto/jwk-jose@0.2.4:
@@ -396,20 +410,6 @@ packages:
     dependencies:
       iso-datestring-validator: 2.2.2
       tslib: 2.8.1
-    dev: false
-
-  /@atproto/tap@0.3.8:
-    resolution: {integrity: sha512-9F0GBSEFBJmGbH6CAJ9yzX2fkdUACOrsXaITwq2b75lHiZYcKibLvp5k0K7+TW8WtSSr2/RbIVptPQnLK5JIvQ==}
-    engines: {node: '>=22'}
-    dependencies:
-      '@atproto/common': 0.7.2
-      '@atproto/lex': 0.2.2
-      '@atproto/syntax': 0.7.2
-      '@atproto/ws-client': 0.1.7
-      ws: 8.21.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
     dev: false
 
   /@atproto/ws-client@0.1.7:
@@ -2118,6 +2118,17 @@ packages:
       electron-to-chromium: 1.5.389
       node-releases: 2.0.51
       update-browserslist-db: 1.2.3(browserslist@4.28.6)
+
+  /bsky-jetstream-preview@0.0.1-preview.1:
+    resolution: {integrity: sha512-n3VY8LLNnaf/q1h9S0+avrzUcZ1xY26jlu9JBIOaCXKS3hp1RbLP/Fd362K1s7n7egQ3b2cYGlHED0IbTElD4w==}
+    engines: {node: '>=22.12.0'}
+    dependencies:
+      '@atproto/lex-schema': 0.2.2
+      '@atproto/ws-client': 0.1.7
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    dev: false
 
   /buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
